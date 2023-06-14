@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles/userNav.css">
+</head>
+<body>
+  <nav>
+      <div class="logo-section">
+        <div class="logo">
+          <a href="/landing-page">
+            <img
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwy0pJwLNGxmmFiMpk6AvgrLh1FgPK8i16Zg&usqp=CAU"
+            alt=""
+          />
+          </a>
+        </div>
+        PETS WORLD
+      </div>
+      <div class="menu-icon">
+        <i class="fa-solid fa-bars"></i>
+      </div>
+      <div class="menu-section">
+        <ul>
+          <li><a href="/dog-food?cat=DOG&sub=FOOD">DOG</a></li>
+          <li><a href="/dog-food?cat=DOG&sub=FOOD">CAT</a></li>
+          <li><a href="#">COMBO PACK</a></li>
+          <li><a href="#">LEARN WITH #PETSWORLD</a></li>
+          <li><a href="/ORDER-HISTORY">ORDERS</a></li>
+          <li><a href="#" onclick="callMe()">COUPONS</a></li>
+        </ul>
+      </div>
+      <div class="option-section">
+        <div class="cart">
+          <span>3</span>
+          <a href="/cart"><i class="fa-solid fa-cart-shopping"></i></a>
+        </div>
+        <div class="wishlist">
+          <a href="/wishlist"><i class="fa-solid fa-heart"></i></a>
+        </div>
+        {{#if loggedIn}}
+          <div class="user">
+            <a href=""><i class="fa-solid fa-user"></i></a>
+          </div>
+        {{else}}
+          <div class="user">
+            <!-- Render different icon for non-logged in users -->
+            <a href="/login"><i class="fa-solid fa-right-to-bracket"></i></a>
+          </div>
+        {{/if}}
+
+      </div>
+      <div class="menu-section-mob">
+        <ul>
+          <li>
+            <a href="#"> <i class="fa-solid fa-dog"></i> DOG</a>
+            <div class="level-1">
+              <ul>
+                <li>FOOD</li>
+                <li>TOYS</li>
+                <li>HEALTH</li>
+                <li>TREATS</li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <a href="#"> <i class="fa-solid fa-cat"></i> CAT</a>
+          </li>
+          <li>
+            <a href="#"> <i class="fa-solid fa-gifts"></i> COMBO PACK</a>
+          </li>
+          <li>
+            <a href="#">
+              <i class="fa-brands fa-leanpub"></i> LEARN WITH #PETSWORLD</a
+            >
+          </li>
+          <li>
+            <a href="#"> <i class="fa-solid fa-paw"></i> LEARN ABOUT BREEDS</a>
+          </li>
+          <li>
+            <a href="#"> <i class="fa-solid fa-gift"></i> COUPONS</a>
+          </li>
+        </ul>
+        <ul>
+          <li>
+            <a href="/wishlist"> <i class="fa-solid fa-heart"></i> Wishlist</a>
+          </li>
+          <li>
+            <a href="#">
+              <div class="cart">
+                <span>3</span>
+                <a href="/cart"><i class="fa-solid fa-cart-shopping"></i></a>
+              </div>
+              Cart</a
+            >
+          </li>
+          <li>
+            <a href="#"> <i class="fa-solid fa-right-to-bracket"></i> Login</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <script>
+       
+      let menu = document.querySelector(".menu-icon");
+      let menuSection = document.querySelector(".menu-section-mob");
+      let lists = document.querySelectorAll("nav .menu-section-mob>ul li");
+
+      menu.addEventListener("click", () => {
+        // alert("hello")
+        event.stopPropagation();
+        menuSection.classList.toggle("show");
+      });
+      menuSection.addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+      document.addEventListener("click", () => {
+        menuSection.classList.remove("show");
+      });
+      lists.forEach((list) => {
+        list.addEventListener("click", (event) => {
+          // alert("hello")
+          event.stopPropagation();
+          list.children[1].classList.toggle("view");
+          list.children.classList.toggle("set");
+        });
+      });
+      function callMe(){
+       alert("Clicked");
+        fetch("/dog-food?cat=DOG&sub=FOOD")
+          .then(response => response.text())
+          .then(data => {
+            // Process the fetched data here
+            console.log(data);
+          })
+          .catch(error => {
+            // Handle any errors that occur during the fetch
+            console.error('Error:', error);
+          });
+
+      }
+
+    
+    
+    </script>
+    
+</body>
+</html>

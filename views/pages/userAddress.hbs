@@ -1,0 +1,216 @@
+<link rel="stylesheet" href="/styles/userAddress.css">
+<div class="search-cont">
+    <input type="text" placeholder="Search Your Orders...">
+    <a href=""><i class="fa-solid fa-magnifying-glass"></i></a></i>
+</div>
+<div class="page" style="color:rgb(224, 168, 66);margin:0.45rem auto;font-size:1rem;font-weight:900;letter-spacing:.45rem;display:flex;align-items:center;height:4rem;overflow:hidden;">
+    <img src="https://png.pngtree.com/png-vector/20230120/ourmid/pngtree-dog-logo-veterinary-design-clipart-vet-golden-retriever-puppy-clinic-png-image_6565449.png" alt="" style="width:8rem;">
+    ADDRESS
+</div>
+<div class="checkout-bs-form">
+    <form method="POST">
+        <div class="country">
+            <input type="text" name="country" placeholder="Country/Region" required>
+        </div>
+        <div class="fullName">
+                <input type="text" name="fName" placeholder="FirstName" required> 
+                <input type="text" name="lName" placeholder="LastName" required> 
+        </div>
+        <div class="address"><textarea id="addr" name="addr" rows="4" cols="40" placeholder="Address (Just Include The landscape, Building No. and so.....)" required></textarea></div>
+        <div class="add-more">
+            <input type="text" name="city" placeholder="City" required>
+            <input type="text" name="state" placeholder="State" required>
+            <input type="text"  name = "pinCode" id="pincodeInput" pattern="[1-9][0-9]{5}" maxlength="6" placeholder="PinCode" required>
+        </div>
+        <div class="phn">
+            <input type="tel" id="mobile" name="ph" pattern="[0-9]{10}" placeholder="PhoneNumber" required>       
+        </div>
+ 
+        <button class="changeAdd">Add / Update Address</button>
+        <button class="closeFrm">Close</button>
+         
+    </form>
+</div>
+<div class="card-det">
+    <div class="left-col">
+        <div class="order">
+            <button class="addOpt" style="color:white;background-color:transparent;border:none;cursor:pointer"><i class="fa-solid fa-plus"></i> Add New Address</button>
+            <div class="order-header">
+                <div class="hd address">Address</div>
+                 
+            </div>
+            <div class="order-body">
+                {{!-- <div class="order-row">
+                    <div class="td address-det">
+                            <h3>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quaerat praesentium ipsam fuga atque.
+                            </h3>
+                    </div>
+                    <div class="td options"> 
+                        <div class="add-updt" style="color:gold">
+                             <a href="#">Update</a>
+                        </div>
+                        <div class="add-choose" style="color:gold">
+                             <a href="#">Select</a>
+                        </div>
+                        <div class="add-del">
+                            <a href="#">Delete</a>
+                        </div>
+                    </div>
+                </div> --}}
+            </div>
+        </div>
+        <div class="order"></div>
+            <div class="order-header">
+                <div class="hd address">Shipping Address</div>
+            </div>
+            <div class="order-body">
+                <div class="order-row">
+                    <div class="td address-det">
+                            <h3>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quaerat praesentium ipsam fuga atque.
+                            </h3>
+                    </div>
+                    <div class="td options"> 
+                        <div class="add-updt" style="color:gold">
+                             <a href="#">Update</a>
+                        </div>
+                        <div class="add-choose" style="color:gold">
+                             <a href="#">Select</a>
+                        </div>
+                        <div class="add-del">
+                            <a href="#">Delete</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-row">
+                    <div class="td address-det">
+                            <h3>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quaerat praesentium ipsam fuga atque.
+                            </h3>
+                    </div>
+                    <div class="td options"> 
+                        <div class="add-updt" style="color:gold">
+                             <a href="#">Update</a>
+                        </div>
+                        <div class="add-choose" style="color:gold">
+                             <a href="#">Select</a>
+                        </div>
+                        <div class="add-del">
+                            <a href="#">Delete</a>
+                        </div>
+                    </div>
+                </div>  
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let addOpt  = document.querySelector(".addOpt");
+    let checkoutForm = document.querySelector(".checkout-bs-form");
+    let form = document.querySelector(".checkout-bs-form form");
+    let closeFrm = document.querySelector(".closeFrm");
+    let changeAdd = document.querySelector(".changeAdd");
+    let token = document.cookie.split("=")[1];
+
+    addOpt.addEventListener("click",()=>{
+        checkoutForm.style.display="flex";
+    })
+    closeFrm.addEventListener("click",()=>{
+        checkoutForm.style.display="none";
+    })
+    
+    //FORM SUBMISSION AFTER MODIFICATION
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const country = formData.get("country");
+        const fName = formData.get("fName");
+        const lName = formData.get("lName");
+        const addr = formData.get("addr");
+        const city = formData.get("city");
+        const state = formData.get("state");
+        const pinCode = formData.get("pinCode");
+        const ph = formData.get("ph");
+         
+
+        const body = {
+         country,
+         fName,
+         lName,
+         addr,
+         city,
+         state,
+         pinCode,
+         ph,
+        };
+
+        try {
+        const response = await fetch(`/handleAddr/${token}`, {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) {
+            throw new Error("Request failed with status: " + response.status);
+        }
+        // Hide the form
+         checkoutForm.style.display = "none";
+        } catch (error) {
+        console.log("Error:", error.message);
+        }
+    });
+    //FORM SUBMISSION AFTER MODIFICATION
+
+
+    //Run the Function Amigos
+    async function run(url){
+        try {
+            const response = await fetch(url); // Replace with your API endpoint URL
+            if (!response.ok) {
+            throw new Error('Request failed with status: ' + response.status);
+            }
+            const pr = await response.json();
+            cartBody.innerHTML="";
+            if(pr.total==0){
+                cartBody.innerHTML=`<div class="cart-row" style="justify-content:center">
+                     
+                    <div class="td">Nothing In Cart</div>
+    
+                </div>`;
+            }
+            
+            
+            console.log(pr);
+            pr.products.forEach(p=>{
+                cartBody.innerHTML+=`<div class="cart-row">
+                    <button class="close" onclick="closeCart('${p._id}')"><i class="fa-solid fa-xmark"></i></button>
+                    <div class="td products">
+                        <img src="${p.productId.photo[0].filepath}.png" alt="${p.productId.photo[0].title}">
+                        <div class="prod-det">
+                            <h3>${p.productId.productName}</h3>
+                            <p>${p.productId.brandName}</p>
+                        </div>
+                    </div>
+                    <div class="td price">${p.productId.salePrice}</div>
+                    <div class="td quantity"><input type="number" class="mobile-input" min="0" max="${p.productId.stock}" value="${p.quantity}" placeholder="Qnty" onchange="updateQuantity(this,'${p.productId._id}')"></div>
+                    <div class="td total">${p.productId.salePrice*p.quantity}</div>
+                    <div class="td purchase"><a href="#"><i class="fa-solid fa-bag-shopping" style="color:white"></i></a></div>
+                </div>`;
+            })
+
+            //Quantity Change Control
+
+            
+            //Temporary Data
+            total.textContent = "Rs "+pr.totalPrice;
+            subTotal.textContent = "Rs "+pr.totalPrice;
+
+
+        } catch (error) {
+            // Handle any errors that occurred during the fetch
+            console.log('Error:', error.message);
+                
+        }
+    }
+</script>

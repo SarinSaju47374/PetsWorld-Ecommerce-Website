@@ -1,0 +1,94 @@
+ <div class="go-up" id="scrollToTopBtn">
+        <i class="fa-solid fa-arrow-up"></i>
+</div>
+<div class="container-category">
+    <div class="category">
+        <a href=""
+            ><img
+            src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
+            alt=""
+        /></a>
+        <p>DOG FOOD</p>
+        </div>
+        <div class="category">
+        <a href=""
+            ><img
+            src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
+            alt=""
+        /></a>
+        <p>DOG FOOD</p>
+        </div>
+        <div class="category">
+        <a href=""
+            ><img
+            src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
+            alt=""
+        /></a>
+        <p>DOG FOOD</p>
+        </div>
+        <div class="category">
+        <a href=""
+            ><img
+            src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
+            alt=""
+        /></a>
+        <p>DOG FOOD</p>
+        </div>
+    </div>
+    <div class="container-content">
+        {{#each products}}
+            <div class="card">
+                <div class="preview">
+                    <a href="/product-descr?oid={{this._id}}"><img src="{{this.photo.[0].filepath}}.png" alt=""></a>
+                </div>
+                <h6>{{this.brandName}}</h6>
+                <h5>{{this.productName}}</h5>
+                <div class="star-rating" style="--rating:{{this.rating}}%;">
+                    <div class="star" id="starRating">
+                        ★★★★★
+                    </div>
+                </div>
+                <div class="coupon">
+                    <p></p>
+                </div>
+                <div class="price">
+                    <h6>Rs {{this.productPrice}}<h6>
+                    <h6>Rs {{this.salePrice}}</h6>
+                </div>
+                <div class="options">
+                    <a href="#"><i class="fa -solid fa-cart-shopping"></i></a>
+                    <a href="#"><i class="fa-solid fa-heart"></i></a>
+                    <a href="/product-descr?oid={{this._id}}"><i class="fa-solid fa-eye"></i></a>
+                </div>
+
+            </div>
+        {{/each}}
+    </div>
+    <script>
+        //   SCROLL JS
+
+    // Get the button element
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+
+    // Function to check the scroll position and toggle button visibility
+    function toggleScrollToTopBtn() {
+    if (window.pageYOffset > 100) {
+        scrollToTopBtn.classList.add('scroll');
+    } else {
+        scrollToTopBtn.classList.remove('scroll');
+    }
+    }
+
+    // Function to scroll to the top when the button is clicked
+    function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Add scroll event listener to check the scroll position
+    window.addEventListener('scroll', toggleScrollToTopBtn);
+
+    // Add click event listener to scroll to the top when the button is clicked
+    scrollToTopBtn.addEventListener('click', scrollToTop);
+
+    //   SCROLL JS
+    </script>

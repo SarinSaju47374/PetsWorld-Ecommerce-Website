@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Product Card/Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap');
+
+        :root {
+        --main-body: #0b243b;
+        --main-text: #fff;
+        font-family: sans-serif;
+        --dark-text:black;
+      }
+
+      * {
+        /* text-decoration: none; */
+        list-style: none;
+        
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        /* scroll-behavior: smooth; */
+        background-color: var(--main-body);
+        color: var(--main-text);
+      }
+        .card-wrapper{
+            max-width: 90vw;
+            margin: 2rem auto;
+        }
+        .card-wrapper img{
+            width: 100%;
+            display: block;
+        }
+        .img-display{
+            max-width:30rem;
+            overflow: hidden;
+        }
+        .img-showcase{
+            display: flex;
+            width: 100%;
+            min-height:20rem;
+            /* aspect-ratio: 100/99; */
+            transition: all 0.5s ease;
+            background-image: url("https://cdn.shopify.com/s/files/1/1199/8502/products/57c91479-aef4-4a3d-a304-44835df6846b_1.448de7dbef33fe2b8477034b9fd6c6b6_1_4238e93e-7d75-4402-8e36-f9f11b63ad7b.webp?v=1666088744");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            /* overflow: auto; */
+        }
+        .img-showcase img{
+            min-width: 100%;
+        }
+        .img-select{
+            display: flex;
+        }
+        .img-item{
+            margin: 0.3rem;
+        }
+        .img-item:nth-child(1),
+        .img-item:nth-child(2),
+        .img-item:nth-child(3){
+            margin-right: 0;
+        }
+        .img-item:hover{
+            opacity: 0.8;
+        }
+        .img-item img{
+          max-width:10rem;
+        }
+        /* .product-imgs{
+          max-width:30rem;
+        } */
+        .product-content{
+            padding: 2rem 1rem;
+        }
+        .product-title{
+            font-size: 3rem;
+            text-transform: capitalize;
+            font-weight: 700;
+            position: relative;
+            /* color: #ffffff; */
+            margin: 1rem 0;
+        }
+        .product-title::after{
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 4px;
+            width: 80px;
+            background: #12263a;
+        }
+        .product-link{
+            text-decoration: none;
+            text-transform: uppercase;
+            font-weight: 400;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            background: #256eff;
+            color: #fff;
+            padding: 0 0.3rem;
+            transition: all 0.5s ease;
+        }
+        .product-link:hover{
+            opacity: 0.9;
+        }
+        .product-rating{
+            color: #ffc107;
+        }
+        .product-rating span{
+            font-weight: 600;
+            color: #c82121;
+        }
+        .product-price{
+            margin: 1rem 0;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .product-price span{
+            font-weight: 400;
+        }
+        .last-price span{
+            color: #f64749;
+            text-decoration: line-through;
+        }
+        .new-price span{
+            color: #88adf6;
+        }
+        .product-detail h2{
+            text-transform: capitalize;
+            color: #12263a;
+            padding-bottom: 0.6rem;
+        }
+        .product-detail p{
+            font-size: 0.9rem;
+            padding: 0.3rem;
+            opacity: 0.8;
+        }
+        .product-detail ul{
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            padding:0
+        }
+        .product-detail ul li{
+            margin: 0;
+            list-style: none;
+            /* padding:0; */
+            background-size: 18px;
+            padding-left: 0.3rem;
+            margin: 0.4rem 0;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+        .product-detail ul li span{
+            font-weight: 400;
+        }
+        .purchase-info{
+           display: flex;
+           flex-wrap: wrap;
+           align-items: center;
+           padding:0;
+           /* justify-content: space-between; */
+           margin: 1.5rem 0
+        }
+        .purchase-info input,
+        .purchase-info .btn{
+            border: 1.5px solid #ddd;
+            border-radius: 25px;
+            text-align: center;
+            padding: 0.45rem 0.8rem;
+            outline: 0;
+            margin-right: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+        .purchase-info input{
+            width: 60px;
+        }
+        .purchase-info .btn{
+            cursor: pointer;
+            color: #fff;
+        }
+        .purchase-info .btn:first-of-type{
+            background: #256eff;
+        }
+        .purchase-info .btn:last-of-type{
+            background: #f64749;
+        }
+        .purchase-info .btn:hover{
+            opacity: 0.9;
+        }
+        .social-links{
+            display: flex ;
+            align-items: center;
+        }
+        .social-links a{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            color: #ffffff;
+            border: 1px solid #fffdfd;
+            margin: 0 0.2rem;
+            border-radius: 50%;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.5s ease;
+        }
+        .social-links a:hover{
+            background: #000;
+            border-color: transparent;
+            color: #fff;
+        }
+        
+        .purchase-info a i{
+             color:rgb(212, 63, 63);
+             transition:color .4s ease;
+        }
+        .purchase-info a i:hover{
+             color:rgb(240, 3, 3);
+        }
+        @media screen and (min-width: 700px){
+            .card-descr{
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                grid-gap: 1.5rem;
+            }
+            .card-wrapper{
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .product-imgs{
+                display: flex;
+                flex-direction: row-reverse;
+                width:40rem;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+            .img-display{
+                width:30rem;
+                overflow: hidden;
+            }
+            .img-select{
+              margin:0;
+              width:20%;
+              flex-direction: column;
+            }
+            .img-showcase{
+              /* margin: 0; */
+            }
+            .product-content{
+                padding-top: 0;
+            }
+            .first{
+              position:relative;
+              /* left:50px; */
+              overflow:hidden;
+            }
+            .img-display{
+              position: relative;
+              overflow:visible;
+              padding-left: 0;
+            }
+             
+            .lens{
+              display:none;
+              position:absolute;
+              width:150px;
+              height:150px;
+              background-color:#8080807d;
+              border:1px solid green;
+              transform:translate(-50%,-50%);
+              pointer-events:none;
+              
+            }
+            .second{
+              position:absolute;
+              display:none;
+              width: 30rem;
+              height:25rem;
+              top:0;
+              left:32rem;
+              background-size: 400% 400%;
+              background-color: red;
+              z-index: 21;
+            }
+            .first:hover .lens{
+              display:block;
+               
+            }
+            .first:hover{
+              cursor:crosshair;
+            }
+            .img-showcase{
+              min-height:33rem;
+            }
+ 
+        }
+    
+    </style>
+</head>
+  <body>
+    
+    <div class = "card-wrapper">
+      <div class = "card-descr">
+        <!-- card left -->
+        <div class = "product-imgs">
+          <div class = "img-display">
+            <div class = "img-showcase first">
+              <!-- <img class="example" src = "https://cdn.britannica.com/79/232779-050-6B0411D7/German-Shepherd-dog-Alsatian.jpg" alt = "shoe image"> -->
+              <span class="lens"></span>
+            </div>
+            <div class="second"></div>
+          </div>
+          <div class = "img-select">
+            <div class = "img-item">
+              <a href = "#" >
+                <img src = "https://cdn.shopify.com/s/files/1/1199/8502/products/57c91479-aef4-4a3d-a304-44835df6846b_1.448de7dbef33fe2b8477034b9fd6c6b6_1_4238e93e-7d75-4402-8e36-f9f11b63ad7b.webp?v=1666088744" alt = "shoe image">
+              </a>
+            </div>
+          </div>
+        </div>
+        <!-- card right -->
+        <div class = "product-content">
+          <h2 class = "product-title">Wobble Toy Dog Ball</h2>
+          
+          <div class = "product-rating">
+            <i class = "fas fa-star"></i>
+            <i class = "fas fa-star"></i>
+            <i class = "fas fa-star"></i>
+            <i class = "fas fa-star"></i>
+            <i class = "fas fa-star-half-alt"></i>
+            <span>3(21)</span>
+          </div>
+
+          <div class = "product-price">
+            <p class = "last-price">Old Price: <span>$257.00</span></p>
+            <p class = "new-price">New Price: <span>$249.00 (5%)</span></p>
+          </div>
+
+          <div class = "product-detail">
+            <h2>about this item: </h2>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo eveniet veniam tempora fuga tenetur placeat sapiente architecto illum soluta consequuntur, aspernatur quidem at sequi ipsa!</p>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur, perferendis eius. Dignissimos, labore suscipit. Unde.</p>
+            <ul>
+              <li>Available: <span>in stock</span></li>
+              <li>Category: <span>Toys</span></li>
+              <li>Brand: <span>Wobble</span></li>
+              <li>Shipping Area: <span>All over the world</span></li>
+              <li>Shipping Fee: <span>Free</span></li>
+            </ul>
+          </div>
+
+          <div class = "purchase-info">
+            <input type = "number" min = "0" value = "1">
+            <button type = "button" class = "btn">
+              Add to Cart <i class = "fas fa-shopping-cart"></i>
+            </button>
+            <button type = "button" class = "btn">
+              Buy Now 
+            </button>
+            <a href="#"><i class="fa-solid fa-heart" style=" font-size: 1.56rem;"></i></a>
+          </div>
+
+          <div class = "social-links">
+            <p>Share At: </p>
+            <a href = "#">
+              <i class = "fab fa-facebook-f"></i>
+            </a>
+            <a href = "#">
+              <i class = "fab fa-twitter"></i>
+            </a>
+            <a href = "#">
+              <i class = "fab fa-instagram"></i>
+            </a>
+            <a href = "#">
+              <i class = "fab fa-whatsapp"></i>
+            </a>
+            <a href = "#">
+              <i class = "fab fa-pinterest"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+    
+    
+    <script>
+        const imgs = document.querySelectorAll('.img-select a');
+         
+        
+        
+        const lens = document.querySelector(".lens");
+        
+        
+        const first = document.querySelector(".first");
+        imgs.forEach(img=>{
+          img.addEventListener("click",()=>{
+            var src = img.children[0].getAttribute("src");
+        first.style.backgroundImage = `url("${src}")`;
+        
+        // Retrieve the updated backgroundImage value
+        let computedStyle = window.getComputedStyle(first);
+        let backgroundImage = computedStyle.getPropertyValue('background-image');
+        console.log(backgroundImage);
+          })
+        })
+        var computedStyle = window.getComputedStyle(first);
+        var backgroundImage;
+        const second = document.querySelector(".second");
+        console.log(backgroundImage);
+        first.addEventListener("mousemove",(e)=>{
+          second.style.display="block";
+          var x = e.clientX-e.target.getBoundingClientRect().left;
+          var y = e.clientY-e.target.getBoundingClientRect().top;
+          lens.style.left = x+"px";
+          lens.style.top = y+"px";  ;
+          second.style.backgroundPosition = (x - 10) * -3 + "px " + (y - 70) * -3 + "px";
+          backgroundImage = computedStyle.getPropertyValue('background-image');
+          second.style.backgroundImage = backgroundImage;
+        })
+
+        first.addEventListener("mouseout",()=>{
+          second.style.display="none";
+        })
+
+
+
+    </script>
+  </body>
+</html>
