@@ -32,11 +32,12 @@ const userSchema = new Schema({
         type:Boolean,
         default:false,
     },
-    addresses:[{
-        type:[Schema.Types.ObjectId],
-        ref:"address",
-        default:[],
-    }],
+    addresses:[
+        {addrId:{
+            type:Schema.Types.ObjectId,
+            ref:"address",
+        }}
+    ],
     cart:{
         type:[Schema.Types.ObjectId],
         ref:"cart",

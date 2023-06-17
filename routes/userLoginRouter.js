@@ -63,7 +63,7 @@ router.post("/", async (req, res) => {
       // res.render("otpLogin",{admin:false,user:false,number:req.body.emailMob})
       // Your AccountSID and Auth Token from console.twilio.com
       const accountSid = 'ACfdde94f962631e5d5d57ea933cdf4618';
-      const authToken = '9c5e93db4567009dd3f560f08c9123d2';
+      const authToken = 'ed2ca5ccc281d3c4bc68dd8ba399448f';
 
       
 

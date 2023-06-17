@@ -226,34 +226,59 @@ async function addUser(req,res){
 
 
 //userAddr Handle
-async function handleAddr(req,res){
-  let userId = new ObjectId(jwt2.verify(req.params.tk,process.env.secretKeyU).user);
- console.log(userId);
+async function handleAddr(req, res) {
+  let userId = new ObjectId(jwt2.verify(req.params.tk, process.env.secretKeyU).user);
+  console.log(userId);
+
   let {
-      country,
-      fName,
-      lName,
-      addr,
-      city,
-      state,
-      pinCode,
-      ph,
-  } =  req.body;
- let data = await addressModel.create({
-  userId:userId,
-  country:country,
-  fName:fName,
-  lName:lName,
-  addr:addr,
-  city:city,
-  state:state,
-  pinCode:pinCode,
-  ph:ph,
- })
- await userModel.findByIdAndUpdate(userId, { $push: { addresses: data._id } });
- console.log(data);
+    country,
+    fName,
+    lName,
+    addr,
+    city,
+    state,
+    pinCode,
+    ph,
+    aid
+  } = req.body;
+
+  let addressData = {
+    userId: userId,
+    country: country,
+    fName: fName,
+    lName: lName,
+    addr: addr,
+    city: city,
+    state: state,
+    pinCode: pinCode,
+    ph: ph,
+  };
+
+  let user = await userModel.findOne({ _id: userId });
+
+  if (aid) {
+    // Update existing address
+    let address = await addressModel.findByIdAndUpdate(aid, addressData, { new: true });
+
+    // Update the address reference in the user collection
+    let existingAddress = user.addresses.find((address) => address.addrId.toString() === aid);
+    if (existingAddress) {
+      existingAddress.addrId = address._id;
+    } else {
+      user.addresses.push({ addrId: address._id });
+    }
+  } else {
+    // Create a new address
+    let address = await addressModel.create(addressData);
+    user.addresses.push({ addrId: address._id });
+  }
+
+  await user.save();
+
+  console.log(user);
   res.json(200);
 }
+
 
 //users
 
@@ -355,7 +380,9 @@ function userPymntView(req,res){
     res.render("userPymntOpt",{admin:false,user:true});
 }
 function userAddressView(req,res){
-    res.render("userAddress",{admin:false,user:true});
+    const token = req.headers.cookie?.split("=")[1]; 
+    let id = jwt2.verify(token,process.env.secretKeyU).user 
+    res.render("userAddress",{admin:false,user:true,id});
 }
 
 //api
@@ -557,27 +584,26 @@ async function getUsers(req,res){
 }
 
 async function getUserAddress(req,res){
-  const userId = req.params.userId;
-
+  const userId = new ObjectId(req.params.id);
   try {
     // Find the user by userId and populate the addresses
-    const user = await userModel.findById(userId).populate('addresses');
-
+    const user = await userModel.findById(userId).populate("addresses.addrId");
+    console.log(user);
     if (!user) {
       return res.status(404).json({ error: true, message: 'User not found' });
     }
 
-    const { addresses } = user;
-    const total = addresses.length;
+    // const { addresses } = user;
+    const total = user.addresses.length;
     const page = 0; // Assuming page 0 for simplicity
-    const limit = addresses.length; // Assuming all addresses are returned in a single page
-
+    const limit = user.addresses.length; // Assuming all addresses are returned in a single page
+  //  console.log(user.addresses)
     const response = {
       error: false,
       total,
       page: page + 1,
       limit,
-      addresses,
+      addresses:user.addresses, //was getting [ [ new ObjectId("6489420ea4dff93081e802bd") ] ] instead of [ new ObjectId("6489420ea4dff93081e802bd") ] 
     };
 
     res.json(response);
@@ -616,11 +642,11 @@ async function getUserAddress(req,res){
 
 async function getCart(req,res){
   try {
-    const userId = req.params.id; // Extract the user ID from the request query
+    const userId = new ObjectId(req.params.id); // Extract the user ID from the request query
 
     // Fetch the cart document for the given user ID
     const cart = await cartModel.findOne({ userId }).populate('items.productId');
-
+    console.log(cart)
     let total = 0;
     cart.items.forEach(c=>total+=c.productId.salePrice*c.quantity);
     if (!cart) {

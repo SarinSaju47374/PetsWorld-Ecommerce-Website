@@ -67,11 +67,16 @@ button{
 .order-row .address-det{
     margin-bottom:1rem;
 }
-.order-row .options a{
+.order-row .options button{
     color:white;
     background-color: #008CBA;
     padding:12px;
     border-radius:12px;
+    cursor:pointer;
+    transition: all 300ms ease;
+}
+.order-row .options button:hover{
+    background-color: #008bba71;
 }
 .order-row .options{
     display: flex;

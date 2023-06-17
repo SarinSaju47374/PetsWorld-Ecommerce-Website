@@ -31,7 +31,7 @@ body{
 .wrapper{
     /* background-color: gray; */
     width:58rem;
-    height:35rem;
+    /* height:90%; */
     display: flex;
     border-radius: 16px;
     overflow: hidden;
@@ -77,6 +77,16 @@ form{
     grid-template-columns: 1fr;
     place-items: center;
 }
+form p{
+    display: none;
+    position:absolute;
+    top:98%;
+    color:rgb(255, 128, 0);
+    /* display: none; */
+    font-size: .8rem;
+    width:18rem;
+    text-align: center;
+}
 form input{
     background-color:transparent;
     outline: none;
@@ -87,7 +97,19 @@ form input{
     margin-top: 1rem;
     padding-left: 0.9rem;
 }
-
+ 
+ 
+form .psswd-cont{
+    position:relative;
+    padding:0;
+    width:84%;
+    display: flex;
+    justify-content: center;
+    overflow: visible;
+}
+form .psswd-cont input{
+    width:100%;
+}
 form input::placeholder{
     color:white;
 }
@@ -120,7 +142,8 @@ form button{
 
 
 .form-section-2{
-    height: 8rem;
+    /* height: 8rem; */
+    padding:1rem;
     background-color:var(--color-form-footer);
     display: flex;
     align-items: center;
@@ -171,7 +194,7 @@ form button{
 @media screen and (max-width:768px){
     .wrapper{
         width:90%; 
-        height:33rem;
+        /* height:40rem; */
     }
     .wrapper .form{
         width:100%;
@@ -184,6 +207,7 @@ form button{
         outline: none;
         width:90%;
     }
+   
     .doggy{
         display: none;
     }
@@ -218,6 +242,15 @@ form button{
     }
     .form input{
         height:1.5rem;
+    }
+    form .psswd-cont{
+        padding:0;
+        width:94%;
+        display: flex;
+        justify-content: center;
+    }
+    form .psswd-cont input{
+        width:100%;
     }
     form .btns{
         display:flex;

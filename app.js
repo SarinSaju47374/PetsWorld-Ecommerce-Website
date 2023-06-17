@@ -2,6 +2,9 @@ import express from "express";
 import mongoose from "mongoose";
 import path from "path";
 import jwt2 from "jsonwebtoken"
+import morgan from "morgan"
+
+
  
 //Environment variables
 import dotenv from 'dotenv';
@@ -11,6 +14,8 @@ dotenv.config();
 //APP
 const app = express();
 
+
+app.use(morgan("dev"));
 //dirname configuration
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';

@@ -10,22 +10,22 @@
 <div class="checkout-bs-form">
     <form method="POST">
         <div class="country">
-            <input type="text" name="country" placeholder="Country/Region" required>
+            <input type="text" name="country" id="country" placeholder="Country/Region" required>
         </div>
         <div class="fullName">
-                <input type="text" name="fName" placeholder="FirstName" required> 
-                <input type="text" name="lName" placeholder="LastName" required> 
+                <input type="text" name="fName" id="fName" placeholder="FirstName" required> 
+                <input type="text" name="lName" id="lName" placeholder="LastName" required> 
         </div>
-        <div class="address"><textarea id="addr" name="addr" rows="4" cols="40" placeholder="Address (Just Include The landscape, Building No. and so.....)" required></textarea></div>
+        <div class="address"><textarea id="addr" name="addr" id="addr" rows="4" cols="40" placeholder="Address (Just Include The landscape, Building No. and so.....)" required></textarea></div>
         <div class="add-more">
-            <input type="text" name="city" placeholder="City" required>
-            <input type="text" name="state" placeholder="State" required>
-            <input type="text"  name = "pinCode" id="pincodeInput" pattern="[1-9][0-9]{5}" maxlength="6" placeholder="PinCode" required>
+            <input type="text" name="city" id="city" placeholder="City" required>
+            <input type="text" name="state" id="state" placeholder="State" required>
+            <input type="text"  name = "pinCode" id = "pinCode" id="pincodeInput" pattern="[1-9][0-9]{5}" maxlength="6" placeholder="PinCode" required>
         </div>
         <div class="phn">
-            <input type="tel" id="mobile" name="ph" pattern="[0-9]{10}" placeholder="PhoneNumber" required>       
+            <input type="tel" name="ph" id="ph" pattern="[0-9]{10}" placeholder="PhoneNumber" required>       
         </div>
- 
+        <input type="text" name="aid" id="aid" hidden>
         <button class="changeAdd">Add / Update Address</button>
         <button class="closeFrm">Close</button>
          
@@ -39,65 +39,21 @@
                 <div class="hd address">Address</div>
                  
             </div>
-            <div class="order-body">
-                {{!-- <div class="order-row">
-                    <div class="td address-det">
-                            <h3>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quaerat praesentium ipsam fuga atque.
-                            </h3>
-                    </div>
-                    <div class="td options"> 
-                        <div class="add-updt" style="color:gold">
-                             <a href="#">Update</a>
-                        </div>
-                        <div class="add-choose" style="color:gold">
-                             <a href="#">Select</a>
-                        </div>
-                        <div class="add-del">
-                            <a href="#">Delete</a>
-                        </div>
-                    </div>
-                </div> --}}
+            <div class="order-body" data-uid="{{id}}" id="orderBody">
+                 {{!-- //Data is Embedded --}}
+                  
             </div>
         </div>
         <div class="order"></div>
             <div class="order-header">
                 <div class="hd address">Shipping Address</div>
             </div>
-            <div class="order-body">
-                <div class="order-row">
+            <div class="shipping-order-body" id="shipBody" >
+                 <div class="order-row" data-aid=${addr._id}>
                     <div class="td address-det">
-                            <h3>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quaerat praesentium ipsam fuga atque.
-                            </h3>
-                    </div>
-                    <div class="td options"> 
-                        <div class="add-updt" style="color:gold">
-                             <a href="#">Update</a>
-                        </div>
-                        <div class="add-choose" style="color:gold">
-                             <a href="#">Select</a>
-                        </div>
-                        <div class="add-del">
-                            <a href="#">Delete</a>
-                        </div>
+                            <h3>No Shipping Address Selected</h3>
                     </div>
                 </div>
-                <div class="order-row">
-                    <div class="td address-det">
-                            <h3>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quaerat praesentium ipsam fuga atque.
-                            </h3>
-                    </div>
-                    <div class="td options"> 
-                        <div class="add-updt" style="color:gold">
-                             <a href="#">Update</a>
-                        </div>
-                        <div class="add-choose" style="color:gold">
-                             <a href="#">Select</a>
-                        </div>
-                        <div class="add-del">
-                            <a href="#">Delete</a>
-                        </div>
-                    </div>
-                </div>  
             </div>
         </div>
     </div>
@@ -109,14 +65,51 @@
     let closeFrm = document.querySelector(".closeFrm");
     let changeAdd = document.querySelector(".changeAdd");
     let token = document.cookie.split("=")[1];
+    let orderBody = document.getElementById("orderBody");
+    let uid = orderBody.dataset.uid;
+    let shipOrderBody = document.getElementById("shipBody");
 
     addOpt.addEventListener("click",()=>{
         checkoutForm.style.display="flex";
+        document.querySelector("#country").value = "";
+        document.querySelector("#fName").value = "";
+        document.querySelector("#lName").value ="";
+        document.querySelector("#addr").value = "";
+        document.querySelector("#city").value = "";
+        document.querySelector("#state").value ="";
+        document.querySelector("#pinCode").value = "";
+        document.querySelector("#ph").value = "";
+        document.querySelector("#aid").value = "";
     })
     closeFrm.addEventListener("click",()=>{
         checkoutForm.style.display="none";
     })
     
+    
+    //UPDATION
+
+    async function openForm(aid){
+         
+        let dataD = await fetch(`/api/users/addr/${uid}`);
+        let data = await dataD.json();
+ 
+        let info = data.addresses.find(val=>val.addrId._id==aid)
+        checkoutForm.style.display="flex";
+     
+        document.querySelector("#country").value = info.addrId.country;
+        document.querySelector("#fName").value = info.addrId.fName;
+        document.querySelector("#lName").value = info.addrId.lName;
+        document.querySelector("#addr").value = info.addrId.addr;
+        document.querySelector("#city").value = info.addrId.city;
+        document.querySelector("#state").value = info.addrId.state;
+        document.querySelector("#pinCode").value = info.addrId.pinCode;
+        document.querySelector("#ph").value = info.addrId.ph;
+        document.querySelector("#aid").value = aid;
+    }
+
+    //UPDATION
+
+
     //FORM SUBMISSION AFTER MODIFICATION
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -130,7 +123,7 @@
         const state = formData.get("state");
         const pinCode = formData.get("pinCode");
         const ph = formData.get("ph");
-         
+        const aid = formData.get("aid")
 
         const body = {
          country,
@@ -141,10 +134,11 @@
          state,
          pinCode,
          ph,
+         aid
         };
 
         try {
-        const response = await fetch(`/handleAddr/${token}`, {
+        const response = await fetch(`/handleAddr/add/${token}`, {
             method: "POST",
             headers: {
             "Content-Type": "application/json"
@@ -156,11 +150,43 @@
         }
         // Hide the form
          checkoutForm.style.display = "none";
+          run(`api/users/addr/${uid}`);
         } catch (error) {
         console.log("Error:", error.message);
         }
     });
     //FORM SUBMISSION AFTER MODIFICATION
+    function select(addrId) {
+        fetch(`/api/users/addr/select/${addrId}`, {
+            method: 'POST',
+        })
+            .then(response => response.json())
+            .then(data => {
+            // Handle the response data if needed
+            run(`api/users/addr/${uid}`);
+            console.log(data);
+            })
+            .catch(error => {
+            // Handle any errors
+            console.error(error);
+            });
+        }
+
+    function del(addrId) {
+        fetch(`/api/users/addr/delete/${addrId}`, {
+            method: 'DELETE',
+        })
+            .then(response => response.json())
+            .then(data => {
+            // Handle the response data if needed
+            run(`api/users/addr/${uid}`);
+            console.log(data);
+            })
+            .catch(error => {
+            // Handle any errors
+            console.error(error);
+            });
+    }
 
 
     //Run the Function Amigos
@@ -170,42 +196,47 @@
             if (!response.ok) {
             throw new Error('Request failed with status: ' + response.status);
             }
-            const pr = await response.json();
-            cartBody.innerHTML="";
-            if(pr.total==0){
-                cartBody.innerHTML=`<div class="cart-row" style="justify-content:center">
-                     
-                    <div class="td">Nothing In Cart</div>
-    
+            const r = await response.json();
+            orderBody.innerHTML=""; 
+            if(r.total==0){           
+                orderBody.innerHTML=`<div class="cart-row" style="justify-content:center">
+                    <div class="td">No Adress Added</div>
                 </div>`;
             }
             
-            
-            console.log(pr);
-            pr.products.forEach(p=>{
-                cartBody.innerHTML+=`<div class="cart-row">
-                    <button class="close" onclick="closeCart('${p._id}')"><i class="fa-solid fa-xmark"></i></button>
-                    <div class="td products">
-                        <img src="${p.productId.photo[0].filepath}.png" alt="${p.productId.photo[0].title}">
-                        <div class="prod-det">
-                            <h3>${p.productId.productName}</h3>
-                            <p>${p.productId.brandName}</p>
+ 
+            r.addresses.forEach(addr=>{
+                orderBody.innerHTML+=`<div class="order-row" data-aid=${addr._id}>
+                    <div class="td address-det">
+                            <h3>${addr.addrId.fName} ${addr.addrId.lName}, ${addr.addrId.addr}, ${addr.addrId.city} ,${addr.addrId.state},${addr.addrId.country}, zip: ${addr.addrId.pinCode}
+                            </h3>
+                    </div>
+                    <div class="td options"> 
+                        <div class="add-updt" style="color:gold">
+                             <button onclick="openForm('${addr.addrId._id}')">Update</button>
+                        </div>
+                        <div class="add-choose" style="color:gold">
+                             <button onclick="select('${addr.addrId._id}')">Select</button>
+                        </div>
+                        <div class="add-del">
+                            <button onclick="del('${addr.addrId._id}')">Delete</button>
                         </div>
                     </div>
-                    <div class="td price">${p.productId.salePrice}</div>
-                    <div class="td quantity"><input type="number" class="mobile-input" min="0" max="${p.productId.stock}" value="${p.quantity}" placeholder="Qnty" onchange="updateQuantity(this,'${p.productId._id}')"></div>
-                    <div class="td total">${p.productId.salePrice*p.quantity}</div>
-                    <div class="td purchase"><a href="#"><i class="fa-solid fa-bag-shopping" style="color:white"></i></a></div>
                 </div>`;
             })
-
-            //Quantity Change Control
-
             
-            //Temporary Data
-            total.textContent = "Rs "+pr.totalPrice;
-            subTotal.textContent = "Rs "+pr.totalPrice;
-
+            r.addresses.forEach(addr=>{
+                 
+                if(addr.addrId.isShippingAddress){
+                    shipOrderBody.innerHTML=`<div class="order-row" data-aid=${addr._id}>
+                    <div class="td address-det">
+                            <h3>${addr.addrId.fName} ${addr.addrId.lName}, ${addr.addrId.addr}, ${addr.addrId.city} ,${addr.addrId.state},${addr.addrId.country}, zip: ${addr.addrId.pinCode}
+                            </h3>
+                    </div>
+                    
+                </div>`;
+                } 
+            })
 
         } catch (error) {
             // Handle any errors that occurred during the fetch
@@ -213,4 +244,8 @@
                 
         }
     }
+    document.addEventListener("DOMContentLoaded", async function() {
+        // DOM manipulation and other code here
+          run(`api/users/addr/${uid}`);
+    });
 </script>
