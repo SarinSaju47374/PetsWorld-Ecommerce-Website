@@ -4,6 +4,7 @@ import twilio from 'twilio';
 import jwt2 from 'jsonwebtoken';
 const router = express.Router();
 import CryptoJS from "crypto-js"
+import Token from "../models/tokenModel.js";
 router.get("/",(req,res)=>{
   res.set("Set-Cookie",``);
   res.render("userLogin");
@@ -16,7 +17,18 @@ router.post("/", async (req, res) => {
     let usersD = await fetch("http://127.0.0.1:2000/api/users");
     let users = await usersD.json();
     let user = users.users.find(d => (CryptoJS.AES.decrypt(d.psswd,process.env.secret_p).toString(CryptoJS.enc.Utf8)==req.body.psswd) && (d.email===req.body.emailMob || d.phoneNumber===Number(req.body.emailMob)))
-     
+    if(!user.verified){
+      let token = await Token.findOne({userId:user._id});
+      if(!token){
+        const token  = await Token.create({
+          userId:user._id,
+          token:crypto.randomBytes(32).toString(hex),
+        })
+        const url = `${process.env.BASE_URL}users/${user._id}/${token.token}`;
+        await sendEmail(user.email,"Verify Email",url);
+      }
+      res.status(400).send({message:"An Email sent to your Email Please Verify"});
+    }
     if(user){
       console.log("User Exists")
       let JWTtoken = jwt2.sign({user:user._id,exp:Math.floor(Date.now()/1000)*(60*60)},process.env.secretKeyU);

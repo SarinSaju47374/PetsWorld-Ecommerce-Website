@@ -192,9 +192,13 @@ form button{
     margin:0;
 }
 @media screen and (max-width:768px){
+    body{
+        height:100vh;
+    }
     .wrapper{
-        width:90%; 
-        /* height:40rem; */
+        width:95%; 
+        /* height:95%; */
+        overflow-y: scroll;
     }
     .wrapper .form{
         width:100%;

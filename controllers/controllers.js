@@ -1,17 +1,21 @@
 import {ctgryModel, productModel,cartModel,addressModel} from "../models/productModel.js"
 import userModel from "../models/userModel.js"
 import adminModel from "../models/adminModel.js"
+import Token from "../models/tokenModel.js"
 import fs from  "fs";
 import path from "path";
 import jwt2 from "jsonwebtoken";
 import CryptoJS from "crypto-js"
 import mongoose from "mongoose";
+import sendEmail from "../utils/sendMail.js"
+import crypto from "crypto";
 const ObjectId = mongoose.Types.ObjectId;
 //dirname configuration
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+ 
 
 
 //website
@@ -204,23 +208,107 @@ async function adminUserView(req,res){
 
 
 async function addUser(req,res){
-    let {
+  console.log("entered add user")
+    try{
+      console.log("Im inside")
+      let {
         userName,
         fName,
         lName,
         email,
         psswd,
         phoneNumber
-    } = req.body
-    await userModel.create({
-        userName:userName,
-        fName:fName,
-        lName:lName,
-        email:email,
-        psswd:CryptoJS.AES.encrypt(psswd,process.env.secret_p),
-        phoneNumber:phoneNumber,
-    });
-    res.render("userLogin",{admin:false,user:false});  
+      } = req.body
+      console.log(req.body)
+      let user = await userModel.create({
+          userName:userName,
+          fName:fName,
+          lName:lName,
+          email:email,
+          psswd:CryptoJS.AES.encrypt(psswd,process.env.secret_p),
+          phoneNumber:phoneNumber,
+      });
+      console.log("Usert details Generated");
+      const token  = await Token.create({
+        userId:user._id,
+        token:crypto.randomBytes(32).toString('hex'),
+      })
+      // await Token.createIndexes({createdAt:1,expireAfterSeconds:30})
+      Token.collection.getIndexes((err, indexes) => {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log(indexes);
+        }})
+      console.log("Token Generated");
+      const url = `${process.env.BASE_URL}/register/${user._id}/verify/${token.token}`;
+      console.log(url);
+      // await sendEmail(user.email,"Verify Email",url);
+      // console.log("Token Generated");
+      // res.status(201).send({message:"An email sent to your Account! Please Verify!"})
+        req.session.data = "Data is weird";
+        console.log(req.session.data);
+        res.redirect(`/register/verify/${user.id}`);
+      // res.render("userLogin",{admin:false,user:false}); 
+    }catch(err){
+      res.status(500).send({message:"Internal Server Error"})
+      console.log(err)
+    }
+}
+
+//When user clicks resend the token is generated again and sent to mail
+async function resendMail(req,res){
+  console.log("Entered Resend Mail")
+  try{
+    const token = await Token.findOne({ userId: req.body.userId });
+  if (token) {
+    // Token exists, update it
+    token.token = crypto.randomBytes(32).toString('hex');
+    await token.save();
+    console.log("Token is created");
+    console.log(token);
+    const url = `${process.env.BASE_URL}/register/${user._id}/verify/${token.token}`;
+    console.log(url);
+    res.json({sent:true});
+  } else {
+    // Token does not exist, send response
+    return res.json({ sent: false });
+  }   
+    // await Token.createIndexes({createdAt:1,expireAfterSeconds:30})
+     
+     console.log(token);
+    
+    // await sendEmail(user.email,"Verify Email",url);
+    // console.log("Token Generated");
+     
+      
+    
+
+    // res.render("userLogin",{admin:false,user:false}); 
+  }catch(err){
+    
+    console.log(err)
+  }
+}
+
+async function verifyToken(req,res){
+  console.log("Entere the verify Token")
+  try{
+    const user  = await userModel.findOne({_id:req.params.id});
+    console.log(user);
+    if(!user) return res.status(400).send({message:"Invalid Link"});
+
+    const token = await Token.findOne({userId:user._id,token:req.params.token})
+    console.log(token);
+    if(!token) return res.status(400).send({message:"Invalid Link"});
+    await userModel.updateOne({ _id: user._id }, { verified: true })
+    console.log("User Verified in DB")
+    await Token.deleteOne({_id:token._id});
+    console.log("Token Removed")
+    res.redirect("/register/user-verified");
+  }catch(err){
+    res.status(500).send({message:"Internal Server Error"})
+  }
 }
 
 
@@ -541,7 +629,7 @@ async function getUsers(req,res){
           
         const limit = !isNaN(parseInt(req.query.l)) && parseInt(req.query.l) <= 3
         ? parseInt(req.query.l)||3
-        : 3;
+        : "";
         const page = !isNaN(parseInt(req.query.p)) && parseInt(req.query.p) >= 0 && parseInt(req.query.p) <= Math.ceil(total/limit)    
         ? parseInt(req.query.p)-1||0
         :0;
@@ -837,7 +925,9 @@ export {
     getCart,
     addToCart,
     handleAddr,
-    getUserAddress
+    getUserAddress,
+    resendMail,
+    verifyToken,
 };
 
  

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import path from "path";
 import jwt2 from "jsonwebtoken"
 import morgan from "morgan"
-
+import session from "express-session";
 
  
 //Environment variables
@@ -16,6 +16,12 @@ const app = express();
 
 
 app.use(morgan("dev"));
+app.use(session({
+  secret: 'amigo-santios',
+  resave: false,
+  saveUninitialized: true
+}));
+
 //dirname configuration
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -168,7 +174,16 @@ app.get("/test",(req,res)=>{
 })
 
 //Just Test for admin Page SetUp
-
+import sendMail from "./utils/sendMail.js";
+app.get("/sendMail",(req,res)=>{
+  // 
+  if(req.session.data){
+    res.json({"session":req.session.data})
+  }else{
+    res.json({"session":"no session"})
+  }
+  
+})
 
 
 let port  = 2000;

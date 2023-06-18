@@ -28,6 +28,11 @@ const userSchema = new Schema({
         required:true,
         unique:true
     },
+    verified:{
+        type:Boolean,
+        default:false,
+        required:true,
+    },
     isBlocked:{
         type:Boolean,
         default:false,
@@ -38,22 +43,12 @@ const userSchema = new Schema({
             ref:"address",
         }}
     ],
-    cart:{
-        type:[Schema.Types.ObjectId],
-        ref:"cart",
-        default:[],
-    },
-    wishList:{
-        type:[Schema.Types.ObjectId],
-        ref:"wishlist",
-        default:[],
-    },
     otp: {
         type: Number,
         default: 0,
         // unique: true,
         // partialFilterExpression: { otp: { $ne: null } },
-      }
+    },
 })
 
 
