@@ -17,9 +17,9 @@ router.get("/verify/:id",(req,res)=>{
 })
 
 router.get("/:id/verify/:token",verifyToken)
-router.get("/user-verified",(req,res)=>{
-    res.render("emailVerified",{admin:false,user:false});
-})
+// router.get("/user-verified",(req,res)=>{
+//     res.render("emailVerified",{admin:false,user:false});
+// })
 
 
 export default router;

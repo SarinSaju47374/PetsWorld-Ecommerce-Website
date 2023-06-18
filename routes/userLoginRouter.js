@@ -5,6 +5,9 @@ import jwt2 from 'jsonwebtoken';
 const router = express.Router();
 import CryptoJS from "crypto-js"
 import Token from "../models/tokenModel.js";
+import userModel from "../models/userModel.js";
+// import CryptoJS from "crypto-js"
+
 router.get("/",(req,res)=>{
   res.set("Set-Cookie",``);
   res.render("userLogin");
@@ -91,67 +94,67 @@ router.post("/", async (req, res) => {
           console.log("Message is Succesfully Sent");
           res.render("otpLogin",{admin:false,user:false,otp:randomNumber,number:req.body.emailMob})
         });
-    }else{
-      try {
-        // Otp generator
-        var randomNumber = Math.floor(Math.random() * 9000) + 1000;
-        fetch('http://127.0.0.1:2000/api/users', {
-        method: 'PUT', // Use the PUT method for updating
-        headers: {
-          'Content-Type': 'application/json', // Set the request content type
-          // Additional headers if required
-        },
-        body: JSON.stringify({ 
-          // Data to be updated
-          otp:randomNumber,
-          email:req.body.emailMob
-        })
-      })
-        .then(response => {
-          // Handle the response
-          if (response.ok) {
-            // Value updated successfully
-            console.log('Value updated successfully');
-          } else {
-            // Handle errors
-            console.error('Error updating value:', response.status);
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
-        // Create a transporter using the ethereal SMTP transport
-        let transporter = nodemailer.createTransport({
-          host: "smtp.ethereal.email",
-          port: 587,
-          secure: false,
-          auth: {
-            user: "liliane.stroman46@ethereal.email",
-            pass: 'jXRBdjgazuXdzFrU2f',
-          },
-        });
-    
-        // Compose the email message
-        let message = {
-          from: "liliane.stroman46@ethereal.email",
-          to: req.body.emailMob,
-          subject: "Random Number",
-          text: `Here is your OTP number: ${randomNumber}`,
-        };
-    
-        // Send the email
-        let info = await transporter.sendMail(message);
-    
-        // Log the message details and preview URL
-        console.log("Message sent: %s", info.messageId);
-        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-        res.render("otpLogin",{admin:false,user:false,otp:randomNumber,number:req.body.emailMob})
-        // res.status(200).json({ message: "Email sent successfully" });
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Failed to send email" });
-      }
     }
+  }
+});
+
+router.get("/forgot",(req,res)=>{
+  res.render("forgotPage1",{admin:false,user:false})
+})
+
+router.post("/forgot",async (req,res)=>{
+   
+  let {email} = req.body;
+  let secret  = email+process.env.SECRET_AUTH;
+  try{
+    let user = await userModel.findOne({email:email});
+    let payload = {
+      id:user._id,
+      email:user.email
+    }
+    const token = jwt2.sign(payload,secret,{expiresIn:'15m'})
+    console.log(token)
+    const link = `${process.env.BASE_URL}/login/reset-password/${user._id}/${token}`
+    console.log(link);
+    res.json({flag:true});
+  }catch(err){
+    console.log("login/forgot err: ",err);
+    res.json({flag:false})
+  }
+})
+
+router.get("/reset-password/:id/:tk",async(req,res)=>{
+  const{id,tk} = req.params;
+  //Checks the user id is valid or not
+  const user = await userModel.findOne({_id:id});
+  if(!user) res.json({"message":"invalid Link"})
+  let secret  = user.email+process.env.SECRET_AUTH;
+  try{
+    const payload = jwt2.verify(tk,secret);
+    res.render("forgotPage2",{admin:false,user:false,email:payload.email});
+  }catch(err){
+    console.log("Err: ",err);
+    res.json({"message":"invalid Link"})
+  }
+  // res.render("forgotPage2")
+})
+router.post("/reset-password/:id/:tk", async (req, res) => {
+  const { id, tk } = req.params;
+  let { psswd } = req.body;
+  const encryptedPassword = CryptoJS.AES.encrypt(psswd, process.env.secret_p).toString();
+  const user = await userModel.findOne({ _id: id });
+  if (!user) {
+    return res.json({ "message": false })
+  };
+  let secret = user.email + process.env.SECRET_AUTH; 
+  try {
+    const payload = jwt2.verify(tk, secret);
+    
+    await userModel.updateOne({ _id: payload.id }, { psswd:encryptedPassword });
+    return res.json({ "message": true });
+  } catch (err) {
+    console.log("Err: ", err);
+    return res.json({ "message": false });
   }
 });
 export default router;

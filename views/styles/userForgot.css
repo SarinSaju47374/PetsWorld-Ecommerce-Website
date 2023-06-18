@@ -74,6 +74,24 @@ form{
     flex-direction: column;
     align-items: center;
 }
+form .psswd-cont{
+    position:relative;
+    padding:0;
+    width:100%;
+    display: flex;
+    justify-content: center;
+    overflow: visible;
+}
+form p{
+    display: none;
+    position:absolute;
+    top:98%;
+    color:rgb(255, 128, 0);
+    /* display: none; */
+    font-size: .8rem;
+    width:24rem;
+    text-align: center;
+}
 form input{
     background-color:transparent;
     outline: none;
@@ -203,7 +221,7 @@ form .btns{
         height:2rem;
         
     }
-     
+    
     .form{
         position:relative;
         background-image: url("https://www.treehugger.com/thmb/Y62sOngV0vrfGLs13beel1Cx2Zk=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/FRODEL-2019-191331499cc54ef0872ea856a3bc8f2f.jpg");

@@ -9,13 +9,17 @@
             background-color: #f2f2f2;
             font-family: Arial, sans-serif;
             text-align: center;
-            padding-top: 100px;
+            padding-top: 100px;color:white;
+            background-color: #0b243b;
         }
-
+        a{
+            color:orange;
+            display: inline-block;
+        }
         .container {
             max-width: 400px;
             margin: 0 auto;
-            background-color: #ffffff;
+            background-color: #1271c99e;
             border-radius: 6px;
             padding: 40px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -25,10 +29,10 @@
             font-size: 24px;
             margin-bottom: 30px;
         }
-
+         
         p {
             font-size: 18px;
-            color: #555555;
+            {{!-- color: #555555; --}}
         }
 
         .button {
@@ -53,6 +57,7 @@
         <h1>Check Your Email</h1>
         <p>An email has been sent to your inbox. Please check your email for verification.</p>
         <a href="#" class="button">Resend Email</a>
+        <h5><span><a href="/register">Re-Register</a></span>    If the session EXPIRES!</h5>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>

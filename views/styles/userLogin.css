@@ -96,7 +96,7 @@ form button{
     border:none;
     border-radius:16px;
     font-weight:700;
-    margin-top:2rem;
+    /* margin-top:2rem; */
     padding:2px;
     color:var(--color-btn-text);
     cursor: pointer;
@@ -108,10 +108,10 @@ form button:hover{
 }
 
 form .btns{
-    display:flex;
-    flex-direction: row;
-    justify-content: space-between;
+    display:grid;
+    place-items: center;;
     width:20rem;
+    padding:1rem;
 }
 
 .logo-img{
@@ -129,7 +129,8 @@ form .btns{
 
 
 .form-section-2{
-    height: 8rem;
+    /* height: 8rem; */
+    padding: 1rem   ;
     background-color:var(--color-form-footer);
     display: flex;
     align-items: center;
@@ -230,9 +231,8 @@ form .btns{
     }
 
     form .btns{
-        display:flex;
-        flex-direction: row;
-        justify-content: space-between;
+        display:grid;
+        place-items: center;;
         width:15rem;
     }
 }
