@@ -7,6 +7,7 @@ import CryptoJS from "crypto-js"
 import crypto from "crypto";
 import Token from "../models/tokenModel.js";
 import userModel from "../models/userModel.js";
+import otpModel from "../models/otpModel.js"
 // import CryptoJS from "crypto-js"
 
 router.get("/",(req,res)=>{
@@ -50,16 +51,42 @@ router.post("/", async (req, res) => {
       } else {
         let JWTtoken = jwt2.sign({ user: user._id, exp: Math.floor(Date.now() / 1000) * (60 * 60) }, process.env.secretKeyU);
         const expiration = new Date(new Date().getTime() + 3600000);
-        res.set("Set-Cookie", `token=${JWTtoken};httpOnly:false;Expiration=${expiration.toUTCString()}`);
+        res.set("Set-Cookie", `token=${JWTtoken};httpOnly:false;Expires=${expiration.toUTCString()}`);
       }
     } else {
-      console.log("User doesn't Exist");
+      
       return res.render("userLogin", { admin: false, user: false, flag: true });
     }
     
     res.redirect("/");
   }else{
     console.log("This is otp login")
+    let {mob} = req.body;
+    let user  = await userModel.findOne({phoneNumber:Number(mob)})
+    var randomNumber = Math.floor(Math.random() * 9000) + 1000;
+
+    let secret  = user.email+process.env.SECRET_AUTH;
+    try{
+    
+      console.log(user)
+      let payload = {
+        id:user._id,
+        email:user.email
+      }
+      const token = jwt2.sign(payload,secret,{expiresIn:'60s'})
+      console.log(token)
+      const link = `${process.env.BASE_URL}/login/otp/${user._id}/${token}`
+      //Send the OTP TO MOBILE
+      await otpModel.findOneAndUpdate(
+        { userId: user._id },
+        { otp: Number(randomNumber) },
+        { upsert: true }
+      );
+      res.redirect(link)
+    }catch(err){
+      console.log("login/forgot err: ",err);
+       
+    }
     // if(/^\d{10}$/.test(req.body.emailMob)){
     //   console.log("This is a number");
       
@@ -113,6 +140,60 @@ router.post("/", async (req, res) => {
     // }
   }
 });
+
+
+router.get("/otp/:id/:tk",async(req,res)=>{
+  const{id,tk} = req.params;
+  //Checks the user id is valid or not
+  const user = await userModel.findOne({_id:id});
+  if(!user) res.json({"message":"invalid Link"})
+  let secret  = user.email+process.env.SECRET_AUTH;
+  try{
+    const payload = jwt2.verify(tk,secret);
+    res.render("otpLogin",{admin:false,user:false,email:payload.email});
+  }catch(err){
+    console.log("Err: ",err);
+    res.json({"message":"invalid Link"})
+  }
+  // res.render("forgotPage2")
+})
+
+
+router.post("/otp/:id/:tk", async (req, res,next) => {
+  const { id, tk } = req.params;
+  console.log(req.params)
+  let { otp } = req.body;
+  console.log(req.body)
+  let dbOtp = await otpModel.findOne({userId:id});
+  let validOtp = dbOtp.otp==otp;
+  console.log(validOtp);
+  if(validOtp){
+    let JWTtoken = jwt2.sign({ user:id, exp: Math.floor(Date.now() / 1000) * (60 * 60) }, process.env.secretKeyU);
+    const expiration = new Date(new Date().getTime() + 3600000);
+    console.log(JWTtoken);
+    res.setHeader("Set-Cookie",`token=${JWTtoken};Path=/;httpOnly:false;Expires=${expiration.toUTCString()}`);
+    console.log("res is set*************")
+    res.redirect("/");
+  }else{
+    res.json({"message":"Not a valid OTP"});
+  }
+  // const encryptedPassword = CryptoJS.AES.encrypt(psswd, process.env.secret_p).toString();
+  // const user = await userModel.findOne({ _id: id });
+  // if (!user) {
+  //   return res.json({ "message": false })
+  // };
+  // let secret = user.email + process.env.SECRET_AUTH; 
+  // try {
+  //   const payload = jwt2.verify(tk, secret);
+    
+  //   await userModel.updateOne({ _id: payload.id }, { psswd:encryptedPassword });
+  //   return res.json({ "message": true });
+  // } catch (err) {
+  //   console.log("Err: ", err);
+  //   next();
+  // }
+});
+
 
 router.get("/forgot",(req,res)=>{
   res.render("forgotPage1",{admin:false,user:false})

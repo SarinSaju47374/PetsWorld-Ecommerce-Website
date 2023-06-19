@@ -246,8 +246,7 @@ async function addUser(req,res){
       // await sendEmail(user.email,"Verify Email",url);
       // console.log("Token Generated");
       // res.status(201).send({message:"An email sent to your Account! Please Verify!"})
-        req.session.data = "Data is weird";
-        console.log(req.session.data);
+         
         res.redirect(`/register/verify/${user.id}`);
       // res.render("userLogin",{admin:false,user:false}); 
     }catch(err){
@@ -403,49 +402,60 @@ async function handleAddr(req, res) {
 
 //users
 
-async function userProductView(req,res){
-    let productsD = await fetch("http://127.0.0.1:2000/api/products");
-    let productsInfo  = await productsD.json();
-    let products = productsInfo.products; 
+async function userProductView(req, res) {
+  let productsD = await fetch("http://127.0.0.1:2000/api/products");
+  let productsInfo = await productsD.json();
+  let products = productsInfo.products;
 
-    //Proper Way to take the Specific Cookie
-    let cookieHeaderValue = req.headers.cookie; // Get the cookie header value
-    let cookies = cookieHeaderValue.split(";"); // Split into individual cookies
-    
-    let token = null;
+  let cookieHeaderValue = req.headers.cookie;
+  let token = null;
+
+  if (cookieHeaderValue) {
+    let cookies = cookieHeaderValue.split(";");
+
     for (let cookie of cookies) {
-      let [cookieName, cookieValue] = cookie.trim().split("="); // Split cookie into name and value
+      let [cookieName, cookieValue] = cookie.trim().split("=");
+
       if (cookieName === "token") {
         token = cookieValue;
-        break; // Found the desired cookie, exit the loop
+        break;
       }
     }
-    //Proper Way to take the Specific Cookie
+  }
 
-    
-    // console.log(req.cookies.token);
-    // res.render("userLandingPage",{admin:false,user:true,loggedIn:true});
-    if (req.headers.cookie && token) {
-         
-        // Proceed with decoding the token
-        const secretKey = process.env.secretKeyU;
-        try {
-        //decoding token
-        const decodedToken = jwt2.verify(token, secretKey);
-        const userId = decodedToken.user;
-        // console.log(userId);
-        res.render("userLandingPage",{admin:false,user:true,loggedIn:true,products});
-        // Proceed with extracting the user name from the decoded token
-        } catch (error) {
-            console.log(error)
-        }
-        
-      } else {
-        console.log("Cookie doesnt exist")
-        // Cookie doesn't exist, handle accordingly
-        res.render("userLandingPage",{admin:false,user:true,loggedIn:false,products});
-      } 
+  if (token) {
+    const secretKey = process.env.secretKeyU;
+
+    try {
+      const decodedToken = jwt2.verify(token, secretKey);
+      const userId = decodedToken.user;
+
+      res.render("userLandingPage", {
+        admin: false,
+        user: true,
+        loggedIn: true,
+        products,
+      });
+    } catch (error) {
+      console.log(error);
+      res.render("userLandingPage", {
+        admin: false,
+        user: true,
+        loggedIn: false,
+        products,
+      });
+    }
+  } else {
+    console.log("Cookie doesn't exist");
+    res.render("userLandingPage", {
+      admin: false,
+      user: true,
+      loggedIn: false,
+      products,
+    });
+  }
 }
+
 
 async function userProductDescr(req,res){
     if(req.query.oid){

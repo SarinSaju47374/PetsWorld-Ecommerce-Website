@@ -79,12 +79,12 @@
 <body>
   <div class="container">
     <h2>Enter OTP</h2>
-    <form id="otpForm" action="/" method="POST">
+    <form id="otpForm" action="" method="POST">
       <div class="otp-input">
         <input type="text" name="otp" maxlength="4" >
       </div>
       <div class="otp-submit">
-        <input type="hidden" id="emailMob" name="phone" value="{{number}}">
+        {{!-- <input type="hidden" id="emailMob" name="phone" value="{{number}}"> --}}
         <input type="submit" value="Submit">
       </div>
     </form>
