@@ -164,8 +164,7 @@
            try{
                 let userD = await fetch("/api/users");
                 let userInfo = await userD.json();
-                let user = userInfo.users.find(val=>val.userName===this.value.trim());
-                console.log(user);
+                let user = userInfo.users.find(val=>val.userName.toLowerCase()==this.value.trim().toLowerCase());
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(()=>{
                     if(user){

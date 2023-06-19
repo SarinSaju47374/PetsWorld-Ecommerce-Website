@@ -11,6 +11,9 @@
     {{#if flag}}
         <div class="popped"></div>
     {{/if}}
+    {{#if unVerif}}
+        <div class="verifPop"></div>
+    {{/if}}
     <div class="wrapper">
         <div class="form">
             <div class="form-section-1">
@@ -19,7 +22,7 @@
                     <h1>PETS WORLD</h1>
                 </div>
                 <form action="/login" method="POST">
-                    <input type="text" name="emailMob" id="email" placeholder="Email Address/Mobile Number.." required>
+                    <input type="text" name="email" id="email" placeholder="Enter your Email Address...." required>
                     <input type="password" name = "psswd" id="psswd" placeholder="Enter your password.." required>
 
                     <div class="btns">
@@ -62,7 +65,6 @@
     email.addEventListener("change",async function(){
          const value  = this.value.trim();
          const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-         const isValidMobile = /^\d{10}$/.test(value);
          this.setCustomValidity(''); // Reset any previous validation error
          let dataD= await fetch("/api/users");
          let data = await dataD.json();
@@ -73,22 +75,15 @@
             this.setCustomValidity('Please enter a valid email address');
             this.reportValidity();
         }
-        if (value && !isValidMobile) {
-            this.setCustomValidity('Please enter a valid Mobile Number');
-            this.reportValidity();
-        }
         if(user && user.isBlocked){
             this.setCustomValidity("You are Blocked")
-            this.reportValidity();
-        }
-        if(user && !user.verified){
-            this.setCustomValidity('You are not Verified! Check your Mail!');
             this.reportValidity();
         }
         if(!user){
             this.setCustomValidity('You Havenot Registered');
             this.reportValidity();
         }
+        
     });
     
     mob.addEventListener("change",async function(){
@@ -108,10 +103,6 @@
             this.setCustomValidity("You are Blocked")
             this.reportValidity();
         }
-        if(user && !user.verified){
-            this.setCustomValidity('You are not Verified! Check your Mail!');
-            this.reportValidity();
-        }
         if(!user){
             this.setCustomValidity('You Havenot Registered');
             this.reportValidity();
@@ -124,7 +115,16 @@
         text: 'Check Your Password Amigo!',
         icon: 'error',
         confirmButtonText: 'OK'
-    })
+        })
     }
+    if(document.querySelector(".verifPop")){
+        Swal.fire({
+        title: 'Error!',
+        text: 'You are not Verified! Check  your Mail',
+        icon: 'error',
+        confirmButtonText: 'OK'
+        })
+    }
+   
 </script>
 </html>

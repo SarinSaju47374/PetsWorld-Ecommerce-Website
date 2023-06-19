@@ -407,7 +407,22 @@ async function userProductView(req,res){
     let productsD = await fetch("http://127.0.0.1:2000/api/products");
     let productsInfo  = await productsD.json();
     let products = productsInfo.products; 
-    let token = req.headers.cookie?.split("=")[1];
+
+    //Proper Way to take the Specific Cookie
+    let cookieHeaderValue = req.headers.cookie; // Get the cookie header value
+    let cookies = cookieHeaderValue.split(";"); // Split into individual cookies
+    
+    let token = null;
+    for (let cookie of cookies) {
+      let [cookieName, cookieValue] = cookie.trim().split("="); // Split cookie into name and value
+      if (cookieName === "token") {
+        token = cookieValue;
+        break; // Found the desired cookie, exit the loop
+      }
+    }
+    //Proper Way to take the Specific Cookie
+
+    
     // console.log(req.cookies.token);
     // res.render("userLandingPage",{admin:false,user:true,loggedIn:true});
     if (req.headers.cookie && token) {

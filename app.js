@@ -3,24 +3,17 @@ import mongoose from "mongoose";
 import path from "path";
 import jwt2 from "jsonwebtoken"
 import morgan from "morgan"
-import session from "express-session";
 
- 
 //Environment variables
 import dotenv from 'dotenv';
 dotenv.config();
 
-
 //APP
 const app = express();
 
-
+//Logs OUR ACTIVITY
 app.use(morgan("dev"));
-app.use(session({
-  secret: 'amigo-santios',
-  resave: false,
-  saveUninitialized: true
-}));
+
 
 //dirname configuration
 import { dirname } from 'path';

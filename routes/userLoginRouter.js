@@ -4,97 +4,113 @@ import twilio from 'twilio';
 import jwt2 from 'jsonwebtoken';
 const router = express.Router();
 import CryptoJS from "crypto-js"
+import crypto from "crypto";
 import Token from "../models/tokenModel.js";
 import userModel from "../models/userModel.js";
 // import CryptoJS from "crypto-js"
 
 router.get("/",(req,res)=>{
-  res.set("Set-Cookie",``);
-  res.render("userLogin");
+  res.setHeader('Set-Cookie', 'token=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+
+  res.render("userLogin",{admin:false,user:false,flag:false,unVerif:false});
 })
 
 router.post("/", async (req, res) => {
-  console.log(req.body.psswd)
+  let {email,psswd} = req.body
+ 
   if(req.body.lgnBtn=="regular-login"){
     console.log("This is login")
-    let usersD = await fetch("http://127.0.0.1:2000/api/users");
-    let users = await usersD.json();
-    let user = users.users.find(d => (CryptoJS.AES.decrypt(d.psswd,process.env.secret_p).toString(CryptoJS.enc.Utf8)==req.body.psswd) && (d.email===req.body.emailMob || d.phoneNumber===Number(req.body.emailMob)))
-    if(!user.verified){
-      let token = await Token.findOne({userId:user._id});
-      if(!token){
-        const token  = await Token.create({
-          userId:user._id,
-          token:crypto.randomBytes(32).toString(hex),
-        })
-        const url = `${process.env.BASE_URL}users/${user._id}/${token.token}`;
-        await sendEmail(user.email,"Verify Email",url);
+    let user = await userModel.findOne({email:email.trim()});
+     console.log(user)
+    // let user = users.users.find(d => (CryptoJS.AES.decrypt(d.psswd,process.env.secret_p).toString(CryptoJS.enc.Utf8)==req.body.psswd) && (d.email===req.body.emailMob || d.phoneNumber===Number(req.body.emailMob)))
+    
+    if (user) {
+      console.log("User Exists");
+
+      if (CryptoJS.AES.decrypt(user.psswd, process.env.secret_p).toString(CryptoJS.enc.Utf8) != psswd) {
+        console.log("I think password is wrong");
+        return res.render("userLogin", { admin: false, user: false, flag: true });
+      } else if (!user.verified) {
+        let token = await Token.findOne({ userId: user._id });
+        console.log("Token Exists");
+        
+        if (!token) {
+          console.log("Token is not there!");
+          const token = await Token.create({
+            userId: user._id,
+            token: crypto.randomBytes(32).toString("hex"),
+          });
+          console.log("Token Is Created!");
+          const url = `${process.env.BASE_URL}/register/${user._id}/verify/${token.token}`;
+          // await sendEmail(user.email,"Verify Email",url);
+          console.log(url);
+        }
+
+        return  res.render("userLogin", { admin: false, user: false, unVerif: true });
+      } else {
+        let JWTtoken = jwt2.sign({ user: user._id, exp: Math.floor(Date.now() / 1000) * (60 * 60) }, process.env.secretKeyU);
+        const expiration = new Date(new Date().getTime() + 3600000);
+        res.set("Set-Cookie", `token=${JWTtoken};httpOnly:false;Expiration=${expiration.toUTCString()}`);
       }
-      res.status(400).send({message:"An Email sent to your Email Please Verify"});
+    } else {
+      console.log("User doesn't Exist");
+      return res.render("userLogin", { admin: false, user: false, flag: true });
     }
-    if(user){
-      console.log("User Exists")
-      let JWTtoken = jwt2.sign({user:user._id,exp:Math.floor(Date.now()/1000)*(60*60)},process.env.secretKeyU);
-      const expiration = new Date(new Date().getTime()+3600000);
-      res.set("Set-Cookie",`token=${JWTtoken};httpOnly:false;Expiration=${expiration.toUTCString()}`);
-      res.redirect("/");
-    }else{
-      console.log("User doesnt Exist")
-      res.render("userLogin",{admin:false,user:false,flag:true})
-    }
+    
+    res.redirect("/");
   }else{
     console.log("This is otp login")
-    if(/^\d{10}$/.test(req.body.emailMob)){
-      console.log("This is a number");
+    // if(/^\d{10}$/.test(req.body.emailMob)){
+    //   console.log("This is a number");
       
-      var randomNumber = Math.floor(Math.random() * 9000) + 1000;
-      fetch('http://127.0.0.1:2000/api/users', {
-      method: 'PUT', // Use the PUT method for updating
-      headers: {
-        'Content-Type': 'application/json', // Set the request content type
-        // Additional headers if required
-      },
-      body: JSON.stringify({ 
-        // Data to be updated
-         otp:randomNumber,
-         number:req.body.emailMob
-      })
-     })
-      .then(response => {
-        // Handle the response
-        if (response.ok) {
-          // Value updated successfully
-          console.log('Value updated successfully');
-        } else {
-          // Handle errors
-          console.error('Error updating value:', response.status);
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-
-      
-      // res.render("otpLogin",{admin:false,user:false,number:req.body.emailMob})
-      // Your AccountSID and Auth Token from console.twilio.com
-      const accountSid = 'ACfdde94f962631e5d5d57ea933cdf4618';
-      const authToken = 'ed2ca5ccc281d3c4bc68dd8ba399448f';
+    //   var randomNumber = Math.floor(Math.random() * 9000) + 1000;
+    //   fetch('http://127.0.0.1:2000/api/users', {
+    //   method: 'PUT', // Use the PUT method for updating
+    //   headers: {
+    //     'Content-Type': 'application/json', // Set the request content type
+    //     // Additional headers if required
+    //   },
+    //   body: JSON.stringify({ 
+    //     // Data to be updated
+    //      otp:randomNumber,
+    //      number:req.body.emailMob
+    //   })
+    //  })
+    //   .then(response => {
+    //     // Handle the response
+    //     if (response.ok) {
+    //       // Value updated successfully
+    //       console.log('Value updated successfully');
+    //     } else {
+    //       // Handle errors
+    //       console.error('Error updating value:', response.status);
+    //     }
+    //   })
+    //   .catch(error => {
+    //     console.error('Error:', error);
+    //   });
 
       
+    //   // res.render("otpLogin",{admin:false,user:false,number:req.body.emailMob})
+    //   // Your AccountSID and Auth Token from console.twilio.com
+    //   const accountSid = 'ACfdde94f962631e5d5d57ea933cdf4618';
+    //   const authToken = 'ed2ca5ccc281d3c4bc68dd8ba399448f';
 
-      const client = twilio(accountSid, authToken);
+      
 
-      client.messages
-        .create({
-          body: ` Your OTP is ${randomNumber}`,
-          to:  `+91${req.body.emailMob}`, // Text your number
-          from: '+13157079467', // From a valid Twilio number
-        })
-        .then((message) => {
-          console.log("Message is Succesfully Sent");
-          res.render("otpLogin",{admin:false,user:false,otp:randomNumber,number:req.body.emailMob})
-        });
-    }
+    //   const client = twilio(accountSid, authToken);
+
+    //   client.messages
+    //     .create({
+    //       body: ` Your OTP is ${randomNumber}`,
+    //       to:  `+91${req.body.emailMob}`, // Text your number
+    //       from: '+13157079467', // From a valid Twilio number
+    //     })
+    //     .then((message) => {
+    //       console.log("Message is Succesfully Sent");
+    //       res.render("otpLogin",{admin:false,user:false,otp:randomNumber,number:req.body.emailMob})
+    //     });
+    // }
   }
 });
 
@@ -138,7 +154,7 @@ router.get("/reset-password/:id/:tk",async(req,res)=>{
   }
   // res.render("forgotPage2")
 })
-router.post("/reset-password/:id/:tk", async (req, res) => {
+router.post("/reset-password/:id/:tk", async (req, res,next) => {
   const { id, tk } = req.params;
   let { psswd } = req.body;
   const encryptedPassword = CryptoJS.AES.encrypt(psswd, process.env.secret_p).toString();
@@ -154,7 +170,7 @@ router.post("/reset-password/:id/:tk", async (req, res) => {
     return res.json({ "message": true });
   } catch (err) {
     console.log("Err: ", err);
-    return res.json({ "message": false });
+    next();
   }
 });
 export default router;
