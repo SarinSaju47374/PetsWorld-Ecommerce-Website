@@ -1,4 +1,4 @@
-let jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken"
 
 //User Verification Middleware
 const authoriseJwt = (req,res,next)=>{
@@ -18,4 +18,4 @@ const authoriseJwt = (req,res,next)=>{
     }
 }
 
-module.exports = authoriseJwt;
+export default authoriseJwt;

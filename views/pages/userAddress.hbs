@@ -64,10 +64,25 @@
     let form = document.querySelector(".checkout-bs-form form");
     let closeFrm = document.querySelector(".closeFrm");
     let changeAdd = document.querySelector(".changeAdd");
-    let token = document.cookie.split("=")[1];
     let orderBody = document.getElementById("orderBody");
     let uid = orderBody.dataset.uid;
     let shipOrderBody = document.getElementById("shipBody");
+
+    //Specific Cookie Extractor code am AMIGOS********
+    let cookieHeaderValue = document.cookie;
+    let token = null;
+
+    if (cookieHeaderValue) {
+    let cookies = cookieHeaderValue.split(";");
+    for (let cookie of cookies) {
+        let [cookieName, cookieValue] = cookie.trim().split("=");
+        if (cookieName === "token") {
+        token = cookieValue;
+        break;
+        }
+    }
+    }
+    //Specific Cookie Extractor code am AMIGOS********
 
     addOpt.addEventListener("click",()=>{
         checkoutForm.style.display="flex";

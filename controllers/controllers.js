@@ -1,4 +1,4 @@
-import {ctgryModel, productModel,cartModel,addressModel} from "../models/productModel.js"
+import {ctgryModel, productModel,cartModel,addressModel,orderModel} from "../models/productModel.js"
 import userModel from "../models/userModel.js"
 import adminModel from "../models/adminModel.js"
 import Token from "../models/tokenModel.js"
@@ -406,7 +406,8 @@ async function userProductView(req, res) {
   let productsD = await fetch("http://127.0.0.1:2000/api/products");
   let productsInfo = await productsD.json();
   let products = productsInfo.products;
-
+ 
+  //cookie extraction
   let cookieHeaderValue = req.headers.cookie;
   let token = null;
 
@@ -422,6 +423,7 @@ async function userProductView(req, res) {
       }
     }
   }
+  //cookie extraction
 
   if (token) {
     const secretKey = process.env.secretKeyU;
@@ -459,6 +461,7 @@ async function userProductView(req, res) {
 
 async function userProductDescr(req,res){
     if(req.query.oid){
+        let qnty=1;
         let productsD = await fetch("http:///127.0.0.1:2000/api/products");
         let products = await productsD.json();
          
@@ -497,9 +500,11 @@ async function userProductDescr(req,res){
               }
             }
           ]);
-          
-        let qnty = cart[0].items[0].quantity
-        // console.log(qnty);
+        if(cart.length>1){
+          qnty = cart[0].items[0].quantity
+          console.log(qnty);
+        }  
+        
         res.render("userProductDescr",{admin:false,user:true,product,qnty});
         }
         
@@ -508,7 +513,23 @@ async function userProductDescr(req,res){
 }
 
 function userCartView(req,res){
-  const token = req.headers.cookie?.split("=")[1]; 
+  //cookie extraction
+  let cookieHeaderValue = req.headers.cookie;
+  let token = null;
+
+  if (cookieHeaderValue) {
+    let cookies = cookieHeaderValue.split(";");
+
+    for (let cookie of cookies) {
+      let [cookieName, cookieValue] = cookie.trim().split("=");
+
+      if (cookieName === "token") {
+        token = cookieValue;
+        break;
+      }
+    }
+  }
+    //cookie extraction
   let id = jwt2.verify(token,process.env.secretKeyU).user 
   res.render("userCart",{admin:false,user:true,id});
 }
@@ -531,6 +552,197 @@ function userAddressView(req,res){
     res.render("userAddress",{admin:false,user:true,id});
 }
 
+async function prodCheckout(req,res){
+  let {iid} = req.params;
+  console.log(iid);
+   //cookie extraction
+   let cookieHeaderValue = req.headers.cookie;
+   let token = null;
+ 
+   if (cookieHeaderValue) {
+     let cookies = cookieHeaderValue.split(";");
+ 
+     for (let cookie of cookies) {
+       let [cookieName, cookieValue] = cookie.trim().split("=");
+ 
+       if (cookieName === "token") {
+         token = cookieValue;
+         break;
+       }
+     }
+   }
+   //cookie extraction
+
+  try{
+    console.log("im inside try of item in cart")
+    let userId = jwt2.verify(token,process.env.secretKeyU).user
+    let cart = await cartModel.findOne({userId:userId}).populate('items.productId');
+    console.log(cart);
+    console.log(cart.items)
+    let item = cart.items.filter(val=>val._id.toString()==iid);
+    let addr = await addressModel.findOne({ userId:userId, isShippingAddress: true })
+    res.render("userCheckout",{admin:false,user:true,item,addr,iid})
+  }catch(err){
+    console.log(err);
+    res.status(500).send("Internal Servor Error");
+  }
+}
+async function cartCheckout(req,res){
+   //cookie extraction
+   let cookieHeaderValue = req.headers.cookie;
+   let token = null;
+ 
+   if (cookieHeaderValue) {
+     let cookies = cookieHeaderValue.split(";");
+ 
+     for (let cookie of cookies) {
+       let [cookieName, cookieValue] = cookie.trim().split("=");
+ 
+       if (cookieName === "token") {
+         token = cookieValue;
+         break;
+       }
+     }
+   }
+   //cookie extraction
+
+  try{
+    console.log("im inside try of item in cart")
+    let userId = jwt2.verify(token,process.env.secretKeyU).user
+    let cart = await cartModel.findOne({userId:userId}).populate('items.productId');
+    let item = cart.items
+    let cid = cart._id.toString();
+    let addr = await addressModel.findOne({ userId:userId, isShippingAddress: true })
+    if(item.length>=1){
+      console.log("cart aint empty")
+      res.render("userCheckout",{admin:false,user:true,item,addr,cid});
+    }else{
+      console.log("cart is empty")
+      res.render("userCart",{admin:false,user:true,item,addr,cid,popped:true});
+    }
+  }catch(err){
+    console.log(err);
+    res.status(500).send("Internal Servor Error");
+  }
+}
+async function cartPymntInit(req,res){
+  let {idType,id} = req.params 
+  //cookie extraction
+   let cookieHeaderValue = req.headers.cookie;
+   let token = null;
+ 
+   if (cookieHeaderValue) {
+     let cookies = cookieHeaderValue.split(";");
+ 
+     for (let cookie of cookies) {
+       let [cookieName, cookieValue] = cookie.trim().split("=");
+ 
+       if (cookieName === "token") {
+         token = cookieValue;
+         break;
+       }
+     }
+   }
+   //cookie extraction
+
+  try{
+    let userId = jwt2.verify(token,process.env.secretKeyU).user
+    let cart = await cartModel.findOne({userId:userId}).populate('items.productId');
+    let addr = await addressModel.findOne({ userId:userId, isShippingAddress: true })
+    let item;
+    if(idType=="cid"){
+      item = cart.items
+      return res.render("userPymntOpt",{admin:false,user:true,item,addr,idType,id})
+    }else{
+      item = cart.items.filter(val=>val._id.toString()==id)
+      return res.render("userPymntOpt",{admin:false,user:true,item,addr,idType,id})
+    }
+  }catch(err){
+    console.log(err);
+    res.status(500).send("Internal Servor Error");
+  }
+}
+
+
+async function cartPay(req,res){
+  //cookie extraction
+  let cookieHeaderValue = req.headers.cookie;
+  let token = null;
+
+  if (cookieHeaderValue) {
+    let cookies = cookieHeaderValue.split(";");
+
+    for (let cookie of cookies) {
+      let [cookieName, cookieValue] = cookie.trim().split("=");
+
+      if (cookieName === "token") {
+        token = cookieValue;
+        break;
+      }
+    }
+  }
+  //cookie extraction
+  try{
+    let userId = jwt2.verify(token,process.env.secretKeyU).user;
+    let addr = await addressModel.findOne({userId:userId,isShippingAddress:true});
+    let {pymnt} = req.body;
+    let {idType,id} = req.params;
+    // res.json({"Pymnt":pymnt,"idType":idType,"id":id});
+    if(pymnt=="cod"){
+      if(idType=="cid"){
+        let cart = await cartModel.findOne({_id:id}).populate('items.productId');
+        let total = 0;
+        let products = [];
+        let qnty=0;
+        //looping in the cartItems
+        cart.items.forEach(item=>{
+          total+=item.productId.salePrice*item.quantity;
+          products.push(item.productId._id);
+          qnty+=item.quantity;
+        })
+        const orderDate = new Date(); //The order Date
+        //adding it to  order collection
+        let newOrder = await orderModel.create({
+          date:orderDate,
+          user:userId,
+          address: {
+            country:addr.country,
+            fName:addr.fName,
+            lName :addr.lname,
+            addr: addr.addr,
+            city: addr.city,
+            state: addr.state,
+            pinCode :addr.pinCode,
+            ph:addr.ph,
+          },
+          product:[...products],
+          paymentmode:pymnt,
+          totalPrice:total,
+          status:"orderPlaced",
+          quantity:qnty,
+          orderPlaced:orderDate, 
+        })
+        async function reduceStock() {
+          for (const item of cart.items) {
+             await productModel.updateOne(
+              {_id:item.productId._id},
+              { $inc: { stock: -item.quantity } }
+             )
+          }
+          await cartModel.deleteOne({_id:id});
+        }
+        reduceStock();
+        res.status(200).json(newOrder);
+
+      }else if(idType=="iid"){
+
+      }
+    }
+  }catch(err){
+    console.log("Err: ",err);
+    res.status(500).json({"message":"Internal Servor error"})
+  }
+}
 //api
 async function getProducts(req,res){
      
@@ -786,23 +998,29 @@ async function getUserAddress(req,res){
 //   }
 // }
 
-async function getCart(req,res){
+async function getCart(req, res) {
   try {
     const userId = new ObjectId(req.params.id); // Extract the user ID from the request query
 
     // Fetch the cart document for the given user ID
     const cart = await cartModel.findOne({ userId }).populate('items.productId');
-    console.log(cart)
-    let total = 0;
-    cart.items.forEach(c=>total+=c.productId.salePrice*c.quantity);
+
     if (!cart) {
       return res.status(404).json({ error: true, message: 'Cart not found' });
     }
 
+    let total = 0;
+    cart.items.forEach((item) => {
+      if (item.productId) {
+        item.price = item.quantity * item.productId.salePrice;
+        total += item.price;
+      }
+    });
+
     const response = {
       error: false,
       total: cart.items.length,
-      totalPrice:total,
+      totalPrice: total,
       page: 1,
       limit: cart.items.length,
       products: cart.items
@@ -814,6 +1032,7 @@ async function getCart(req,res){
     res.status(500).json({ error: true, message: 'Internal Server Error' });
   }
 }
+
 // ********** Time Consuming Code ************ the next code solves this issue og slowness
 // async function addToCart(req,res){
 //   let id =  new ObjectId(req.query.prId);
@@ -986,6 +1205,10 @@ export {
     getUserAddress,
     resendMail,
     verifyToken,
+    cartCheckout,
+    prodCheckout,
+    cartPymntInit,
+    cartPay
 };
 
  

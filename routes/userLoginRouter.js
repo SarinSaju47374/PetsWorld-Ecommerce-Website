@@ -51,7 +51,7 @@ router.post("/", async (req, res) => {
       } else {
         let JWTtoken = jwt2.sign({ user: user._id, exp: Math.floor(Date.now() / 1000) * (60 * 60) }, process.env.secretKeyU);
         const expiration = new Date(new Date().getTime() + 3600000);
-        res.set("Set-Cookie", `token=${JWTtoken};httpOnly:false;Expires=${expiration.toUTCString()}`);
+        res.set("Set-Cookie", `token=${JWTtoken};httpOnly:false;SameSite=Strict;Expires=${expiration.toUTCString()}`);
       }
     } else {
       
@@ -146,7 +146,9 @@ router.get("/otp/:id/:tk",async(req,res)=>{
   const{id,tk} = req.params;
   //Checks the user id is valid or not
   const user = await userModel.findOne({_id:id});
-  if(!user) res.json({"message":"invalid Link"})
+  if(!user) {
+    return res.json({"message":"invalid Link"})
+  }
   let secret  = user.email+process.env.SECRET_AUTH;
   try{
     const payload = jwt2.verify(tk,secret);
@@ -171,7 +173,7 @@ router.post("/otp/:id/:tk", async (req, res,next) => {
     let JWTtoken = jwt2.sign({ user:id, exp: Math.floor(Date.now() / 1000) * (60 * 60) }, process.env.secretKeyU);
     const expiration = new Date(new Date().getTime() + 3600000);
     console.log(JWTtoken);
-    res.setHeader("Set-Cookie",`token=${JWTtoken};Path=/;httpOnly:false;Expires=${expiration.toUTCString()}`);
+    res.setHeader("Set-Cookie",`token=${JWTtoken};Path=/;httpOnly:false;SameSite=Strict,Expires=${expiration.toUTCString()}`);
     console.log("res is set*************")
     res.redirect("/");
   }else{

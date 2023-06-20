@@ -8,25 +8,30 @@
     <div class="checkout-bs-form">
         <form action="#">
             <div class="country">
-                <input type="text" name="country" placeholder="Country/Region">
+                <input type="text" name="country" placeholder="Country/Region" value="{{addr.country}}" required>
             </div>
             <div class="fullName">
-                 <input type="text" name="fname" placeholder="FirstName" required> 
-                 <input type="text" name="lname" placeholder="LastName" required> 
+                 <input type="text" name="fname" placeholder="FirstName" value="{{addr.fName}}" required> 
+                 <input type="text" name="lname" placeholder="LastName" value="{{addr.lName}}" required> 
             </div>
-            <div class="address"><textarea id="message" name="message" rows="4" cols="40" placeholder="Address" required></textarea></div>
+            <div class="address"><textarea id="message" name="message" rows="4" cols="40" placeholder="Address" required>{{addr.addr}}</textarea></div>
             <div class="add-more">
-                <input type="text" name="city input" placeholder="City" required>
-                <input type="text" name="state input" placeholder="State" required>
-                <input type="text" name="pincode input" placeholder="Pincode" required>
+                <input type="text" name="city input" placeholder="City" value="{{addr.city}}" required>
+                <input type="text" name="state input" placeholder="State" value="{{addr.state}}" required>
+                <input type="text" name="pincode input" placeholder="Pincode" value="{{addr.pinCode}}" required>
             </div>
             <div class="phn">
-                <input type="tel" id="mobile" name="mobile" pattern="[0-9]{10}" placeholder="PhoneNumber" required>       
+                <input type="tel" id="mobile" name="mobile" pattern="[0-9]{10}" placeholder="PhoneNumber" value="{{addr.ph}}" required>       
             </div>
             <div class="action-frm">
-                <button type = "submit">Continue Shipping</button>
+                {{#if cid}}
+                    <a href="/cart/pymnt/cid/{{cid}}">Continue Shipping</a>
+                {{/if}}
+                {{#if iid}}
+                    <a href="/cart/pymnt/iid/{{iid}}">Continue Shipping</a>
+                {{/if}}
             </div>
-            <a href="#" class="changeAdd">Change Address</a>
+            <a href="/address" class="changeAdd">Change/Add Adress</a>
             <a href="/cart" class="bck-cart"><i class="fa-solid fa-caret-left"></i> Back to cart</a>
         </form>
     </div>
@@ -40,33 +45,20 @@
               
             </div>
             <div class="cart-body">
-                
-                <div class="cart-row">
-                    <div class="td products">
-                        <img src="http://cdn.shopify.com/s/files/1/0086/0795/7054/products/GoldenRetrieverAdult-1.png?v=1674648799" alt="">
-                        <div class="prod-det">
-                            <h3>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Porro unde error voluptatibus.
-                            </h3>
-                            <p>Pets World</p>
+                {{#each item}}
+                    <div class="cart-row">
+                        <div class="td products">
+                            <img src="{{this.productId.photo.[0].filepath}}.png" alt="">
+                            <div class="prod-det">
+                                <h3>{{this.productId.productName}}
+                                </h3>
+                                <p>{{this.productId.brandName}}</p>
+                            </div>
                         </div>
+                        <div class="td price">{{this.productId.salePrice}}</div>
+                        <div class="td quantity"><input type="number" class="mobile-input" value="{{this.quantity}}" placeholder="Qnty" readonly></div>
                     </div>
-                    <div class="td price">Rs 1234</div>
-                    <div class="td quantity"><input type="number" class="mobile-input" value="4" placeholder="Qnty"></div>
-                 
-                </div>
-                <div class="cart-row">
-                    <div class="td products">
-                        <img src="http://cdn.shopify.com/s/files/1/0086/0795/7054/products/GoldenRetrieverAdult-1.png?v=1674648799" alt="">
-                        <div class="prod-det">
-                            <h3>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Porro unde error voluptatibus.
-                            </h3>
-                            <p>Pets World</p>
-                        </div>
-                    </div>
-                    <div class="td price">Rs 1234</div>
-                    <div class="td quantity"><input type="number" class="mobile-input" value="4" placeholder="Qnty"></div>
-                 
-                </div>
+                {{/each}}
             </div>
         </div>
     </div>
@@ -75,7 +67,7 @@
             <h3>Order Summary</h3>
              <div class="subTotal">
                 <span>Sub Total:</span>
-                <h5>Rs 12500</h5>
+                <h5>Rs {{calculateTotal item}}</h5>
              </div>
              <div class="shipping">
                 <span>Shipping:</span>
@@ -83,7 +75,7 @@
              </div>
              <div class="total">
                 <span>Total:</span>
-                <h5>Rs 12500</h5>
+                <h5>Rs {{calculateTotal item}}</h5>
              </div>
              <div class="options">
                 <input type="text" name="coupon" placeholder="Coupon....">
@@ -94,12 +86,13 @@
     </div>
 </div>
 </div>
+
 <script>
     let i=0;
     let placeholder="";
     const txt="Search in Cart....";
     const speed=120;
-    function type(){
+    {{!-- function type(){
         placeholder+=txt.charAt(i);
         if(i<txt.length){
             document.querySelector(".search-cont input").setAttribute("placeholder",placeholder)
@@ -110,5 +103,6 @@
         }
         setTimeout(type,speed);
     }
-    type(); 
+    type();  --}}
+    
 </script>

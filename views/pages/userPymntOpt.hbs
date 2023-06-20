@@ -12,9 +12,9 @@
                     CONTACT
                 </h4>
                 <p>
-                    +917568052899
+                    {{addr.ph}}
                 </p>
-                <a href="#">
+                <a href="/address">
                     Change
                 </a>
             </div>
@@ -28,25 +28,26 @@
                     -webkit-box-orient: vertical;
                     overflow: hidden;
                 ">
-                    Chalikkavattom, Kochi, Detail Lorem ipsum, dolor sit amet consectetur adipisicing elit. In, veritatis.
+                    {{addr.addr}},{{addr.city}},{{addr.state}},{{addr.country}},{{addr.pinCode}}
                 </p>
-                <a href="#">
+                <a href="/address">
                     Change
                 </a>
             </div>
         </div>
         <div class="payment-det">
-            <form action="#">
+            <form action="/cart/pymnt/{{idType}}/{{id}}" method="POST">
                 <label class="pymnt-option" for="pymnt-online">
-                    <input type="radio" name="pymnt" id="pymnt-online" value="Online">
+                    <input type="radio" name="pymnt" id="pymnt-online" value="online" required>
                     <h3>Online Payment - Free Delivery</h3>
                     <p>Free</p>
                 </label>
                 <label class="pymnt-option"  for="pymnt-cod">
-                    <input type="radio" name="pymnt" id="pymnt-cod" value="COD">
+                    <input type="radio" name="pymnt" id="pymnt-cod" value="cod" required>
                     <h3>Cash On Delivery</h3>
-                    <p>Rs 1234</p>
+                    <p>Rs {{calculateTotal item}}</p>
                 </label>
+                <input type="text" value="{{idType}}" hidden>
                 <div class="action-frm">
                     <button type = "submit">Pay</button>
                 </div>
@@ -67,20 +68,20 @@
                 <div class="hd total">Total</div>
             </div>
             <div class="cart-body">
-                
-                <div class="cart-row">
-                    <div class="td products">
-                        <img src="http://cdn.shopify.com/s/files/1/0086/0795/7054/products/GoldenRetrieverAdult-1.png?v=1674648799" alt="">
-                        <div class="prod-det">
-                            <h3>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Porro unde error voluptatibus.
-                            </h3>
-                            <p>Pets World</p>
+                {{#each item}}
+                    <div class="cart-row">
+                        <div class="td products">
+                            <img src="{{this.productId.photo.[0].filepath}}.png" alt="">
+                            <div class="prod-det">
+                                <h3>{{this.productId.productName}}</h3>
+                                <p>{{this.productId.brandName}}</p>
+                            </div>
                         </div>
+                        <div class="td price">{{this.productId.salePrice}}</div>
+                        <div class="td quantity"><input type="number" class="mobile-input" value="{{this.quantity}}" placeholder="Qnty" readonly></div>
+                        <div class="td total">{{multiply this.productId.salePrice this.quantity}}</div>
                     </div>
-                    <div class="td price">Price</div>
-                    <div class="td quantity"><input type="number" class="mobile-input" value="4" placeholder="Qnty"></div>
-                    <div class="td total">Total</div>
-                </div>
+                {{/each}}
             </div>
         </div>
     </div>
@@ -89,11 +90,11 @@
             <h3>Order Summary</h3>
              <div class="subTotal">
                 <span>Sub Total:</span>
-                <h5>Rs 12500</h5>
+                <h5>Rs {{calculateTotal item}}</h5>
              </div>
              <div class="total">
                 <span>Total:</span>
-                <h5>Rs 12500</h5>
+                <h5>Rs {{calculateTotal item}}</h5>
              </div>
              <div class="options">
                 <input type="text" name="coupon" placeholder="Coupon....">

@@ -4,6 +4,11 @@
     <div class="typing">.</div>
     <a href=""><i class="fa-solid fa-magnifying-glass"></i></a></i>
 </div>
+ 
+    {{#if popped}}
+        <div class="popped"></div>
+    {{/if}}
+ 
 <div class="page" style="color:rgb(224, 168, 66);margin:0.45rem auto;font-size:2rem;font-weight:900;letter-spacing:.45rem;display:flex;align-items:center;height:4rem;overflow:hidden;">
     <img src="https://png.pngtree.com/png-vector/20230120/ourmid/pngtree-dog-logo-veterinary-design-clipart-vet-golden-retriever-puppy-clinic-png-image_6565449.png" alt="" style="width:8rem;">
     CART
@@ -35,12 +40,13 @@
                 <h5></h5>
              </div>
              <div class="options">
-                <a class="checkout" href="/checkout">Checkout</a>
-                <a class="shopping">Continue Shopping</a>
+                <a class="checkout" href="/cart/checkout">Checkout</a>
+                <a class="shopping" href="/">Continue Shopping</a>
              </div> 
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
 <script>
     let cartBody = document.querySelector(".cart-body");
     let id = cartBody.dataset.id;
@@ -119,9 +125,9 @@
                         </div>
                     </div>
                     <div class="td price">${p.productId.salePrice}</div>
-                    <div class="td quantity"><input type="number" class="mobile-input" min="0" max="${p.productId.stock}" value="${p.quantity}" placeholder="Qnty" onchange="updateQuantity(this,'${p.productId._id}')"></div>
+                    <div class="td quantity"><input type="number" class="mobile-input" min="1" max="${p.productId.stock}" value="${p.quantity}" placeholder="Qnty" onchange="updateQuantity(this,'${p.productId._id}')"></div>
                     <div class="td total">${p.productId.salePrice*p.quantity}</div>
-                    <div class="td purchase"><a href="#"><i class="fa-solid fa-bag-shopping" style="color:white"></i></a></div>
+                    <div class="td purchase"><a href="/cart/checkout/item/${p._id}"><i class="fa-solid fa-bag-shopping" style="color:white"></i></a></div>
                 </div>`;
             })
 
@@ -155,9 +161,18 @@
         setTimeout(type,speed);
     }
     type(); 
-    document.cookie.split("=")[0]
+    {{!-- document.cookie.split("=")[0] --}}
     document.addEventListener("DOMContentLoaded", async function() {
         // DOM manipulation and other code here
           run(`/api/cart/${id}`);
         });
+    
+    if(document.querySelector(".popped")){
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Cant Checkout the EMPTY CART!',
+            footer: '<a href="/">Lets DO SHOPPING!</a>'
+        })
+    }
 </script>

@@ -1,11 +1,11 @@
  <div class="go-up" id="scrollToTopBtn">
         <i class="fa-solid fa-arrow-up"></i>
 </div>
-<div class="banner">
+<div class="banner" data-aos="zoom-out-down">
     <img src="https://cdn.shopify.com/s/files/1/1199/8502/files/Drools_Desktop.png?v=1680942323" alt="#">
 </div>
 <div class="container-category">
-    <div class="category">
+    <div class="category" data-aos="zoom-in">
         <a href="/dog-food?cat=DOG&sub=FOOD"
             ><img
             src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
@@ -13,7 +13,7 @@
         /></a>
         <p>DOG FOOD</p>
         </div>
-        <div class="category">
+        <div class="category" data-aos="zoom-in">
         <a href=""
             ><img
             src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
@@ -21,7 +21,7 @@
         /></a>
         <p>DOG TOYS</p>
         </div>
-        <div class="category">
+        <div class="category" data-aos="zoom-in">
         <a href=""
             ><img
             src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
@@ -29,7 +29,7 @@
         /></a>
         <p>CAT FOOD</p>
         </div>
-        <div class="category">
+        <div class="category" data-aos="zoom-in">
         <a href=""
             ><img
             src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
@@ -41,7 +41,7 @@
     
     <div class="container-content">
         {{#each products}}
-            <div class="card">
+            <div class="card" data-aos="fade-up">
                 <div class="preview">
                     <a href="/product-descr?oid={{this._id}}"><img src="{{this.photo.[0].filepath}}.png" alt=""></a>
                 </div>
@@ -68,18 +68,34 @@
             </div>
         {{/each}}
     </div>
-    <div class="banner">
+    <div class="banner" data-aos="zoom-out-down">
         <img src="https://cdn.shopify.com/s/files/1/1199/8502/files/Royal_Canin_Desktop_1920x.webp?v=1678883460" alt="#">
     </div>
-    <div class="banner">
+    <div class="banner" data-aos="zoom-out-down">
         <img src="https://cdn.shopify.com/s/files/1/1199/8502/files/Baybot_Desktop_Banner_1_1920x.webp?v=1677581795" alt="#">
     </div>
     <script>
-
+  
         //cart Adder
         async function cartAdder(prId){
             console.log(prId)
-            let token = document.cookie.split("=")[1]||"";
+            
+            //Specific Cookie Extractor code am AMIGOS********
+            let cookieHeaderValue = document.cookie;
+            let token = null;
+
+            if (cookieHeaderValue) {
+                let cookies = cookieHeaderValue.split(";");
+                for (let cookie of cookies) {
+                let [cookieName, cookieValue] = cookie.trim().split("=");
+                if (cookieName === "token") {
+                    token = cookieValue;
+                    break;
+                }
+                }
+            }
+            //Specific Cookie Extractor code am AMIGOS********
+
             try {
                 const response = await fetch(`/api/cart?prId=${prId}&tk=${token}`);
                 if (!response.ok) {

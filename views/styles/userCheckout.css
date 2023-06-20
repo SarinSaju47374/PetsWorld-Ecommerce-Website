@@ -94,12 +94,13 @@ textarea{
 .phn input{
     /* width:30%; */
 }
-.action-frm button{
+.action-frm a{
     background-color:#008CBA;
     color:white;
     border:none;
     padding:1rem;
-    border-radius: 12px;;
+    border-radius: 12px;
+    margin-top:1rem !important;
 }
 .card-det{
     width:90%;
@@ -251,9 +252,10 @@ color: rgba(255, 255, 255, 0.7);
 @media screen and (min-width: 700px) {
 .checkout-bs-page{
     flex-direction:row;
-    width:70%;
+    width:80%;
     margin: 1rem auto;
     justify-content: space-between;
+    
 }
  
 .country{

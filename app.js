@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import path from "path";
 import jwt2 from "jsonwebtoken"
 import morgan from "morgan"
-
+// import hbs from "hbs";
 //Environment variables
 import dotenv from 'dotenv';
 dotenv.config();
@@ -27,6 +27,19 @@ hbs.registerPartials(__dirname + "/views/partials");
 hbs.registerHelper('joinPoints', function(points) {
   return points.join(',');
 });
+
+hbs.registerHelper('calculateTotal', function(items) {
+  let total = 0;
+  items.forEach(item => {
+    total += item.productId.salePrice * item.quantity;
+  });
+ 
+  return total;
+});
+hbs.registerHelper('multiply', function(num1,num2) {
+  return num1*num2;
+});
+ 
 
  
 //HBS and Static files configuration
@@ -54,6 +67,7 @@ import { lookup } from "mime-types";
 import nodemailer from "nodemailer";
 //Middleware
 import authoriseAdminJwt from "./Middleware/authoriseAdminJwt.js";
+import authoriseJwt from "./Middleware/authoriseJwt.js";
 //Routers
 import userLoginRouter from "./routes/userLoginRouter.js"
 import userRegisterRouter from "./routes/userRegisterRouter.js"
@@ -80,6 +94,10 @@ import productApi from "./routes/productApi.js";
 import userApi from "./routes/userApi.js";
 import cartApi from "./routes/cartApi.js"
 import userModel from "./models/userModel.js";
+
+//DataRouter
+import dataRouter from "./routes/dataRouter.js";
+
 // import ctgryApi from "./routes/product"
 //This code helps in preventing the access of logged in history content after Log out 
 app.use((req, res, next) => {
@@ -134,7 +152,7 @@ app.use("/ctgry-view",authoriseAdminJwt,adminCtgryViewRouter);
 app.use("/",userProductViewRouter);
 app.use("/product-descr",userProductDescrRouter); 
 app.use("/dog-food",dogFoodRouter);
-app.use("/cart",userCarRouter);
+app.use("/cart",authoriseJwt,userCarRouter);
 app.use("/order-history",userOrderHistRouter);
 app.use("/wishlist",userWishlistRouter);
 app.use("/checkout",userCheckoutRouter);
@@ -150,6 +168,7 @@ app.use("/api",productApi);
 app.use("/api",userApi);
 app.use("/api",cartApi);
 app.use("/",handleAddressRouter);
+app.use("/data",dataRouter);
 // app.use(express.static("views", {
 //   setHeaders: (res, path) => {
 //     const contentType = lookup(path);
