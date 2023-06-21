@@ -26,7 +26,7 @@
             <input type="tel" name="ph" id="ph" pattern="[0-9]{10}" placeholder="PhoneNumber" required>       
         </div>
         <input type="text" name="aid" id="aid" hidden>
-        <button class="changeAdd">Add / Update Address</button>
+        <button type="submit" class="changeAdd">Add / Update Address</button>
         <button class="closeFrm">Close</button>
          
     </form>
@@ -194,7 +194,7 @@
             .then(response => response.json())
             .then(data => {
             // Handle the response data if needed
-            run(`api/users/addr/${uid}`);
+            run(`/api/users/addr/${uid}`);
             console.log(data);
             })
             .catch(error => {

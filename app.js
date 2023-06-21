@@ -39,6 +39,10 @@ hbs.registerHelper('calculateTotal', function(items) {
 hbs.registerHelper('multiply', function(num1,num2) {
   return num1*num2;
 });
+hbs.registerHelper('convert', function(date) {
+  const formattedDate = date.toLocaleDateString();
+  return formattedDate;
+});
  
 
  

@@ -94,6 +94,10 @@ textarea{
 .phn input{
     /* width:30%; */
 }
+.action-frm{
+    margin-top: 1rem;
+    height: 3rem;
+}
 .action-frm a{
     background-color:#008CBA;
     color:white;

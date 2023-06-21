@@ -286,10 +286,15 @@ const orderSchema = new Schema({
       required:true,
     },
   },
-  product: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Product',
-  }],
+  products: [
+    {
+      productId:{
+        type: Schema.Types.ObjectId,
+        ref: 'product',
+      },
+      quantity:Number,
+    }
+  ],
   paymentmode: {
     type: String,
     required: true,
@@ -302,6 +307,7 @@ const orderSchema = new Schema({
   status: {
     type: String,
     required: true,
+    default:"orderPlaced",
   },
   quantity: {
     type: Number,
@@ -318,6 +324,12 @@ const orderSchema = new Schema({
   },
   orderDelivered: {
     type: Date
+  },
+  orderCancelled:{
+    type:Date
+  },
+  expectedDelivery:{
+    type:Date
   }
 });
 

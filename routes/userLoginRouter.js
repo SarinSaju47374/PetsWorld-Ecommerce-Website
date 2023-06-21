@@ -8,6 +8,8 @@ import crypto from "crypto";
 import Token from "../models/tokenModel.js";
 import userModel from "../models/userModel.js";
 import otpModel from "../models/otpModel.js"
+import sendMail from "../utils/sendMail.js"
+import sendOtp from "../utils/sendOtp.js"
 // import CryptoJS from "crypto-js"
 
 router.get("/",(req,res)=>{
@@ -43,10 +45,10 @@ router.post("/", async (req, res) => {
           });
           console.log("Token Is Created!");
           const url = `${process.env.BASE_URL}/register/${user._id}/verify/${token.token}`;
-          // await sendEmail(user.email,"Verify Email",url);
-          console.log(url);
-        }
 
+          //Send Verification Temporary URL(controlled in DataBase using TTL) Via Email
+          await sendMail(user.email,"Verify Email",`Click the link to get Verified ${url}`);
+        }
         return  res.render("userLogin", { admin: false, user: false, unVerif: true });
       } else {
         let JWTtoken = jwt2.sign({ user: user._id, exp: Math.floor(Date.now() / 1000) * (60 * 60) }, process.env.secretKeyU);
@@ -54,10 +56,8 @@ router.post("/", async (req, res) => {
         res.set("Set-Cookie", `token=${JWTtoken};httpOnly:false;SameSite=Strict;Expires=${expiration.toUTCString()}`);
       }
     } else {
-      
       return res.render("userLogin", { admin: false, user: false, flag: true });
     }
-    
     res.redirect("/");
   }else{
     console.log("This is otp login")
@@ -76,7 +76,10 @@ router.post("/", async (req, res) => {
       const token = jwt2.sign(payload,secret,{expiresIn:'60s'})
       console.log(token)
       const link = `${process.env.BASE_URL}/login/otp/${user._id}/${token}`
+      
       //Send the OTP TO MOBILE
+      await sendOtp(mob,randomNumber);
+
       await otpModel.findOneAndUpdate(
         { userId: user._id },
         { otp: Number(randomNumber) },
@@ -147,7 +150,8 @@ router.get("/otp/:id/:tk",async(req,res)=>{
   //Checks the user id is valid or not
   const user = await userModel.findOne({_id:id});
   if(!user) {
-    return res.json({"message":"invalid Link"})
+    console.log("Invalid Link acessed")
+    redirect("/")
   }
   let secret  = user.email+process.env.SECRET_AUTH;
   try{
@@ -155,7 +159,7 @@ router.get("/otp/:id/:tk",async(req,res)=>{
     res.render("otpLogin",{admin:false,user:false,email:payload.email});
   }catch(err){
     console.log("Err: ",err);
-    res.json({"message":"invalid Link"})
+    res.redirect("/")
   }
   // res.render("forgotPage2")
 })
@@ -214,8 +218,9 @@ router.post("/forgot",async (req,res)=>{
     const token = jwt2.sign(payload,secret,{expiresIn:'15m'})
     console.log(token)
     const link = `${process.env.BASE_URL}/login/reset-password/${user._id}/${token}`
-    console.log(link);
+    await sendMail(user.email,"Change the Account PassWord",`Click this link to change the password ${link}`);
     res.json({flag:true});
+
   }catch(err){
     console.log("login/forgot err: ",err);
     res.json({flag:false})
@@ -226,14 +231,14 @@ router.get("/reset-password/:id/:tk",async(req,res)=>{
   const{id,tk} = req.params;
   //Checks the user id is valid or not
   const user = await userModel.findOne({_id:id});
-  if(!user) res.json({"message":"invalid Link"})
+  if(!user) res.redirect("/")
   let secret  = user.email+process.env.SECRET_AUTH;
   try{
     const payload = jwt2.verify(tk,secret);
     res.render("forgotPage2",{admin:false,user:false,email:payload.email});
   }catch(err){
     console.log("Err: ",err);
-    res.json({"message":"invalid Link"})
+    res.redirect("/")
   }
   // res.render("forgotPage2")
 })

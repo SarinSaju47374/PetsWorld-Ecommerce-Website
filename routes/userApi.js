@@ -4,6 +4,7 @@ import userModel from "../models/userModel.js";
 import { addressModel } from "../models/productModel.js";
 const router = express.Router();
 import mongoose from "mongoose";
+import jwt2 from "jsonwebtoken";
 const ObjectId = mongoose.Types.ObjectId;
 
 router.get("/users",getUsers);
@@ -44,11 +45,33 @@ router.post('/users/addr/select/:addrId', async (req, res) => {
   // Delete address
   router.delete('/users/addr/delete/:addrId', async (req, res) => {
     const { addrId } = req.params;
+    let userId;
+    //cookie extraction
+    let cookieHeaderValue = req.headers.cookie;
+    let token = null;
+
+    if (cookieHeaderValue) {
+      let cookies = cookieHeaderValue.split(";");
+
+      for (let cookie of cookies) {
+        let [cookieName, cookieValue] = cookie.trim().split("=");
+
+        if (cookieName === "token") {
+          token = cookieValue;
+          break;
+        }
+      }
+    }
+    //cookie extraction
+
+    if(token){
+      userId = jwt2.verify(token,process.env.secretkeyU).user;
+    }
     try {
       // Remove the address from the address collection
       await addressModel.findByIdAndDelete(addrId);
       // Remove the address from the user's addresses array
-      await userModel.updateOne({}, { $pull: { addresses: { addrId: addrId } } });
+      await userModel.updateOne({_id:userId}, { $pull: { addresses:{ addrId: addrId } } });
       res.json({ message: 'Address deleted successfully' });
     } catch (error) {
       console.error(error);

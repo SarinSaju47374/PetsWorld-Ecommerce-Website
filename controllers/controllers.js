@@ -7,7 +7,7 @@ import path from "path";
 import jwt2 from "jsonwebtoken";
 import CryptoJS from "crypto-js"
 import mongoose from "mongoose";
-import sendEmail from "../utils/sendMail.js"
+import sendMail from "../utils/sendMail.js"
 import crypto from "crypto";
 const ObjectId = mongoose.Types.ObjectId;
 //dirname configuration
@@ -242,7 +242,8 @@ async function addUser(req,res){
         }})
       console.log("Token Generated");
       const url = `${process.env.BASE_URL}/register/${user._id}/verify/${token.token}`;
-      console.log(url);
+      //Send Verification Temporary URL(controlled in DataBase using TTL) Via Email
+      await sendMail(user.email,"Verify Email",`Click the link to get Verified ${url}`);
       // await sendEmail(user.email,"Verify Email",url);
       // console.log("Token Generated");
       // res.status(201).send({message:"An email sent to your Account! Please Verify!"})
@@ -267,7 +268,7 @@ async function resendMail(req,res){
     console.log("Token is created");
     console.log(token);
     const url = `${process.env.BASE_URL}/register/${user._id}/verify/${token.token}`;
-    console.log(url);
+    await sendMail(user.email,"Verify Email",`Click the link to get Verified ${url}`);
     res.json({sent:true});
   } else {
     // Token does not exist, send response
@@ -315,14 +316,14 @@ async function verifyToken(req, res) {
   try {
     const user = await userModel.findOne({ _id: req.params.id });
     console.log(user);
-    if (!user) return res.status(400).send({ message: "Invalid Link" });
+    if (!user) res.redirect("/");
 
     const token = await Token.findOne({
       userId: user._id,
       token: req.params.token,
     });
     console.log(token);
-    if (!token) return res.status(400).send({ message: "Invalid Link" });
+    if (!token) res.redirect("/");
 
     // Check if the token has expired
     if (token.expiration < Date.now()) {
@@ -331,7 +332,8 @@ async function verifyToken(req, res) {
 
     // Validate the token against the user
     if (token.userId.toString() !== user._id.toString()) {
-      return res.status(400).send({ message: "Invalid Link" });
+      console.log("Invalid Link");
+      res.redirect("/");
     }
 
     await userModel.updateOne({ _id: user._id }, { verified: true });
@@ -697,10 +699,13 @@ async function cartPay(req,res){
         //looping in the cartItems
         cart.items.forEach(item=>{
           total+=item.productId.salePrice*item.quantity;
-          products.push(item.productId._id);
+          products.push({productId:item.productId._id,quantity:item.quantity});
           qnty+=item.quantity;
         })
+        console.log(products);
         const orderDate = new Date(); //The order Date
+        const expectedDelivery = new Date();
+        expectedDelivery.setDate(expectedDelivery.getDate()+4);///Adding 4 days to orderplaced date.
         //adding it to  order collection
         let newOrder = await orderModel.create({
           date:orderDate,
@@ -715,12 +720,13 @@ async function cartPay(req,res){
             pinCode :addr.pinCode,
             ph:addr.ph,
           },
-          product:[...products],
+          products:[...products],
           paymentmode:pymnt,
           totalPrice:total,
           status:"orderPlaced",
           quantity:qnty,
           orderPlaced:orderDate, 
+          expectedDelivery:expectedDelivery,
         })
         async function reduceStock() {
           for (const item of cart.items) {
@@ -732,7 +738,7 @@ async function cartPay(req,res){
           await cartModel.deleteOne({_id:id});
         }
         reduceStock();
-        res.status(200).json(newOrder);
+        res.redirect(`/cart/order/${newOrder._id}`)
 
       }else if(idType=="iid"){
 
@@ -741,6 +747,16 @@ async function cartPay(req,res){
   }catch(err){
     console.log("Err: ",err);
     res.status(500).json({"message":"Internal Servor error"})
+  }
+}
+
+async function orderInvoice(req,res){
+  try{
+    let {id} = req.params;
+    let order = await orderModel.findOne({_id:id}).populate("products.productId");
+    return res.render("userOrderInvoice",{admin:false,user:true,order})
+  }catch(err){
+    console.log("Err: ",err)
   }
 }
 //api
@@ -1208,7 +1224,8 @@ export {
     cartCheckout,
     prodCheckout,
     cartPymntInit,
-    cartPay
+    cartPay,
+    orderInvoice,
 };
 
  
