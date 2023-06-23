@@ -40,7 +40,7 @@
     margin:0;
     padding:0;
     outline:0;
-    appearance:none;
+    /* appearance:none; */
     text-decoration: none;
     list-style: none;
     border:0;
@@ -429,6 +429,13 @@ main table tbody td{
     border-bottom:1px solid var(--color-light);
     color:var(--color-dark-variant);
 }
+main table tbody td.addr{
+    max-width: 100px; /* Adjust the value to your desired width */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-y: auto;
+}
 
 main table tbody tr:last-child{
     border:none;
@@ -591,8 +598,9 @@ main table tbody tr:last-child{
     padding-left:1rem;
     color:var(--color-dark);
 }
+ 
 .form-admin input#file-upload-btn{
-    baclground-color:red;
+    background-color:red;
 }
 .file-input-wrapper {
     display: flex;
@@ -705,15 +713,20 @@ main table tbody tr:last-child{
     align-items: center;
     justify-content: space-around;
   }
-  .table-admin input{
+  .table-admin >input{
     width:85%;
     background-color:transparent;
     border:none;
+    /* border:1px solid orange; */
      
     border-radius: 12px;
     padding-left:1rem;
     color:var(--color-dark);
     margin:1rem 0 1rem 0;
+  }
+  .table-admin td i{
+     font-size:1.1rem;
+   
   }
 
   /* select options */

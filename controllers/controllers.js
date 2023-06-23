@@ -73,28 +73,39 @@ async function adminProductView(req,res){
         res.render("adminProductUpdate",{admin:true,user:false,product});
     }
         
-    else if(req.query.delete_oid){
-        let oid = req.query.delete_oid;
-        const product = await productModel.deleteOne({_id: oid});
-        // Delete the associated files
-        if (product && product.photo && product.photo.length > 0) {
-            product.photo.forEach(photo => {
-            console.log(path.join(__dirname,"views",`${photo.filePath}.png`));
-            const filePath = path.join(__dirname,"..","views",`${photo.filepath}.png`);
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                console.error(`Error deleting file ${filePath}: ${err}`);
-                } else {
-                console.log(`File ${filePath} deleted successfully`);
-                }
-            });
-            });
-        }
+    else if(req.query.hide_oid){
+      let oid = req.query.hide_oid;
+      const product = await productModel.updateOne({_id: oid},{
+        isHidden:true
+      });
+      // const product = await productModel.deleteOne({_id: oid});
+      // Delete the associated files
+      // if (product && product.photo && product.photo.length > 0) {
+      //     product.photo.forEach(photo => {
+      //     console.log(path.join(__dirname,"views",`${photo.filePath}.png`));
+      //     const filePath = path.join(__dirname,"..","views",`${photo.filepath}.png`);
+      //     fs.unlink(filePath, (err) => {
+      //         if (err) {
+      //         console.error(`Error deleting file ${filePath}: ${err}`);
+      //         } else {
+      //         console.log(`File ${filePath} deleted successfully`);
+      //         }
+      //     });
+      //     });
+      // }
 
-        await productModel.deleteOne({_id:oid});
-        const productData = await fetch("http://127.0.0.1:2000/api/products");
-        const products = await productData.json();
-        res.render("adminProductView",{admin:true,user:false,products});
+      // await productModel.deleteOne({_id:oid});
+      const productData = await fetch("http://127.0.0.1:2000/api/products");
+      const products = await productData.json();
+      res.render("adminProductView",{admin:true,user:false,products});
+    }else if(req.query.ftd_oid){
+      let oid = req.query.ftd_oid;
+      const product = await productModel.updateOne({_id: oid},{
+        isFeatured:true
+      });
+      const productData = await fetch("http://127.0.0.1:2000/api/products");
+      const products = await productData.json();
+      res.render("adminProductView",{admin:true,user:false,products});
     }
    else{
     const productData = await fetch("http://127.0.0.1:2000/api/products");
@@ -518,7 +529,7 @@ function userCartView(req,res){
   //cookie extraction
   let cookieHeaderValue = req.headers.cookie;
   let token = null;
-
+ console.log("im inside the CartView!")
   if (cookieHeaderValue) {
     let cookies = cookieHeaderValue.split(";");
 
@@ -533,10 +544,37 @@ function userCartView(req,res){
   }
     //cookie extraction
   let id = jwt2.verify(token,process.env.secretKeyU).user 
+  console.log("This is id of cart view ",id)
   res.render("userCart",{admin:false,user:true,id});
 }
-function userOrderHistView(req,res){
-    res.render("userOrderHistory",{admin:false,user:true});
+async function userOrderHistView(req,res){
+  //cookie extraction
+  let cookieHeaderValue = req.headers.cookie;
+  let token = null;
+
+  if (cookieHeaderValue) {
+    let cookies = cookieHeaderValue.split(";");
+
+    for (let cookie of cookies) {
+      let [cookieName, cookieValue] = cookie.trim().split("=");
+
+      if (cookieName === "token") {
+        token = cookieValue;
+        break;
+      }
+    }
+  }
+  //cookie extraction
+  try{
+    let userId = jwt2.verify(token,process.env.secretKeyU).user;
+    console.log(userId);
+    let orders = await orderModel.find({user:new ObjectId(userId) });
+    console.log(orders);
+  }catch(err){
+    console.log("ORder Hist Error: ",err)
+  }
+
+  res.render("userOrderHistory",{admin:false,user:true});
 }
 function userWishlistView(req,res){
     res.render("userWishlist",{admin:false,user:true});
@@ -759,6 +797,28 @@ async function orderInvoice(req,res){
     console.log("Err: ",err)
   }
 }
+async function adminOrderInvoice(req,res){
+  try{
+    let {id} = req.params;
+    let order = await orderModel.findOne({_id:id}).populate("products.productId");
+    return res.render("adminOrderInvoice",{admin:true,user:false,order})
+  }catch(err){
+    console.log("Err: ",err)
+  }
+}
+
+async function orderStatus(req,res){
+  let {id} = req.params;
+  try{
+    let order = await orderModel.findOne({_id:new ObjectId(id)});
+    console.log(order);
+    res.json({"status":order.status,"valid":true})
+  }catch(err){
+    console.log("Order Status error: ",err)
+    res.json({"status":null,"valid":false})
+
+  }
+}
 //api
 async function getProducts(req,res){
      
@@ -956,6 +1016,144 @@ async function getUsers(req,res){
         res.status(500).json({ error: true, message: "Internal Server Error" });
       }
 }
+async function getUsersV2(req,res){
+    try {
+         
+        let sort = req.query.sort || "userName";
+        const search = req.query.s || "";
+        const total = await userModel.countDocuments({
+            $or: [
+                { userName: { $regex: search, $options: "i" } },
+                { fName: { $regex: search, $options: "i" } },
+                { lName: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+                // Add more fields to search here
+              ]
+        })
+          
+        const limit = !isNaN(parseInt(req.query.l)) && parseInt(req.query.l) <= 3
+        ? parseInt(req.query.l)||3
+        : "3";
+        const page = !isNaN(parseInt(req.query.p)) && parseInt(req.query.p) >= 0 && parseInt(req.query.p) <= Math.ceil(total/limit)    
+        ? parseInt(req.query.p)-1||0
+        :0;
+          
+        // Sort options
+        const sortOptions = sort.split(",");
+        const sortBy = {};
+        if (sortOptions.length === 2) {
+          sortBy[sortOptions[0]] = parseInt(sortOptions[1]);
+        } else {
+          sortBy[sortOptions[0]] = 1;
+        }
+        // Query for product collection
+        const users = await userModel.find({
+            $or: [
+                { userName: { $regex: search, $options: "i" } },
+                { fName: { $regex: search, $options: "i" } },
+                { lName: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+                // Add more fields to search here
+              ]
+                // Add more fields to search here
+        })
+          .sort(sortBy)
+          .skip(page * limit)
+          .limit(limit);
+        const response = {
+          error: false,
+          total,
+          page: page + 1,
+          limit,
+          users
+        };
+        
+        res.status(200).json(response);
+      } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: true, message: "Internal Server Error" });
+      }
+}
+
+
+async function getOrdersV2(req, res) {
+  try {
+    let sort = req.query.sort || "-date"; // Sort by descending order of date by default
+    const search = req.query.s || "";
+    const total = await orderModel.countDocuments({
+      $or: [
+        { "user.userName": { $regex: search, $options: "i" } },
+        { "address.fName": { $regex: search, $options: "i" } },
+        { "address.lName": { $regex: search, $options: "i" } },
+        { "address.email": { $regex: search, $options: "i" } },
+        // Add more fields to search here
+      ],
+    });
+
+    const limit =
+      !isNaN(parseInt(req.query.l)) && parseInt(req.query.l) <= 3
+        ? parseInt(req.query.l) || 3
+        : 3;
+    const page =
+      !isNaN(parseInt(req.query.p)) &&
+      parseInt(req.query.p) >= 0 &&
+      parseInt(req.query.p) <= Math.ceil(total / limit)
+        ? parseInt(req.query.p) - 1 || 0
+        : 0;
+
+    // Sort options
+    const sortOptions = sort.split(",");
+    const sortBy = {};
+    if (sortOptions.length === 2) {
+      sortBy[sortOptions[0]] = parseInt(sortOptions[1]);
+    } else {
+      sortBy[sortOptions[0]] = -1; // Sort by descending order by default
+    }
+
+    // Query for order collection
+    const orders = await orderModel
+      .find({
+        $or: [
+          { "user.userName": { $regex: search, $options: "i" } },
+          { "user.fName": { $regex: search, $options: "i" } },
+          { "user.lName": { $regex: search, $options: "i" } },
+          { "address.fName": { $regex: search, $options: "i" } },
+          { "address.lName": { $regex: search, $options: "i" } },
+          // Add more fields to search here
+        ],
+      })
+      .populate({
+        path: "user",
+        model: userModel, // Use the userModel variable for population
+        select: "userName fName lName", // Only populate the userName field of the user
+      })
+      .populate({
+        path:"products.productId",
+        model:productModel,
+      })
+      .select("-products") // Exclude the products field from the query result
+      .sort(sortBy)
+      .skip(page * limit)
+      .limit(limit);
+
+    const response = {
+      error: false,
+      total,
+      page: page + 1,
+      limit,
+      orders,
+    };
+
+    res.status(200).json(response);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: true, message: "Internal order Server Error" });
+  }
+}
+
+export default getOrdersV2;
+
+
 
 async function getUserAddress(req,res){
   const userId = new ObjectId(req.params.id);
@@ -1226,6 +1424,10 @@ export {
     cartPymntInit,
     cartPay,
     orderInvoice,
+    orderStatus,
+    getUsersV2,
+    getOrdersV2,
+    adminOrderInvoice
 };
 
  

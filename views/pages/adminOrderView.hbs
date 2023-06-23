@@ -1,5 +1,5 @@
 <main>
-<h1>ADD PRODUCT</h1>
+<h1>Orders</h1>
 <div class="date">
     <input type="date">
 </div>
@@ -8,7 +8,7 @@
 {{!-- Product Add --}}
 
 <div class="table-admin">
-    <h2>Add a Product</h2> 
+    <h2>View Recent Orders</h2> 
     <div class="search-options">
         <div class="input-admin">
             <input type="text" placeholder="Search here..">
@@ -20,21 +20,20 @@
         <select class="subCategory">
             <option value="">All</option>
         </select>
+
     </div>
     <div class="table">
          <table>
             <thead>
             <tr>
-                <th>ProductName</th>
-                <th>ProductPrice</th>
-                <th>SalePrice</th>
-                <th>Stock</th>
-                <th>Category</th>
-                <th>SubCategory</th>
-                <th>Featured</th>
-                <th>preview</th>
-                <th></th>
-                <th></th>
+                <th>OrderId</th>
+                <th>First Name</th>
+                <th>Delivery Address</th>
+                <th>Total Amount</th>
+                <th>Order Date</th>
+                <th>Status</th>
+                <th>View</th>
+                <th>Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -190,6 +189,7 @@
     let tableTbody = document.querySelector(".table-admin table tbody");
     let input = document.querySelector(".input-admin input");
     let category = document.querySelector(".search-options .category");
+    let chsStatus = document.querySelector(".order-status-dropdown");
     let totalPages;
     let subCategory = document.querySelector(".search-admin .subCategory");    
     //REQUIRED DOM DATA
@@ -197,13 +197,15 @@
     //Numbered FLAG
     let flag;
     //Numbered FLAG
+    
+
 
     
     //SEARCH LOGIC
     input.addEventListener("input",()=>{
         flag=1;
         const searchTerm = input.value.trim();
-        run(`api/products?s=${searchTerm}`);
+        run(`/custom/orders?s=${searchTerm}`);
     })
     //SEARCH LOGIC
     
@@ -222,6 +224,7 @@
     })
     //CATEGORY SELECTION LOGIC
      
+    
     //RUN FETCHING DATA
     async function run(url){
         try {
@@ -229,32 +232,29 @@
             if (!response.ok) {
             throw new Error('Request failed with status: ' + response.status);
             }
-            const pr = await response.json();
-            if(!pr.products){
+            const or = await response.json();
+            if(!or.orders){
                 tableTbody.innerHTML="No Data";
             }
             
             tableTbody.innerHTML="";
-            pr.products.forEach(p=>{
+            or.orders.forEach(o=>{
                 tableTbody.innerHTML+=`<tr>
-                            <td>${p.productName}</td>
-                            <td>${p.productPrice}</td>
-                            <td>${p.salePrice}</td>
-                            <td>${p.stock}</td>
-                            <td>${p.category}</td>
-                            <td>${p.subCategory}</td>
-                            ${p.isFeatured?`<td><a href="#" onclick="showPopupUn(event,\`${p._id}\`)" class="butn btn-updt"><i class="fa-solid fa-thumbs-down"></i></a></td>`
-                                                            :`<td><a href="#" onclick="showPopup(event,\`${p._id}\`)" class="butn btn-del"><i class="fa-solid fa-thumbs-up"></i></a></td>`} 
-                             
-                            <td>
-                                ${
-                                    p.photo[0] && p.photo[0].filepath
-                                    ? `<img src="${p.photo[0].filepath}.png" alt="" style="width:100px;height:60px" accept="image/png">`
-                                    : 'No Image Available'
-                                }
+                            <td>#PTW${o._id}</td>
+                            <td>${o.address.fName}</td>
+                            <td class="addr">${o.address.addr},${o.address.city},${o.address.state},${o.address.country}</td>
+                            <td>${o.totalPrice}</td>
+                            <td>${new Date(o.orderPlaced).toLocaleDateString()}</td>
+                            <td>${o.status}</td>
+                            <td><a href="/admin/orders/${o._id}"><i class="fa-regular fa-eye"></i></a></td>
+                            <td><select class="order-status-dropdown">
+                                    <option value="orderPlaced">Order Placed</option>
+                                    <option value="orderShipped">Order Shipped</option>
+                                    <option value="orderOnRoute">Order On-Route</option>
+                                    <option value="orderDelivered">Order Delivered</option>
+                                    <option value="orderCancelled">Order Cancelled</option>
+                                </select>
                             </td>
-                            <td><a href="#" onclick="openForm('${p._id}',${pr.page})"><i class="fa-solid fa-pen" style="font-size:1rem;"></i></a></td>
-                            <td><a href="#" onclick="showPopup(event, '${p._id}')" class="butn btn-del"><i class="fa-solid fa-trash" style="font-size:1rem;"></i></a></td> 
                         </tr>`;
             })
         } catch (error) {
@@ -264,12 +264,12 @@
         }
     }
     //RUN FETCHING DATA
-   
+     chsStatus.addEventListener("change",async function(){
+        console.log(this.value)
+     })
+    
     // *************PAGINATION UI******************
- 
- 
-       
-
+    //selecting required Element
     const ulTag = document.querySelector("ul");
     
     function element(totalPages,page){
@@ -330,28 +330,39 @@
         }
         ulTag.innerHTML=liTag;
         console.log(page);
-        run(`api/products?p=${page}`)
+        run(`/custom/orders?p=${page}`)
     }
     
     // *************PAGINATION UI******************
 
     //ALERT POPOUP BEFORE DELETE
-   
+    function showPopup(event, categoryId) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to delete this product",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete this Product!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Redirect to the unhide action
+                window.location.href = `/product-view?delete_oid=${categoryId}`;
+            }
+        });
+        }
          
         document.addEventListener("DOMContentLoaded", async function() {
         // DOM manipulation and other code here
-          run('/api/products');
-        const response = await fetch("/api/products"); // Replace with your API endpoint URL
+            run('/custom/orders');
+            const response = await fetch("/custom/orders"); // Replace with your API endpoint URL
             if (!response.ok) {
                 throw new Error('Request failed with status: ' + response.status);
             }
-            const pr = await response.json();
-            if(pr.categories){
-                pr.categories.forEach(cat=>{
-                    category.innerHTML+=`<option value="${cat}">${cat}</option>`;
-                })
-            }
-            totalPages = Math.ceil(pr.total/pr.limit);
+            const or = await response.json();
+            totalPages = Math.ceil(or.total/or.limit);
             element(totalPages,1)
         
         });
@@ -359,120 +370,19 @@
         event.preventDefault();
         Swal.fire({
         title: 'Are you sure?',
-        text: "Do you really want to feature this product",
+        text: "Do you really want to delete this product",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, Feature this Product!'
+        confirmButtonText: 'Yes, delete this Product!'
         }).then((result) => {
         if (result.isConfirmed) {
             window.location.href = `/product-view?delete_oid=${categoryId}`;
         }
         });
     }
-
-    //MODAL FOR DATA UPDATION
-    async function openForm(id,pg){
-        document.querySelector(".form-popup").style.display = "block";
-        let dataD = await fetch(`/api/products/${id}`);
-        let data = await dataD.json();
-        document.querySelector("#id").value = data[0]._id;
-        document.querySelector("#productName").value = data[0].productName;
-        document.querySelector("#brandName").value = data[0].brandName;
-        document.querySelector("#productName").value = data[0].productName;
-        document.querySelector("#description").value = data[0].description;
-        document.querySelector("#points").value = data[0].points.join(",");
-        document.querySelector("#productPrice").value = data[0].productPrice;
-        document.querySelector("#salePrice").value = data[0].salePrice;
-        document.querySelector("#stock").value = data[0].stock;
-        document.querySelector("#category").value = data[0].category;
-        document.querySelector("#subCategory").value = data[0].subCategory;
-        document.querySelector("#paymentOption").value = data[0].paymentOption;
-        document.querySelector("#rating").value = data[0].rating;
-        document.querySelector(".form-popup .number").value = pg ; 
-    }
-    //MODAL FOR DATA UPDATION
-
-    function closeForm() {
-        document.querySelector(".form-popup").style.display = "none";
-    }
-
-    const form = document.querySelector("#modify-form");
-
-    //FORM SUBMISSION AFTER MODIFICATION
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        const id = formData.get("id");
-        const productName = formData.get("productName");
-        const brandName = formData.get("brandName");
-        const description = formData.get("description");
-        const points = formData.get("points");
-        const productPrice = formData.get("productPrice");
-        const salePrice = formData.get("salePrice");
-        const stock = formData.get("stock");
-        const category = formData.get("category");
-        const subCategory = formData.get("subCategory");
-        const paymentOption = formData.get("paymentOption");
-        const rating = formData.get("rating");
-        const page = formData.get("number");
-
-        const body = {
-        productName,
-        brandName,
-        description,
-        points,
-        productPrice,
-        salePrice,
-        stock,
-        category,
-        subCategory,
-        paymentOption,
-        rating,
-        page
-        };
-
-        try {
-        const response = await fetch(`/api/products/${id}`, {
-            method: "PUT",
-            headers: {
-            "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        });
-        if (!response.ok) {
-            throw new Error("Request failed with status: " + response.status);
-        }
-
-        if(flag==1){
-            //Beautiful code that triggers the "input" event 
-            input.value=input.value;
-            const event = new Event("input");
-            input.dispatchEvent(event);
-            
-        }else if(flag==2){
-            console.log(category)
-            console.log(category.value)
-             run(`api/products?cat=${category}`)
-             
-        }else if(flag==3){
-            run(`api/products?p=${page}`)
-        }
-
-        
-        // Update the modified data in the table or perform any other necessary actions
-
-        // Hide the form
-        document.querySelector(".form-popup").style.display = "none";
-        } catch (error) {
-        console.log("Error:", error.message);
-        }
-    });
-    //FORM SUBMISSION AFTER MODIFICATION
-        
-        
+ 
     </script>
 </body>
 </html>

@@ -375,7 +375,7 @@
       <!-- Add more filter options here -->
     </div>
   </div>
-  
+  <canvas id="my-canvas"></canvas>
   <script>
     (function() {
         var parent = document.querySelector("#rangeSlider");
@@ -420,6 +420,13 @@
         });
 
         })();   
+  </script>
+  <script src="node_modules/confetti-js/dist/index.min.js"></script>
+  <script>
+      var confettiElement = document.getElementById('my-canvas');
+var confettiSettings = { target: confettiElement };
+var confetti = new ConfettiGenerator(confettiSettings);
+confetti.render();
   </script>
 </body>
 </html>

@@ -99,6 +99,7 @@
     async function run(url){
         try {
             const response = await fetch(url); // Replace with your API endpoint URL
+            console.log("I have fetched the data in user Cart hbs")
             if (!response.ok) {
             throw new Error('Request failed with status: ' + response.status);
             }

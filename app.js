@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import path from "path";
 import jwt2 from "jsonwebtoken"
 import morgan from "morgan"
+// At the component you want to use confetti
+// import ConfettiGenerator from "confetti-js";
 // import hbs from "hbs";
 //Environment variables
 import dotenv from 'dotenv';
@@ -54,6 +56,9 @@ app.use("/styles",express.static(path.join(__dirname,"views","styles")));
 app.use("/uploads",express.static(path.join(__dirname,"views","uploads")));
 app.use("/images",express.static(path.join(__dirname,"views","images")));
 app.use("/JS",express.static(path.join(__dirname,"views","JS")));
+app.use(express.static('node_modules'));
+
+// app.use("/node_modules",express.static(path.join(__dirname,"node_modules")));
 
 //Mongooose Connection
 mongoose.connect("mongodb://127.0.0.1:27017/PetsWorld");
@@ -93,9 +98,11 @@ import userCheckoutRouter from "./routes/userCheckoutRouter.js"
 import userPymntRouter from "./routes/userPymntRouter.js"
 import userAddressRouter from "./routes/userAddressRouter.js"
 import handleAddressRouter from "./routes/handleAddressRouter.js"
+import adminOrderRouter from "./routes/adminOrderRouter.js"
 //API routers
 import productApi from "./routes/productApi.js";
 import userApi from "./routes/userApi.js";
+import customUserApi from "./routes/customApi.js";
 import cartApi from "./routes/cartApi.js"
 import userModel from "./models/userModel.js";
 
@@ -157,14 +164,16 @@ app.use("/",userProductViewRouter);
 app.use("/product-descr",userProductDescrRouter); 
 app.use("/dog-food",dogFoodRouter);
 app.use("/cart",authoriseJwt,userCarRouter);
-app.use("/order-history",userOrderHistRouter);
+app.use("/order-history",authoriseJwt,userOrderHistRouter);
 app.use("/wishlist",userWishlistRouter);
-app.use("/checkout",userCheckoutRouter);
-app.use("/pymnt",userPymntRouter);
-app.use("/address",userAddressRouter);
+app.use("/checkout",authoriseJwt,userCheckoutRouter);
+app.use("/pymnt",authoriseJwt,userPymntRouter);
+app.use("/address",authoriseJwt,userAddressRouter);
 app.get("/otp",(req,res)=>{
   res.render("otpLogin")
 })
+
+app.use("/admin",adminOrderRouter);
 
 //API
 app.use("/api",productApi);
@@ -173,6 +182,7 @@ app.use("/api",userApi);
 app.use("/api",cartApi);
 app.use("/",handleAddressRouter);
 app.use("/data",dataRouter);
+app.use("/custom",customUserApi);
 // app.use(express.static("views", {
 //   setHeaders: (res, path) => {
 //     const contentType = lookup(path);

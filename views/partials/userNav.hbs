@@ -160,7 +160,8 @@
       }
       //Specific Cookie Extractor code am AMIGOS********
 
-      try {
+      if(token){
+        try {
         let response = await fetch(`/data/cartNumber/${token}`);
         if (!response.ok) {
           // handle error response
@@ -175,6 +176,9 @@
         }
       } catch (err) {
         console.log("Err: ", err);
+      }
+      }else{
+        document.querySelector(".option-section .cart").innerHTML+=`<span class="cart-number" data-aos="flip-left">0</span>`
       }
      })
 
