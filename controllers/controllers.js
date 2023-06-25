@@ -565,16 +565,15 @@ async function userOrderHistView(req,res){
     }
   }
   //cookie extraction
-  try{
-    let userId = jwt2.verify(token,process.env.secretKeyU).user;
-    console.log(userId);
-    let orders = await orderModel.find({user:new ObjectId(userId) });
-    console.log(orders);
-  }catch(err){
-    console.log("ORder Hist Error: ",err)
-  }
-
-  res.render("userOrderHistory",{admin:false,user:true});
+  
+  let  userId = jwt2.verify(token,process.env.secretKeyU).user;
+    try{
+      let orders = await orderModel.find({user:userId}).populate('user').sort({date:-1});
+      res.render("userOrderHistory",{admin:false,user:true,orders});
+    }catch(err){
+      console.log("Error inside OrderHist Controller: ",err);
+    }
+ 
 }
 function userWishlistView(req,res){
     res.render("userWishlist",{admin:false,user:true});
@@ -734,16 +733,23 @@ async function cartPay(req,res){
         let total = 0;
         let products = [];
         let qnty=0;
-        //looping in the cartItems
-        cart.items.forEach(item=>{
-          total+=item.productId.salePrice*item.quantity;
-          products.push({productId:item.productId._id,quantity:item.quantity});
-          qnty+=item.quantity;
-        })
-        console.log(products);
         const orderDate = new Date(); //The order Date
         const expectedDelivery = new Date();
         expectedDelivery.setDate(expectedDelivery.getDate()+4);///Adding 4 days to orderplaced date.
+        //looping in the cartItems
+        cart.items.forEach(item=>{
+          total+=item.productId.salePrice*item.quantity;
+          products.push({
+            productId:item.productId._id,
+            quantity:item.quantity,
+            status:"orderPlaced",
+            orderPlaced:orderDate, 
+            expectedDelivery:expectedDelivery,
+          });
+          qnty+=item.quantity;
+        })
+        console.log(products);
+        
         //adding it to  order collection
         let newOrder = await orderModel.create({
           date:orderDate,
@@ -751,7 +757,7 @@ async function cartPay(req,res){
           address: {
             country:addr.country,
             fName:addr.fName,
-            lName :addr.lname,
+            lName :addr.lName,
             addr: addr.addr,
             city: addr.city,
             state: addr.state,
@@ -761,10 +767,7 @@ async function cartPay(req,res){
           products:[...products],
           paymentmode:pymnt,
           totalPrice:total,
-          status:"orderPlaced",
           quantity:qnty,
-          orderPlaced:orderDate, 
-          expectedDelivery:expectedDelivery,
         })
         async function reduceStock() {
           for (const item of cart.items) {
@@ -810,15 +813,36 @@ async function adminOrderInvoice(req,res){
 async function orderStatus(req,res){
   let {id} = req.params;
   try{
-    let order = await orderModel.findOne({_id:new ObjectId(id)});
-    console.log(order);
-    res.json({"status":order.status,"valid":true})
+    let order = await orderModel.findOne({_id:new ObjectId(id)}).populate("products.productId"  );
+     
+    res.json({"products":order.products,"oid":order._id,"valid":true})
   }catch(err){
     console.log("Order Status error: ",err)
-    res.json({"status":null,"valid":false})
+    res.json({"products":null,"valid":false})
 
   }
 }
+
+async function orderCancel(req,res){
+  let {oid,pid} = req.body;
+  try{
+    let orders  = await orderModel.findById(oid);
+    let product = orders.products.find(val=>val.productId==pid)
+    let prod = await productModel.findById(pid);
+    
+    console.log(product,product.quantity);
+    prod.stock+=product.quantity;
+    await prod.save();
+    product.status = "orderCancelled";
+    product.orderCancelled = new Date();
+    await orders.save();
+    res.json({"sent":true})
+  }catch(err){
+    console.log("Error in order cancel controller: ",err);
+    res.json({"sent":false})
+  }
+}
+
 //api
 async function getProducts(req,res){
      
@@ -1427,7 +1451,8 @@ export {
     orderStatus,
     getUsersV2,
     getOrdersV2,
-    adminOrderInvoice
+    adminOrderInvoice,
+    orderCancel,
 };
 
  

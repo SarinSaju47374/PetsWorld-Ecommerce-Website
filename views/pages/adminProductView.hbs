@@ -235,28 +235,28 @@
             }
             
             tableTbody.innerHTML="";
-            pr.products.forEach(p=>{
-                tableTbody.innerHTML+=`<tr>
-                            <td>${p.productName}</td>
-                            <td>${p.productPrice}</td>
-                            <td>${p.salePrice}</td>
-                            <td>${p.stock}</td>
-                            <td>${p.category}</td>
-                            <td>${p.subCategory}</td>
-                            ${p.isFeatured?`<td><a href="#" onclick="showPopupUn(event,\`${p._id}\`)" class="butn btn-updt"><i class="fa-solid fa-thumbs-down"></i></a></td>`
-                                                            :`<td><a href="#" onclick="showPopup(event,\`${p._id}\`)" class="butn btn-del"><i class="fa-solid fa-thumbs-up"></i></a></td>`} 
-                             
-                            <td>
-                                ${
-                                    p.photo[0] && p.photo[0].filepath
-                                    ? `<img src="${p.photo[0].filepath}.png" alt="" style="width:100px;height:60px" accept="image/png">`
-                                    : 'No Image Available'
-                                }
-                            </td>
-                            <td><a href="#" onclick="openForm('${p._id}',${pr.page})"><i class="fa-solid fa-pen" style="font-size:1rem;"></i></a></td>
-                            <td><a href="#" onclick="showPopup(event, '${p._id}')" class="butn btn-del"><i class="fa-solid fa-trash" style="font-size:1rem;"></i></a></td> 
-                        </tr>`;
-            })
+           pr.products.forEach(p => {
+            tableTbody.innerHTML += `
+                <tr>
+                <td>${p.productName}</td>
+                <td>${p.productPrice}</td>
+                <td>${p.salePrice}</td>
+                <td>${p.stock}</td>
+                <td>${p.category}</td>
+                <td>${p.subCategory}</td>
+                ${p.isFeatured ? `<td><a href="#" onclick="showPopupUn(event, '${p._id}')" class="butn btn-updt"><i class="fa-solid fa-thumbs-down"></i></a></td>`
+                                : `<td><a href="#" onclick="showPopup(event, '${p._id}')" class="butn btn-del"><i class="fa-solid fa-thumbs-up"></i></a></td>`}
+                <td>
+                    ${p.photo[0] && p.photo[0].filepath
+                    ? `<img src="${p.photo[0].filepath}.png" alt="" style="width:100px;height:60px" accept="image/png">`
+                    : 'No Image Available'
+                    }
+                </td>
+                <td><a href="#" onclick="openForm('${p._id}', ${pr.page})"><i class="fa-solid fa-pen" style="font-size:1rem;"></i></a></td>
+                <td><a href="#" onclick="showPopup(event, '${p._id}')" class="butn btn-del"><i class="fa-solid fa-trash" style="font-size:1rem;"></i></a></td>
+                </tr>`;
+            });
+
         } catch (error) {
             // Handle any errors that occurred during the fetch
             console.log('Error:', error.message);

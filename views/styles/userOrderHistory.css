@@ -50,16 +50,18 @@
     width:100%;
 }
 .hd{
+    display:grid;
+    place-items:center;
     /* border:1px solid white; */
 }
 .order-header{
     width:100%;
     display:flex;
-    padding:1rem;
+    padding:1rem 0;
     box-sizing: border-box;
-    justify-content: center;
     background-color: #1C3E5A;
     justify-content:space-between;
+
 }
 /* sort */
 .order-header .products button{
@@ -92,12 +94,20 @@
 .products{
     width:30%; 
     text-align: center;
+    display: flex;
+    justify-content: center;
 }
 .orderId{
     width:30%;
-    text-align: center;
-    display: flex;
-    justify-content: center;
+    /* text-align: center; */
+    /* display: flex; */
+    /* justify-content: center; */
+    
+}
+.orderId h4{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .status{
     width:30%;
@@ -105,15 +115,20 @@
 }
  
 /* applies both in row and header */
-.order-row{
+.order-row {
     display: flex;
-    /* flex-direction: column; */
-    margin-top:1rem;
-    padding:1rem;
+    margin-top: 1rem;
+    padding: 1rem;
     align-items: center;
     justify-content: space-between;
     background-color: #0D2B47;
-}
+    cursor: pointer;
+    transition: transform 0.3s; /* Adding transition for smooth animation */
+  }
+  
+  .order-row:hover {
+    transform: scale(1.05); /* Scale the element by 1.1 on hover */
+  }
 .order-row img{
     width:5rem;
 }
@@ -203,6 +218,12 @@ color: rgba(255, 255, 255, 0.7);
 .search-cont{
     width:30%;
 }
+.hd{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    /* border:1px solid white; */
+}
 .card-det{
     width:80%;
     flex-direction: row;
@@ -212,7 +233,7 @@ color: rgba(255, 255, 255, 0.7);
 
  
 .order-header{
-    justify-content: center;
+    justify-content: space-between;
     margin-top: 1rem;
 }
 
@@ -228,7 +249,7 @@ color: rgba(255, 255, 255, 0.7);
 
 .orderId{
     text-align: center;
-    width:30%;
+    width:20%;
 }
 .status{
     

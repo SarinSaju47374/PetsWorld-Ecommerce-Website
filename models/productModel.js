@@ -253,7 +253,7 @@ const orderSchema = new Schema({
   date: Date,
   user: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'user',
   },
   address: {
     country:{
@@ -293,6 +293,29 @@ const orderSchema = new Schema({
         ref: 'product',
       },
       quantity:Number,
+      status: {
+        type: String,
+        required: true,
+        default:"orderPlaced",
+      },
+      orderPlaced: {
+        type: Date,
+      },
+      orderShipped: {
+        type: Date,
+      },
+      orderOnRoute: {
+        type: Date
+      },
+      orderDelivered: {
+        type: Date
+      },
+      orderCancelled:{
+        type:Date
+      },
+      expectedDelivery:{
+        type:Date
+      }
     }
   ],
   paymentmode: {
@@ -304,33 +327,7 @@ const orderSchema = new Schema({
     required: true,
   },
 
-  status: {
-    type: String,
-    required: true,
-    default:"orderPlaced",
-  },
-  quantity: {
-    type: Number,
-    default: 1
-  },
-  orderPlaced: {
-    type: Date,
-  },
-  orderShipped: {
-    type: Date,
-  },
-  orderOnRoute: {
-    type: Date
-  },
-  orderDelivered: {
-    type: Date
-  },
-  orderCancelled:{
-    type:Date
-  },
-  expectedDelivery:{
-    type:Date
-  }
+  
 });
 
 // const wishlistSchema = new mongoose.Schema({
