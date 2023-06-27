@@ -1119,6 +1119,33 @@ async function getUsersV2(req,res){
       }
 }
 
+async function getUserDetails(req,res){
+  let {tk} = req.params;
+  let id = jwt2.verify(tk,process.env.secretKeyU).user;
+  try{
+    let user  = await userModel.findById(id);
+    res.json(user);
+  }catch(err){
+    console.log("Error in getUserDetails controller : ",err);
+  }
+}
+async function updateUserDetails(req,res){
+  let {tk} = req.params;
+  let {fName,lName,ph} = req.body;
+  let id = jwt2.verify(tk,process.env.secretKeyU).user;
+  
+  try{
+    let user  = await userModel.findById(id);
+     
+    user.fName = fName;
+    user.lName = lName;
+    user.phoneNumber = ph;
+    await user.save();
+    res.json({"updated":true})
+  }catch(err){
+    console.log("Error in getUserDetails controller : ",err);
+  }
+}
 
 async function getOrdersV2(req, res) {
   try {
@@ -1482,7 +1509,9 @@ export {
     adminOrderInvoice,
     orderCancel,
     getSpecificOrder,
-    modifyOrder
+    modifyOrder,
+    getUserDetails,
+    updateUserDetails
 };
 
  

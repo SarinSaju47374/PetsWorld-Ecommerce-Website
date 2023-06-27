@@ -1,5 +1,5 @@
 import express from "express";
-import {getUsers,getUserAddress} from "../controllers/controllers.js"
+import {getUsers,getUserAddress,getUserDetails,updateUserDetails} from "../controllers/controllers.js"
 import userModel from "../models/userModel.js";
 import { addressModel } from "../models/productModel.js";
 const router = express.Router();
@@ -9,6 +9,8 @@ const ObjectId = mongoose.Types.ObjectId;
 
 router.get("/users",getUsers);
 router.get("/users/addr/:id",getUserAddress);
+router.get("/users/:tk",getUserDetails)
+router.post("/users/update/:tk",updateUserDetails)
 router.put("/users",async(req,res)=>{
     try{
         await userModel.updateOne({phoneNumber:req.body.number},{otp:req.body.otp});

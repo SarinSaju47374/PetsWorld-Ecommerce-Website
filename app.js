@@ -100,6 +100,7 @@ import userAddressRouter from "./routes/userAddressRouter.js"
 import handleAddressRouter from "./routes/handleAddressRouter.js"
 import adminOrderRouter from "./routes/adminOrderRouter.js"
 import adminDashRouter from "./routes/adminDashRouter.js"
+import userProfileRouter from "./routes/userProfileRouter.js"
 //API routers
 import productApi from "./routes/productApi.js";
 import userApi from "./routes/userApi.js";
@@ -170,6 +171,7 @@ app.use("/wishlist",userWishlistRouter);
 app.use("/checkout",authoriseJwt,userCheckoutRouter);
 app.use("/pymnt",authoriseJwt,userPymntRouter);
 app.use("/address",authoriseJwt,userAddressRouter);
+app.use("/profile",authoriseJwt,userProfileRouter);
 app.get("/otp",(req,res)=>{
   res.render("otpLogin")
 })
