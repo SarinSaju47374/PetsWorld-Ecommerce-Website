@@ -46,27 +46,40 @@
 
 {{!-- END OF ORDERS --}}
 {{!-- FORM FOR MODIFYING EXISTING DATA --}}
-  <div class="form-popup">
+  <div class="order-popup">
      <h2>Modify Product</h2>
-    <form id="modify-form">
+     <i class="fa-solid fa-xmark"></i>
+    <form id="modify-order-form">
          <table>
             <thead>
             <tr>
                 <th>OrderId</th>
-                <th>First Name</th>
+                <th>Name</th>
                 <th>Delivery Address</th>
                 <th>Total Amount</th>
-                <th>View</th>
+                <th>Product Name</th>
+                <th>Payment Mode</th>
+                <th>Status</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
-                <tr>
+                {{!-- <tr>
                 <td>OrderId</td>
                 <td>First Name</td>
                 <td>Delivery Address</td>
                 <td>Total Amount</td>
-                <td>View</td>
-            </tr>
+<td>Payment Mode</td>
+                <td>
+                    <select class="order-status-dropdown">
+                        <option value="orderPlaced">Order Placed</option>
+                        <option value="orderShipped">Order Shipped</option>
+                        <option value="orderOnRoute">Order On-Route</option>
+                        <option value="orderDelivered">Order Delivered</option>
+                        <option value="orderCancelled">Order Cancelled</option>
+                    </select>
+                </td>
+            </tr> --}}
             </tbody>
         </table>
     </form>
@@ -145,6 +158,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
 <script>
+    let pg;
     //REQUIRED DOM DATA
     let tableTbody = document.querySelector(".table-admin table tbody");
     let input = document.querySelector(".input-admin input");
@@ -201,18 +215,11 @@
             or.orders.forEach(o=>{
                 tableTbody.innerHTML+=`<tr>
                             <td>#PTW${o._id}</td>
-                            <td>${o.address.fName}</td>
+                            <td>${o.address.fName} ${o.address.lName}</td>
                             <td class="addr">${o.address.addr},${o.address.city},${o.address.state},${o.address.country}</td>
-                            <td>${o.totalPrice}</td>
-                            <td><a href="/admin/orders/${o._id}"><i class="fa-regular fa-eye"></i></a></td>
-                            {{!-- <td><select class="order-status-dropdown">
-                                    <option value="orderPlaced">Order Placed</option>
-                                    <option value="orderShipped">Order Shipped</option>
-                                    <option value="orderOnRoute">Order On-Route</option>
-                                    <option value="orderDelivered">Order Delivered</option>
-                                    <option value="orderCancelled">Order Cancelled</option>
-                                </select>
-                            </td> --}}
+                            <td>Rs ${o.totalPrice}</td>
+                            <td><i class="fa-solid fa-eye" style="cursor:pointer" onclick="viewMore('${o._id}',${or.page})"></i></td>
+                             
                         </tr>`;
             })
         } catch (error) {
@@ -287,7 +294,8 @@
         liTag+=`<li class="btn next" onclick="element(totalPages,${afterPages})">Next<span><i class="fa-solid fa-chevron-right"></i></span></li>`; 
         }
         ulTag.innerHTML=liTag;
-        console.log(page);
+        console.log(page)
+        pg=page;
         run(`/custom/orders?p=${page}`)
     }
     
@@ -308,8 +316,131 @@
             element(totalPages,1)
         
         });
-     
- 
+
+
+        //Close the modal 
+        document.querySelector(".order-popup i").addEventListener("click",()=>{
+            document.querySelector(".order-popup").style.display="none";
+            run(`/custom/orders?p=${pg}`)
+        })
+        //Close the modal 
+        
+
+        async function viewDet(oid){
+            let response = await fetch(`/custom/orders/${oid}`)
+                let data  = await response.json();
+                if(!response.ok){
+                    console.log("The data is not received")
+                }
+                console.log(data);
+                document.querySelector(".order-popup").style.display="block"
+                document.querySelector("#modify-order-form table tbody").innerHTML="";
+                data.products.forEach(o=>{
+                    let selectOptions = '';
+                    switch (o.status) {
+                        case 'orderPlaced':
+                        selectOptions = `
+                           
+                            <option value="orderShipped">Order Shipped</option>
+                            <option value="orderOnRoute">Order On-Route</option>
+                            <option value="orderDelivered">Order Delivered</option>
+                            <option value="orderCancelled">Order Cancelled</option>`;
+                        break;
+                        case 'orderShipped':
+                        selectOptions = `
+                             
+                            <option value="orderShipped" disabled selected>Order Shipped</option>
+                            <option value="orderOnRoute">Order On-Route</option>
+                            <option value="orderDelivered">Order Delivered</option>
+                            <option value="orderCancelled">Order Cancelled</option>`;
+                        break;
+                        case 'orderOnRoute':
+                        selectOptions = `
+                            
+                            <option value="orderShipped" disabled>Order Shipped</option>
+                            <option value="orderOnRoute" disabled selected>Order On-Route</option>
+                            <option value="orderDelivered">Order Delivered</option>
+                            <option value="orderCancelled">Order Cancelled</option>`;
+                        break;
+                        case 'orderDelivered':
+                        selectOptions = `
+                          
+                            <option value="orderShipped" disabled>Order Shipped</option>
+                            <option value="orderOnRoute" disabled>Order On-Route</option>
+                            <option value="orderDelivered" disabled selected>Order Delivered</option>
+                            <option value="orderCancelled">Order Cancelled</option>`;
+                        break;
+                        case 'orderCancelled':
+                        selectOptions = `
+                            
+                            <option value="orderShipped" disabled>Order Shipped</option>
+                            <option value="orderOnRoute" disabled>Order On-Route</option>
+                            <option value="orderDelivered" disabled>Order Delivered</option>
+                            <option value="orderCancelled" disabled selected>Order Cancelled</option>`;
+                        break;
+                    }
+                    document.querySelector("#modify-order-form table tbody").innerHTML+=`<tr>
+                                <td>#PTW${data._id}</td>
+                                <td>${data.address.fName} ${data.address.lName}</td>
+                                <td class="addr">${data.address.addr},${data.address.city},${data.address.state},${data.address.country}</td>
+                                <td>${o.productId.productName}</td>
+                                <td>Rs ${data.totalPrice}</td>
+                                <td>${data.paymentmode.toUpperCase()}</td>
+                                <td>${o.status}</td>
+                                <td><select class="order-status-dropdown" data-order-id="${data._id}" data-product-id="${o.productId._id}">
+                                        ${selectOptions}
+                                    </select>
+                                </td>
+                            </tr>`;
+                })
+        }
+
+        //open the modal
+        async function viewMore(oid,pg){
+            console.log(oid)
+            try{
+                viewDet(oid);
+                //Order Management
+                document.querySelectorAll("select").forEach(elem=>{
+                    elem.addEventListener("change",function(){
+                        const orderId = this.getAttribute("data-order-id");
+                        const productId = this.getAttribute("data-product-id");
+                        const newStatus = this.value;
+                        // Create the payload object
+                        const payload = {
+                        orderId: orderId,
+                        productId: productId,
+                        newStatus: newStatus
+                        };
+
+                        // Make the POST request
+                        fetch("/custom/orders", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(payload)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                        // Handle the response data
+                        console.log("Order status updated:", data);
+                        viewDet(oid);
+                        })
+                        .catch(error => {
+                        console.log("Error updating order status:", error);
+                        });
+                    })
+                })
+                //Order Management
+
+            }catch(err){
+                console.log(err);
+            }
+        }
+        //open the modal
+
+        
     </script>
 </body>
 </html>

@@ -99,6 +99,7 @@ import userPymntRouter from "./routes/userPymntRouter.js"
 import userAddressRouter from "./routes/userAddressRouter.js"
 import handleAddressRouter from "./routes/handleAddressRouter.js"
 import adminOrderRouter from "./routes/adminOrderRouter.js"
+import adminDashRouter from "./routes/adminDashRouter.js"
 //API routers
 import productApi from "./routes/productApi.js";
 import userApi from "./routes/userApi.js";
@@ -173,7 +174,8 @@ app.get("/otp",(req,res)=>{
   res.render("otpLogin")
 })
 
-app.use("/admin",adminOrderRouter);
+app.use("/",adminOrderRouter);
+app.use("/",adminDashRouter);
 
 //API
 app.use("/api",productApi);

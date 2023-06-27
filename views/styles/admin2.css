@@ -404,7 +404,7 @@ main .insights small{
 main .recent-orders{
     margin-top:2rem;
 }
-main table thead tr th,#modify-form table thead tr th{
+main table thead tr th,#modify-order-form table thead tr th{
     color:var(--color-dark);
 }
 main .recent-orders h2{
@@ -424,7 +424,7 @@ main .recent-orders table:hover{
     box-shadow:none;
 }
 
-main table tbody td,#modify-form table tbody td{
+main table tbody td,#modify-order-form table tbody td{
     height:2.8rem;
     border-bottom:1px solid var(--color-light);
     color:var(--color-dark-variant);
@@ -437,7 +437,7 @@ main table tbody td.addr{
     overflow-y: auto;
 }
 
-main table tbody tr:last-child,.modify-form table tbody tr:last-child{
+main table tbody tr:last-child,.modify-order-form table tbody tr:last-child{
     border:none;
 }
 
@@ -450,7 +450,7 @@ main .recent-orders a{
 /* =========================Main Content Table======================= */
 
  
-main table,#modify-form table{
+main table,#modify-order-form table{
     background-color: var(--color-white);
     min-width:100%;
     border-radius:var(--card-border-radius);
@@ -460,7 +460,7 @@ main table,#modify-form table{
     transition:all 300ms ease;
 }
 
-main table:hover,#modify-form table:hover{
+main table:hover,#modify-order-form table:hover{
     box-shadow:none;
 }
 main table{
@@ -469,14 +469,14 @@ main table{
     }
 
 
-main table tbody td,#modify-form table tbody td{
+main table tbody td,#modify-order-form table tbody td{
     height:2.8rem;
     border-bottom:1px solid var(--color-light);
     color:var(--color-dark-variant);
     font-size: 0.8rem;
     padding:0.5rem;
 }
-main table thead th,#modify-form table thead th{
+main table thead th,#modify-order-form table thead th{
     padding:0.5rem;
 }
 main table tbody td img{
@@ -485,7 +485,7 @@ main table tbody td img{
     object-fit:cover;
 }
 
-main table tbody tr:last-child,#modify-form table tbody tr:last-child{
+main table tbody tr:last-child,#modify-order-form table tbody tr:last-child{
     border:none;
 }
 
@@ -761,7 +761,7 @@ main table tbody tr:last-child,#modify-form table tbody tr:last-child{
     color: #333;
   }
   /* Popup Form */
-.form-popup {
+.form-popup,.order-popup{
     display: block;
     position: fixed;
     top: 50%;
@@ -781,12 +781,12 @@ main table tbody tr:last-child,#modify-form table tbody tr:last-child{
     gap:1rem;
     
   }
-  .form-popup h2 {
+  .form-popup h2 ,.order-popup h2{
     margin-top: 0;
     font-size: 1.5rem;
     color:var(--color-dark)
   }
-  .form-popup label {
+  .form-popup label,.order-popup label{
     color:var(--color-dark)
   }
 
@@ -822,6 +822,27 @@ main table tbody tr:last-child,#modify-form table tbody tr:last-child{
     flex-direction: column;
     margin-bottom:0.5rem;rem;
   }
+  .order-popup{
+    /* position:relative; */
+    display: none;
+    width:80%;
+    padding:3rem;
+  }
+  .order-popup i{
+    position:absolute;
+    top:-1rem;
+    right:-1rem;
+    width:1rem;
+    height:1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color:red;
+    color:white;
+    padding:1rem;
+    border-radius:50%;
+    cursor: pointer;
+  }
   .form-row input{
     height:2rem;
     padding-left:1rem;
@@ -838,8 +859,33 @@ main table tbody tr:last-child,#modify-form table tbody tr:last-child{
   .form-popup .close{
     background-color: var(--color-danger);
   }
-  
-  
+
+  .preview .dashboard-cards{
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap:1rem;
+  }
+  .preview .card{
+    padding: var(--card-padding);
+    background-color:var(--color-white);
+    border-radius: var(--border-radius-3);
+    color: var(--color-dark);
+    border:1px cyan solid;
+  }
+  .preview i{
+    font-size: 2rem;
+  }
+  .doughnut{
+    margin-top:1rem;
+    display: flex;
+    justify-content: space-between;
+    gap:1rem;
+  }
+  .pymntMode,.ordr{
+    text-align: center;
+    width:45%;
+  }
+   
   /* select options */
 /* =============MEDIA QUERIES================= */
 @media screen and (max-width:1200px){
@@ -881,7 +927,7 @@ main table tbody tr:last-child,#modify-form table tbody tr:last-child{
     /* =========================Main Content Table======================= */
 
  
-    main table,#modify-form table{
+    main table,#modify-order-form table{
         background-color: var(--color-white);
         width:100%;
         border-radius:var(--card-border-radius);
@@ -891,18 +937,18 @@ main table tbody tr:last-child,#modify-form table tbody tr:last-child{
         transition:all 300ms ease;
     }
 
-    main table:hover,#modify-form table:hover{
+    main table:hover,#modify-order-form table:hover{
         box-shadow:none;
     }
 
-    main table tbody td,#modify-form table tbody td{
+    main table tbody td,#modify-order-form table tbody td{
         height:2.8rem;
         border-bottom:1px solid var(--color-light);
         color:var(--color-dark-variant);
         font-size: 0.8rem;
         padding:0.5rem;
     }
-    main table thead th,#modify-form table thead th{
+    main table thead th,#modify-order-form table thead th{
         padding:0.5rem;
     }
     main table tbody td img{
@@ -1061,5 +1107,11 @@ main table tbody tr:last-child,#modify-form table tbody tr:last-child{
         width:80vw;
         overflow-y: scroll;
     }
-
+    .preview .dashboard-cards{
+        display: grid;
+        grid-template-columns: repeat(2,1fr);
+        gap:1rem;
+        margin-right:1rem;
+        /* width:5rem; */
+      }
 }

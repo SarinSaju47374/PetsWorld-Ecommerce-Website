@@ -810,6 +810,26 @@ async function adminOrderInvoice(req,res){
   }
 }
 
+async function modifyOrder(req,res){
+  let  {orderId,productId,newStatus}= req.body;
+   
+  try{
+    let orders  = await orderModel.findById(orderId);
+    let product = orders.products.find(val=>val.productId==productId)
+    let prod = await productModel.findById(productId);
+    if(newStatus=="orderCancelled"){
+      prod.stock+=product.quantity;
+    }  
+    await prod.save();
+    product.status = newStatus;
+    product[orderStatus] = new Date();
+    await orders.save();
+    res.json({"sent":true})
+     
+  }catch(err){
+    console.log(err);
+  }
+}
 async function orderStatus(req,res){
   let {id} = req.params;
   try{
@@ -1175,7 +1195,15 @@ async function getOrdersV2(req, res) {
   }
 }
 
-export default getOrdersV2;
+async function getSpecificOrder(req,res){
+  let {oid}  = req.params;
+  try{
+    let order = await orderModel.findById(oid).populate('products.productId');
+    res.json(order);
+  }catch(err){
+    console.log("Error in getSpecific Order: ",err);
+  }
+}
 
 
 
@@ -1453,6 +1481,8 @@ export {
     getOrdersV2,
     adminOrderInvoice,
     orderCancel,
+    getSpecificOrder,
+    modifyOrder
 };
 
  

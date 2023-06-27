@@ -427,7 +427,7 @@
                         orderStatus.innerHTML += `
                         <div>
                             <h4>${val.productId.productName}</h4>
-                            <h5>${val.orderDelivered.toLocaleDateString()}</h5>
+                            <h5>${new Date(val.orderDelivered).toLocaleDateString()}</h5>
                             <div class="status-slider">
                                 <div class="slider-item">Order Placed</div>
                                 <div class="slider-item">Order Shipped</div>
@@ -456,7 +456,7 @@
                 {{!-- statusSlider.innerHTML="amigos" --}}
                         // Fetch the status every 5 seconds
                 let id=setInterval(fetchStatus, 5000);
-                {{!-- clearInterval(id); --}}
+                clearInterval(id);
             })
         
     </script>

@@ -246,7 +246,7 @@
                 <td>${p.subCategory}</td>
                 ${p.isFeatured ? `<td><a href="#" onclick="showPopupUn(event, '${p._id}')" class="butn btn-updt"><i class="fa-solid fa-thumbs-down"></i></a></td>`
                                 : `<td><a href="#" onclick="showPopup(event, '${p._id}')" class="butn btn-del"><i class="fa-solid fa-thumbs-up"></i></a></td>`}
-                <td>
+                </td> 
                     ${p.photo[0] && p.photo[0].filepath
                     ? `<img src="${p.photo[0].filepath}.png" alt="" style="width:100px;height:60px" accept="image/png">`
                     : 'No Image Available'
