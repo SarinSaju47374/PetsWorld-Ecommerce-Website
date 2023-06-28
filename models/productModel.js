@@ -24,10 +24,14 @@ const productSchema = new Schema({
         type:Number,
     },
     category: {
-        type:String,
+      type: Schema.Types.ObjectId,
+      ref: 'category',
+      required: true,
     },
     subCategory:{
-        type:String,
+      type: Schema.Types.ObjectId,
+      ref: 'subCategory',
+      required: true,
     },
     createdAt:{
         type:Date,
@@ -42,6 +46,10 @@ const productSchema = new Schema({
     photo: {
         type:[{title: String,filepath: String,}]
     },
+    isHidden:{
+      type:Boolean,
+      default:false,
+    }
   });
 
 
@@ -343,33 +351,35 @@ const orderSchema = new Schema({
 
 
 const categorySchema = new Schema({
-  ctgryName:{
-    type:String,
-    required:true,
+  name: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  photo: {
-    type:{title: String,filepath: String,}
+  isHidden: {
+    type: Boolean,
+    default: false,
   },
-  isHide:{
-    type:Boolean,
-    enum:[true,false],
-    default:false, 
-  }
 },{
   collection:"category"
 })
 const subCategorySchema = new Schema({
-  ctgryName:{
+  name: {
+    type: String,
+    required: true,
+  },
+  category: {
     type: Schema.Types.ObjectId,
     ref: 'category',
     required: true,
   },
-  subCtgryName:{
-    type:String,
-    required:true,
-  },
   photo: {
-    type:{title: String,filepath: String,}
+    type: String,
+    required: true,
+  },
+  isHidden: {
+    type: Boolean,
+    default: false,
   },
 },{
   collection:"subCategory"

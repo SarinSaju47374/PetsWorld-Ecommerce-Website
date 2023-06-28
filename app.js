@@ -87,7 +87,7 @@ import adminProductViewRouter from "./routes/adminProductViewRouter.js"
 import adminLoginRouter from "./routes/adminLoginRouter.js" 
 import adminUserViewRouter from "./routes/adminUserViewRouter.js"
 import userProductViewRouter from "./routes/userProductViewRouter.js";
-import adminCtgryAddRouter from "./routes/adminCtgryAddRouter.js"
+import ctgryAddRouter from "./routes/ctgryAddRouter.js"
 import adminCtgryViewRouter from "./routes/adminCtgryViewRouter.js"
 import userProductDescrRouter from "./routes/userProductDescrRouter.js";
 import dogFoodRouter from "./routes/dogFoodRouter.js";
@@ -160,7 +160,7 @@ app.use("/product-add",authoriseAdminJwt,productAddRouter);
 app.use("/product-view",adminProductViewRouter);
 app.use("/admin",adminLoginRouter);
 app.use("/user-view",adminUserViewRouter);
-app.use("/ctgry-add",authoriseAdminJwt,adminCtgryAddRouter);
+app.use("/ctgry-add",authoriseAdminJwt,ctgryAddRouter);
 app.use("/ctgry-view",authoriseAdminJwt,adminCtgryViewRouter);
 app.use("/",userProductViewRouter);
 app.use("/product-descr",userProductDescrRouter); 

@@ -598,6 +598,14 @@ main table tbody tr:last-child,#modify-order-form table tbody tr:last-child{
     padding-left:1rem;
     color:var(--color-dark);
 }
+.form-admin select{
+    background-color:var(--color-white);
+    border:none;
+    height:3rem;
+    border-radius: 12px;
+    padding-left:1rem;
+    color:var(--color-dark);
+}
  
 .form-admin input#file-upload-btn{
     background-color:red;
@@ -1114,4 +1122,17 @@ main table tbody tr:last-child,#modify-order-form table tbody tr:last-child{
         margin-right:1rem;
         /* width:5rem; */
       }
+      .doughnut{
+        margin-top:1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        gap:1rem;
+      }
+      .pymntMode,.ordr{
+        text-align: center;
+        width:90%;
+      }
+       
 }

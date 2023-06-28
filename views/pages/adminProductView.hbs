@@ -242,8 +242,8 @@
   <td>${p.productPrice}</td>
   <td>${p.salePrice}</td>
   <td>${p.stock}</td>
-  <td>${p.category}</td>
-  <td>${p.subCategory}</td>
+  <td>${p.category.name}</td>
+  <td>${p.subCategory.name}</td>
   ${
     p.isFeatured
       ? `<td><a href="#" onclick="showPopupUn(event, '${p._id}')" class="butn btn-updt"><i class="fa-solid fa-thumbs-down"></i></a></td>`
@@ -363,15 +363,16 @@
         event.preventDefault();
         Swal.fire({
         title: 'Are you sure?',
-        text: "Do you really want to feature this product",
+        text: "Do you really want to Hide this product",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, Feature this Product!'
+        confirmButtonText: 'Yes, Hide this Product!'
         }).then((result) => {
         if (result.isConfirmed) {
-            window.location.href = `/product-view?delete_oid=${categoryId}`;
+            alert("about to change")
+            window.location.href = `/product-view?hide_oid=${categoryId}`;
         }
         });
     }

@@ -17,8 +17,12 @@
         <input type="number" name="productPrice" placeholder="Product Price.." required>
         <input type="number" name="salePrice" placeholder="Enter the Sale Price" required>
         <input type="number" name="stock" placeholder="Enter Thew Stock" required>
-        <input type="text" name="category" placeholder="Category" required>
-        <input type="text" name="subCategory" placeholder="SubCategory" required>
+        <select name="ctgryId" id="ctgry" required>
+            //Dynamic Data for Category
+        </select>
+        <select name="subCtgryId" id="subCtgry" required>
+            //Dynamic Data for SubCategory
+        </select>
         <input type="text" name="paymentOption" placeholder="paymentOption" required>
         <input type="number" name="rating" placeholder="Initial rating" required>
         <div class="file-input-wrapper">
@@ -92,6 +96,7 @@
     
 </div>
 <script src="/JS/adminContent.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
 <script>
     const sideBarOpts = document.querySelectorAll(".sidebar a");
      
@@ -100,6 +105,98 @@
         a.classList.remove("active");
     })
     sideBarOpts[7].classList.add("active");
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded",()=>{
+        run();
+    })
+    document.getElementById("ctgry").addEventListener("change",function(){
+        subDetector(this.value);
+    })
+    async function run(){
+        try{
+            let data = await fetch("/ctgry-add/fetch");
+            let info = await data.json();
+            
+            if(info && info.length>0){
+                document.getElementById("ctgry").innerHTML="";
+                info.forEach(val=>{
+                    document.getElementById("ctgry").innerHTML+=`<option value="${val._id}">${val.name}</option>`
+                })
+            }else{ 
+                document.getElementById("ctgry").innerHTML="<option value=null>No Category</option>"
+            }
+
+        }catch(err){
+            console.log(err);
+        }
+    }
+    async function subDetector(id){
+        try{
+            let data = await fetch(`/ctgry-add/fetch/${id}`);
+            let info = await data.json();
+            
+            if(info && info.length>0){
+                document.getElementById("subCtgry").innerHTML="";
+                info.forEach(val=>{
+                    document.getElementById("subCtgry").innerHTML+=`<option value="${val._id}">${val.name}</option>`
+                })
+            }else{ 
+                document.getElementById("subCtgry").innerHTML="<option value=null>No Category</option>"
+            }  
+
+        }catch(err){
+            console.log(err);
+        }
+    }
+    ctgryForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Prevent default form submission
+
+        // Create FormData object to collect form data
+        const jsonObject = {};
+        let formData = new FormData(ctgryForm);
+        formData.forEach((value, key) => {
+            jsonObject[key] = value;
+        });
+
+        const jsonBody = JSON.stringify(jsonObject);
+        console.log(jsonBody);
+        try {
+            // Send form data using Fetch POST request
+            const response = await fetch('/ctgry-add/ctgry', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: jsonBody
+            });
+
+            // Handle response
+            if(!response.ok) console.log("Form not Submitted")
+            let success = await response.json();
+            if(success.success){
+                Swal.fire({
+                    position: 'center',
+                    icon: 'success',
+                    title: 'Category Is Added',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+                run();
+            }else{
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Something went Wrong!',
+                    footer: 'Check it out Amigo!'
+                })
+            }
+                
+            
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
 </script>
 
  

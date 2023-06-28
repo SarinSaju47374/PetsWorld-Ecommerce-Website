@@ -46,8 +46,9 @@ async function adminVerify(req,res){
 function productAdd(req,res){
     res.render("adminProductAdd",{admin:true,user:false});
 }
-function ctgryAdd(req,res){
-    res.render("adminCtgryAdd",{admin:true,user:false});
+async function ctgryAdd(req,res){
+    let ctgrys = await ctgryModel.find();
+    res.render("adminCtgryAdd",{admin:true,user:false,ctgrys});
 }
 async function ctgryUpdate(req,res){
     const{
@@ -98,7 +99,7 @@ async function adminProductView(req,res){
       // await productModel.deleteOne({_id:oid});
       const productData = await fetch("http://127.0.0.1:2000/api/products");
       const products = await productData.json();
-      res.render("adminProductView",{admin:true,user:false,products});
+      res.redirect("/product-view")
     }else if(req.query.ftd_oid){
       let oid = req.query.ftd_oid;
       const product = await productModel.updateOne({_id: oid},{
@@ -1020,21 +1021,28 @@ async function getProducts(req,res){
 
         // Query for product collection
         const products = await productModel.find({
-            $or: [
+          $and: [
+            {
+              $or: [
                 { productName: { $regex: search, $options: "i" } },
                 { brandName: { $regex: search, $options: "i" } },
                 { description: { $regex: search, $options: "i" } },
                 { points: { $elemMatch: { $regex: search, $options: "i" } } },
                 {
-                    salePrice: {
-                      $gte: priceAmount - priceThreshold,
-                      $lte: priceAmount + priceThreshold,
-                    }
-                }
+                  salePrice: {
+                    $gte: priceAmount - priceThreshold,
+                    $lte: priceAmount + priceThreshold,
+                  },
+                },
                 // Add more fields to search here
               ],
-          ...filter
+            },
+            { isHidden: false }, // Add condition to filter by isHidden field
+            { ...filter },
+          ],
         })
+          .populate("category", "name") // Populate the "category" field and retrieve only the "name" property
+          .populate("subCategory", "name") // Populate the "subCategory" field and retrieve only the "name" property
           .sort(sortBy)
           .skip(page * limit)
           .limit(limit);

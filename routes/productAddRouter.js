@@ -8,7 +8,7 @@ import fs from "fs";
 const router = express.Router();
 
 router.get("/",productAdd);
-router.use(express.json());router.use(express.json());
+router.use(express.json()); 
 
 const upload = multer({ dest: 'views/uploads' });
 router.post("/",upload.array('photos'),async(req,res)=>{
@@ -20,8 +20,8 @@ router.post("/",upload.array('photos'),async(req,res)=>{
         productPrice,
         salePrice,
         stock,
-        category,
-        subCategory,
+        ctgryId,
+        subCtgryId,
         paymentOption,
         rating,
      } = req.body;
@@ -69,14 +69,14 @@ router.post("/",upload.array('photos'),async(req,res)=>{
         productPrice:productPrice,
         salePrice:salePrice,
         stock:stock,
-        category:category,
-        subCategory:subCategory,
+        category:ctgryId,
+        subCategory:subCtgryId,
         paymentOption:paymentOption,
         rating:rating,
         photo:photos
     })
     console.log("Successfully product added to data base")
-    res.send("Sucess");
+    res.redirect("/product-view");
 })
 
 export default router;
