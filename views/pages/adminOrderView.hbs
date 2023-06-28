@@ -332,7 +332,6 @@
                 if(!response.ok){
                     console.log("The data is not received")
                 }
-                console.log(data);
                 document.querySelector(".order-popup").style.display="block"
                 document.querySelector("#modify-order-form table tbody").innerHTML="";
                 data.products.forEach(o=>{
@@ -397,12 +396,15 @@
 
         //open the modal
         async function viewMore(oid,pg){
-            console.log(oid)
+            {{!-- console.log(oid) --}}
             try{
-                viewDet(oid);
+                await viewDet(oid);
+                 
                 //Order Management
-                document.querySelectorAll("select").forEach(elem=>{
-                    elem.addEventListener("change",function(){
+                document.querySelectorAll(".order-status-dropdown").forEach(elem=>{
+                    console.log(elem);
+                    elem.addEventListener("input",async function(){
+                         console.log("******************")
                         const orderId = this.getAttribute("data-order-id");
                         const productId = this.getAttribute("data-product-id");
                         const newStatus = this.value;
@@ -414,7 +416,7 @@
                         };
 
                         // Make the POST request
-                        fetch("/custom/orders", {
+                        await fetch("/custom/orders", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
@@ -422,16 +424,17 @@
                         body: JSON.stringify(payload)
                         })
                         .then(response => response.json())
-                        .then(data => {
+                        .then(async (data) => {
                         // Handle the response data
-                        console.log("Order status updated:", data);
-                        viewDet(oid);
+                        await viewMore(oid,pg);
+                        {{!-- console.log("Order status updated:", data); --}}
+                        
                         })
                         .catch(error => {
                         console.log("Error updating order status:", error);
                         });
                     })
-                })
+                });
                 //Order Management
 
             }catch(err){

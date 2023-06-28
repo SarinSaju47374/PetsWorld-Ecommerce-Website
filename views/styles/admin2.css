@@ -334,7 +334,7 @@ main .insights > div .middle{
  
 main .insights >div .middle .left{
     white-space: nowrap;
-    width:5rem;check
+    width:5rem;
 }
 /* main .insights >div .middle .progress{
     flex:1;
@@ -762,7 +762,7 @@ main table tbody tr:last-child,#modify-order-form table tbody tr:last-child{
   }
   /* Popup Form */
 .form-popup,.order-popup{
-    display: block;
+    display: none;
     position: fixed;
     top: 50%;
     left: 50%;
