@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="payment-det">
-            <form action="/cart/pymnt/{{idType}}/{{id}}" method="POST">
+            <form  action="#" onsubmit="initPay(event,'{{idType}}','{{id}}')" method="POST">
                 <label class="pymnt-option" for="pymnt-online">
                     <input type="radio" name="pymnt" id="pymnt-online" value="online" required>
                     <h3>Online Payment - Free Delivery</h3>
@@ -105,7 +105,22 @@
     </div>
 </div>
 </div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded');
+    const onlinePaymentRadio = document.getElementById('pymnt-online');
+    const codPaymentRadio = document.getElementById('pymnt-cod');
+
+    onlinePaymentRadio.addEventListener('change', function() {
+      pymnt = "online";
+    });
+
+    codPaymentRadio.addEventListener('change', function() {
+      pymnt = "cod";
+    });
+  });
+    //Typing Animation
     let i=0;
     let placeholder="";
     const txt="Search in Cart....";
@@ -122,4 +137,80 @@
         setTimeout(type,speed);
     }
     type(); 
+    //Typing Animation
+
+ var pymnt;
+    
+  codPaymentRadio.addEventListener('change', function() {
+    console.log("Cash on Delivery selected");
+  });
+    async function initPay(e,idType, id) {
+        e.preventDefault();
+        alert(pymnt)
+        if(pymnt=="cod"){
+            let link = await fetch(`/cart/pymnt/chkout/${idType}/${id}`,{
+                method: 'POST',
+                body:JSON.stringify({pymnt:"cod"}),
+                headers: {
+                'Content-Type': 'application/json'
+                }
+            });
+            let urlData = await link.json();
+            window.location.href=urlData.url;
+
+        }else if(pymnt=="online"){
+            let order = await fetch(`/cart/pymnt/chkout/${idType}/${id}`,{
+                method: 'POST',
+                body:JSON.stringify({pymnt:"online"}),
+                headers: {
+                'Content-Type': 'application/json'
+                }
+            });
+            let ordr = await order.json();
+            console.log(ordr);
+            var options = {
+                "key": ordr.id, // Enter the Key ID generated from the Dashboard
+                "amount": ordr.order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                "currency": "INR",
+                "name": "Pets World",
+                "description": "Test Transaction",
+                "order_id": ordr.order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                "handler": function (response){
+                     verifyPayment(response,ordr,idType,id);
+                },
+                "notes": {
+                    "address": "Razorpay Corporate Office"
+                },
+            };
+            var rzp1 = new Razorpay(options);
+            rzp1.on('payment.failed', function (response){
+                    alert(response.error.code);
+                    alert(response.error.description);
+                    alert(response.error.source);
+                    alert(response.error.step);
+                    alert(response.error.reason);
+                    alert(response.error.metadata.order_id);
+                    alert(response.error.metadata.payment_id);
+            });
+            rzp1.open();
+        }
+    }
+    //Form Submission
+    async function verifyPayment(response,ordr,idType,id){
+        let data = {
+            ordr,
+            response:response,
+            idType:idType,
+            id:id
+        }
+        let verify = await fetch(`/cart/pymnt/verify`,{
+                method: 'POST',
+                body:JSON.stringify(data),
+                headers: {
+                'Content-Type': 'application/json'
+                }
+        })
+        let urlData = await verify.json();
+        window.location.href=urlData.url;
+    }
 </script>

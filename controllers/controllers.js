@@ -9,6 +9,7 @@ import CryptoJS from "crypto-js"
 import mongoose from "mongoose";
 import sendMail from "../utils/sendMail.js"
 import crypto from "crypto";
+import {genrateRazorPay,verifyRazrPymnt} from "../utils/razorPay.js";
 const ObjectId = mongoose.Types.ObjectId;
 //dirname configuration
 import { dirname } from 'path';
@@ -473,21 +474,27 @@ async function userProductView(req, res) {
 
 
 async function userProductDescr(req,res){
+  console.log("im inside Product Descrtiption Page *************************")
     if(req.query.oid){
         let qnty=1;
-        let productsD = await fetch("http:///127.0.0.1:2000/api/products");
-        let products = await productsD.json();
-         
-        products.products.forEach(obj => {
-            if (obj.photo && Array.isArray(obj.photo)) {
-              obj.photo.forEach(photo => {
-                if (photo.filepath) {
-                  photo.filepath = photo.filepath.replace(/\\/g, "/");
-                }
-              });
-            }
-          });
-        let product = products.products.find(item=>item._id==req.query.oid) 
+        // let productsD = await fetch("http:///127.0.0.1:2000/api/products");
+        // let products = await productsD.json();
+        let product = await productModel.findById(req.query.oid);
+        product.photo.forEach(photo => {
+          if (photo.filepath) {
+            photo.filepath = photo.filepath.replace(/\\/g, "/");
+          }
+        })
+        // products.products.forEach(obj => {
+        //     if (obj.photo && Array.isArray(obj.photo)) {
+        //       obj.photo.forEach(photo => {
+        //         if (photo.filepath) {
+        //           photo.filepath = photo.filepath.replace(/\\/g, "/");
+        //         }
+        //       });
+        //     }
+        //   });
+        // let product = products.products.find(item=>item._id==req.query.oid) 
         let token = req.headers.cookie?.split("=")[1]
         // console.log(token);
         if(token){
@@ -520,7 +527,7 @@ async function userProductDescr(req,res){
         
         res.render("userProductDescr",{admin:false,user:true,product,qnty});
         }
-        
+        res.render("userProductDescr",{admin:false,user:true,product,qnty});
     }
     
 }
@@ -779,15 +786,106 @@ async function cartPay(req,res){
           await cartModel.deleteOne({_id:id});
         }
         reduceStock();
-        res.redirect(`/cart/order/${newOrder._id}`)
+        res.json({"url":`/cart/order/${newOrder._id}`})
 
       }else if(idType=="iid"){
-
+          
       }
+    }else{
+      let cart = await cartModel.findOne({_id:id}).populate('items.productId');
+      let total=0;
+      cart.items.forEach(item=>{
+        total+=item.productId.salePrice*item.quantity;
+      })
+      let data = await genrateRazorPay(total*100);
+      res.json({"order":data,"id":process.env.RAZOR_ID});
     }
   }catch(err){
     console.log("Err: ",err);
     res.status(500).json({"message":"Internal Servor error"})
+  }
+}
+
+async function verifyPymnt(req,res){
+  let {idType,id} = req.body
+  //Tweaks needed for iid;
+  //cookie extraction
+  let cookieHeaderValue = req.headers.cookie;
+  let token = null;
+
+  if (cookieHeaderValue) {
+    let cookies = cookieHeaderValue.split(";");
+
+    for (let cookie of cookies) {
+      let [cookieName, cookieValue] = cookie.trim().split("=");
+
+      if (cookieName === "token") {
+        token = cookieValue;
+        break;
+      }
+    }
+  }
+  //cookie extraction
+  let userId = jwt2.verify(token,process.env.secretKeyU).user;
+  try{
+   
+    await verifyRazrPymnt(req.body);
+    console.log("Its verified");
+    let addr = await addressModel.findOne({userId:userId,isShippingAddress:true});
+    let pymnt = 'online';
+    let cart = await cartModel.findOne({_id:id}).populate('items.productId');
+        let total = 0;
+        let products = [];
+        let qnty=0;
+        const orderDate = new Date(); //The order Date
+        const expectedDelivery = new Date();
+        expectedDelivery.setDate(expectedDelivery.getDate()+4);///Adding 4 days to orderplaced date.
+        //looping in the cartItems
+        cart.items.forEach(item=>{
+          total+=item.productId.salePrice*item.quantity;
+          products.push({
+            productId:item.productId._id,
+            quantity:item.quantity,
+            status:"orderPlaced",
+            orderPlaced:orderDate, 
+            expectedDelivery:expectedDelivery,
+          });
+          qnty+=item.quantity;
+        })
+        console.log(products);
+        
+        //adding it to  order collection
+        let newOrder = await orderModel.create({
+          date:orderDate,
+          user:userId,
+          address: {
+            country:addr.country,
+            fName:addr.fName,
+            lName :addr.lName,
+            addr: addr.addr,
+            city: addr.city,
+            state: addr.state,
+            pinCode :addr.pinCode,
+            ph:addr.ph,
+          },
+          products:[...products],
+          paymentmode:pymnt,
+          totalPrice:total,
+          quantity:qnty,
+        })
+        async function reduceStock() {
+          for (const item of cart.items) {
+             await productModel.updateOne(
+              {_id:item.productId._id},
+              { $inc: { stock: -item.quantity } }
+             )
+          }
+          await cartModel.deleteOne({_id:id});
+        }
+        reduceStock();
+        res.json({"url":`/cart/order/${newOrder._id}`})
+  }catch(err){
+    console.log(err);
   }
 }
 
@@ -1511,7 +1609,8 @@ export {
     getSpecificOrder,
     modifyOrder,
     getUserDetails,
-    updateUserDetails
+    updateUserDetails,
+    verifyPymnt
 };
 
  

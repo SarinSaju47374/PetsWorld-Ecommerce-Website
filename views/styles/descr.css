@@ -22,7 +22,7 @@ color: var(--main-text);
 }
 .card-wrapper{
     max-width: 90vw;
-    margin: 5rem auto;
+    margin: 1.5rem auto;
 }
 .card-wrapper img{
     width: 100%;
