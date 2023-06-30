@@ -191,6 +191,7 @@
     let input = document.querySelector(".input-admin input");
     let category = document.querySelector(".search-options .category");
     let totalPages;
+    let pg;
     let subCategory = document.querySelector(".search-admin .subCategory");    
     //REQUIRED DOM DATA
 
@@ -238,28 +239,28 @@
            pr.products.forEach(p => {
             tableTbody.innerHTML += `
                 <tr>
-  <td>${p.productName}</td>
-  <td>${p.productPrice}</td>
-  <td>${p.salePrice}</td>
-  <td>${p.stock}</td>
-  <td>${p.category.name}</td>
-  <td>${p.subCategory.name}</td>
-  ${
-    p.isFeatured
-      ? `<td><a href="#" onclick="showPopupUn(event, '${p._id}')" class="butn btn-updt"><i class="fa-solid fa-thumbs-down"></i></a></td>`
-      : `<td><a href="#" onclick="showPopup(event, '${p._id}')" class="butn btn-del"><i class="fa-solid fa-thumbs-up"></i></a></td>`
-  }
-  <td>
-    ${
-      p.photo[0] && p.photo[0].filepath
-        ? `<img src="${p.photo[0].filepath}.png" alt="" style="width:100px;height:60px" accept="image/png">`
-        : 'No Image Available'
-    }
-  </td>
-  <td><a href="#" onclick="openForm('${p._id}', ${pr.page})"><i class="fa-solid fa-pen" style="font-size:1rem;"></i></a></td>
-  <td><a href="#" onclick="showPopup(event, '${p._id}')" class="butn btn-del"><i class="fa-solid fa-trash" style="font-size:1rem;"></i></a></td>
-</tr>`;
-            });
+                    <td>${p.productName}</td>
+                    <td>${p.productPrice}</td>
+                    <td>${p.salePrice}</td>
+                    <td>${p.stock}</td>
+                    <td>${p.category.name}</td>
+                    <td>${p.subCategory.name}</td>
+                    ${
+                        p.isFeatured
+                        ? `<td><a href="#" onclick="showFeaturePopupUn(event, '${p._id}')" class="butn btn-updt"><i class="fa-solid fa-thumbs-down"></i></a></td>`
+                        : `<td><a href="#" onclick="showFeaturePopup(event, '${p._id}')" class="butn btn-del"><i class="fa-solid fa-thumbs-up"></i></a></td>`
+                    }
+                    <td>
+                        ${
+                        p.photo[0] && p.photo[0].filepath
+                            ? `<img src="${p.photo[0].filepath}.png" alt="" style="width:100px;height:60px" accept="image/png">`
+                            : 'No Image Available'
+                        }
+                    </td>
+                    <td><a href="#" onclick="openForm('${p._id}', ${pr.page})"><i class="fa-solid fa-pen" style="font-size:1rem;"></i></a></td>
+                    <td><a href="#" onclick="showPopup(event, '${p._id}')" class="butn btn-del"><i class="fa-solid fa-trash" style="font-size:1rem;"></i></a></td>
+                </tr>`;
+                                });
 
         } catch (error) {
             // Handle any errors that occurred during the fetch
@@ -333,7 +334,7 @@
         liTag+=`<li class="btn next" onclick="element(totalPages,${afterPages})">Next<span><i class="fa-solid fa-chevron-right"></i></span></li>`; 
         }
         ulTag.innerHTML=liTag;
-        console.log(page);
+        pg=page;
         run(`api/products?p=${page}`)
     }
     
@@ -359,7 +360,7 @@
             element(totalPages,1)
         
         });
-    function showPopup(event, categoryId) {
+    function showPopup(event, productId) {
         event.preventDefault();
         Swal.fire({
         title: 'Are you sure?',
@@ -369,10 +370,89 @@
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Yes, Hide this Product!'
-        }).then((result) => {
+        }).then(async (result) => {
         if (result.isConfirmed) {
-            alert("about to change")
-            window.location.href = `/product-view?hide_oid=${categoryId}`;
+           const url = `/product-view?hide_oid=${productId}`;
+        try {
+            const response = await fetch(url);
+            if (response.ok) {
+                const data = await response.json();
+                if(data.success){
+                    run(`api/products?p=${pg}`)
+                }
+            } else {
+                // Handle the error if the response is not ok
+                console.error('Error:', response.status);
+            }
+        } catch (error) {
+        // Handle any network or other errors
+            console.error('Error:', error);
+        }
+
+        }
+        });
+    }
+    function showFeaturePopup(event, productId) {
+        event.preventDefault();
+        Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to feature this product?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Feature this Product!'
+        }).then(async (result) => {
+        if (result.isConfirmed) {
+           const url = `/product-view?feature_oid=${productId}`;
+        try {
+            const response = await fetch(url);
+            if (response.ok) {
+                const data = await response.json();
+                if(data.success){
+                    run(`api/products?p=${pg}`)
+                }
+            } else {
+                // Handle the error if the response is not ok
+                console.error('Error:', response.status);
+            }
+        } catch (error) {
+        // Handle any network or other errors
+            console.error('Error:', error);
+        }
+
+        }
+        });
+    }
+    function showFeaturePopupUn(event, productId) {
+        event.preventDefault();
+        Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to remove it from featured products?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Ommit this Product from Products!'
+        }).then(async (result) => {
+        if (result.isConfirmed) {
+            const url = `/product-view?unFeature_oid=${productId}`;
+        try {
+            const response = await fetch(url);
+            if (response.ok) {
+                const data = await response.json();
+                if(data.success){
+                    run(`api/products?p=${pg}`)
+                }
+            } else {
+                // Handle the error if the response is not ok
+                console.error('Error:', response.status);
+            }
+        } catch (error) {
+        // Handle any network or other errors
+            console.error('Error:', error);
+        }
+
         }
         });
     }
@@ -425,18 +505,18 @@
         const page = formData.get("number");
 
         const body = {
-        productName,
-        brandName,
-        description,
-        points,
-        productPrice,
-        salePrice,
-        stock,
-        category,
-        subCategory,
-        paymentOption,
-        rating,
-        page
+            productName,
+            brandName,
+            description,
+            points,
+            productPrice,
+            salePrice,
+            stock,
+            category,
+            subCategory,
+            paymentOption,
+            rating,
+            page
         };
 
         try {
@@ -460,8 +540,7 @@
         }else if(flag==2){
             console.log(category)
             console.log(category.value)
-             run(`api/products?cat=${category}`)
-             
+            run(`api/products?cat=${category}`)
         }else if(flag==3){
             run(`api/products?p=${page}`)
         }

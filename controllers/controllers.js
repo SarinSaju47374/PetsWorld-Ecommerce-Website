@@ -21,7 +21,7 @@ const __dirname = dirname(__filename);
 
 //website
 function adminLogin(req,res){
-    res.set("Set-Cookie",`token=;httpOnly;Expiration=Thu, 01 Jan 1970 00:00:00 GMT`);
+    res.setHeader('Set-Cookie', 'token=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
     res.render("adminLogin",{admin:false,user:false});
 }
 
@@ -37,7 +37,7 @@ async function adminVerify(req,res){
         res.removeHeader("Set-Cookie");
         res.set("Set-Cookie",`token=${JWTtoken};httpOnly;Expiration=${expiration.toUTCString()}`);
         //Change this as soon as possible;
-        res.redirect("/product-view");
+        res.redirect("/dashboard");
     }else{
         res.send("Not a valid User Macha!")
     }
@@ -80,34 +80,19 @@ async function adminProductView(req,res){
       const product = await productModel.updateOne({_id: oid},{
         isHidden:true
       });
-      // const product = await productModel.deleteOne({_id: oid});
-      // Delete the associated files
-      // if (product && product.photo && product.photo.length > 0) {
-      //     product.photo.forEach(photo => {
-      //     console.log(path.join(__dirname,"views",`${photo.filePath}.png`));
-      //     const filePath = path.join(__dirname,"..","views",`${photo.filepath}.png`);
-      //     fs.unlink(filePath, (err) => {
-      //         if (err) {
-      //         console.error(`Error deleting file ${filePath}: ${err}`);
-      //         } else {
-      //         console.log(`File ${filePath} deleted successfully`);
-      //         }
-      //     });
-      //     });
-      // }
-
-      // await productModel.deleteOne({_id:oid});
-      const productData = await fetch("http://127.0.0.1:2000/api/products");
-      const products = await productData.json();
-      res.redirect("/product-view")
-    }else if(req.query.ftd_oid){
-      let oid = req.query.ftd_oid;
+      res.json({"success":true});
+    }else if(req.query.feature_oid){
+      let oid = req.query.feature_oid;
       const product = await productModel.updateOne({_id: oid},{
         isFeatured:true
       });
-      const productData = await fetch("http://127.0.0.1:2000/api/products");
-      const products = await productData.json();
-      res.render("adminProductView",{admin:true,user:false,products});
+      res.json({"success":true});
+    }else if(req.query.unFeature_oid){
+      let oid = req.query.unFeature_oid;
+      const product = await productModel.updateOne({_id: oid},{
+        isFeatured:false
+      });
+      res.json({"success":true});
     }
    else{
     const productData = await fetch("http://127.0.0.1:2000/api/products");
@@ -179,9 +164,8 @@ async function adminCtgryView(req,res){
         const ctgrys = await ctgryData.json();
         res.render("adminCtgryView",{admin:true,user:false,ctgrys});
     }else{
-        const ctgryData = await fetch("http://127.0.0.1:2000/products/categories");
-        const ctgrys = await ctgryData.json();
-        res.render("adminCtgryView",{admin:true,user:false,ctgrys});
+
+        res.render("adminCtgryView",{admin:true,user:false});
     }
         
     
@@ -1063,8 +1047,6 @@ async function getProducts(req,res){
         console.log(err);
         res.status(500).json({ error: true, message: "Internal Server Error" });
       }
-      
-    
 }
 
 async function updateProductsApi(req, res) {
@@ -1568,10 +1550,10 @@ async function addToCart(req, res) {
 
 async function dogFoodView(req,res){
     let { cat, sub } = req.query;
-    let productsD = await fetch("http:127.0.0.1:2000/products");
-    let products = await productsD.json();
-    products = products.filter(item=>item.category==cat && item.subCategory==sub)
-    res.render("dogFood",{user:true,admin:false,products})
+    // let productsD = await fetch("/api/products");
+    // let products = await productsD.json();
+    // products = products.products.filter(item=>item.category==cat && item.subCategory==sub)
+    res.render("dogFood",{user:true,admin:false,cat,sub})
 }
 
 

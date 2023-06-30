@@ -24,12 +24,40 @@
       </div>
       <div class="menu-section">
         <ul>
-          <li><a href="/dog-food?cat=DOG&sub=FOOD">DOG</a></li>
-          <li><a href="/dog-food?cat=DOG&sub=FOOD">CAT</a></li>
-          <li><a href="#">COMBO PACK</a></li>
-          <li><a href="#">LEARN WITH #PETSWORLD</a></li>
-          <li><a href="/ORDER-HISTORY">ORDERS</a></li>
-          <li><a href="#" onclick="callMe()">COUPONS</a></li>
+          <ul class="dropdown">
+            <li><a href="#">DOG</a>
+                <ul>
+                    <li><a href="">Toys</a></li>
+                    <li><a href="">Food</a></li>
+                    <li><a href="#">Treats</a> </li>
+                    <li><a href="">Health Care</a></li>
+                </ul>
+            </li>
+          </ul>
+          <ul class="dropdown">
+            <li><a href="#">CAT</a>
+                <ul>
+                    <li><a href="">Toys</a></li>
+                    <li><a href="">Food</a></li>
+                    <li><a href="#">Treats</a> </li>
+                    <li><a href="">Health Care</a></li>
+                </ul>
+            </li>
+          </ul>
+          <li class="dropdown"><a href="#">COMBO PACK</a></li>
+          <li class="dropdown"><a href="#">LEARN WITH #PETSWORLD</a></li>
+          <li class="dropdown"><a href="/ORDER-HISTORY">ORDERS</a></li>
+          <li class="dropdown"><a href="#" onclick="callMe()">COUPONS</a></li>
+        </ul>
+      </div>
+      <div class="full-search">
+        <div class="search-cont home">
+          <input type="text" placeholder="Search in Cart...">
+          <div class="typing">.</div>
+          <a href=""><i class="fa-solid fa-magnifying-glass"></i></a></i>
+        </div>
+        <ul>
+             {{!-- Dynamic Data --}}
         </ul>
       </div>
       <div class="option-section">
@@ -40,15 +68,26 @@
         <div class="wishlist">
           <a href="/wishlist"><i class="fa-solid fa-heart"></i></a>
         </div>
-        {{#if loggedIn}}
-          <div class="user">
-            <a href=""><i class="fa-solid fa-user"></i></a>
-          </div>
+        {{#if loggedIn}} 
+          <ul class="dropdown" >
+            <li> 
+            <a href="#"><i class="fa-solid fa-user"></i></a>
+                <ul>
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/profile">Profile</a></li>
+                </ul>
+            </li>
+          </ul>
         {{else}}
-          <div class="user">
-            <!-- Render different icon for non-logged in users -->
-            <a href="/login"><i class="fa-solid fa-right-to-bracket"></i></a>
-          </div>
+          <ul class="dropdown" >
+            <li> 
+            <a href="#" ><i class="fa-solid fa-user"></i></a>
+                <ul>
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/register">Register</a></li>
+                </ul>
+            </li>
+          </ul>
         {{/if}}
 
       </div>
@@ -67,9 +106,6 @@
           </li>
           <li>
             <a href="#"> <i class="fa-solid fa-cat"></i> CAT</a>
-          </li>
-          <li>
-            <a href="#"> <i class="fa-solid fa-gifts"></i> COMBO PACK</a>
           </li>
           <li>
             <a href="#">
@@ -182,7 +218,31 @@
       }
      })
 
+    let search = document.querySelector(".search-cont input")
+    
+    let ul = document.querySelector(".full-search ul")
+    search.addEventListener("input",function(){
+        srch(`/api/products?s=${search.value}`)
+    })
+    search.addEventListener("blur", function() {
+      // Delay hiding the ul to allow click events on the <a> tag to work
+      setTimeout(function() {
+        ul.innerHTML = "";
+      }, 200);
+    });
 
+    async function srch(url){
+      ul.innerHTML="";
+      try{        
+        let data=await fetch(url);
+        let pr = await data.json();
+        pr.products.forEach(p=>{
+          ul.innerHTML+=`<li><a href="/product-descr?oid=${p._id}">${p.productName}</a></li>`
+        })
+      }catch(err){
+        console.log(err);
+      }
+    }
     </script>
     
 </body>

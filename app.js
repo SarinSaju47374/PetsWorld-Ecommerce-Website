@@ -54,6 +54,7 @@ app.use(express.static(path.join(__dirname, "views","styles")));
 app.set('views',[path.join(__dirname, 'views'),path.join(__dirname, 'views/pages'),path.join(__dirname, 'views/layouts')]);
 app.use("/styles",express.static(path.join(__dirname,"views","styles")));
 app.use("/uploads",express.static(path.join(__dirname,"views","uploads")));
+app.use("/categories",express.static(path.join(__dirname,"views","categories")));
 app.use("/images",express.static(path.join(__dirname,"views","images")));
 app.use("/JS",express.static(path.join(__dirname,"views","JS")));
 app.use(express.static('node_modules'));
@@ -149,36 +150,6 @@ async function sendEmail() {
 }
 // sendEmail().catch(console.error);
 
-
-
-//Rendering Page
-// app.use("/admin",productMngmtRouter);
-app.use("/login",userLoginRouter);
-app.use("/register",userRegisterRouter);
-app.use("/forgot",forgotPageRouter);
-app.use("/product-add",authoriseAdminJwt,productAddRouter);
-app.use("/product-view",adminProductViewRouter);
-app.use("/admin",adminLoginRouter);
-app.use("/user-view",adminUserViewRouter);
-app.use("/ctgry-add",authoriseAdminJwt,ctgryAddRouter);
-app.use("/ctgry-view",authoriseAdminJwt,adminCtgryViewRouter);
-app.use("/",userProductViewRouter);
-app.use("/product-descr",userProductDescrRouter); 
-app.use("/dog-food",dogFoodRouter);
-app.use("/cart",authoriseJwt,userCarRouter);
-app.use("/order-history",authoriseJwt,userOrderHistRouter);
-app.use("/wishlist",userWishlistRouter);
-app.use("/checkout",authoriseJwt,userCheckoutRouter);
-app.use("/pymnt",authoriseJwt,userPymntRouter);
-app.use("/address",authoriseJwt,userAddressRouter);
-app.use("/profile",authoriseJwt,userProfileRouter);
-app.get("/otp",(req,res)=>{
-  res.render("otpLogin")
-})
-
-app.use("/",adminOrderRouter);
-app.use("/",adminDashRouter);
-
 //API
 app.use("/api",productApi);
 // app.use("/products",productsApi);
@@ -187,6 +158,38 @@ app.use("/api",cartApi);
 app.use("/",handleAddressRouter);
 app.use("/data",dataRouter);
 app.use("/custom",customUserApi);
+
+//Rendering Page
+// app.use("/admin",productMngmtRouter);
+app.use("/login",userLoginRouter);
+
+app.use("/register",userRegisterRouter);
+app.use("/forgot",forgotPageRouter);
+app.use("/product-descr",userProductDescrRouter); 
+app.use("/cart",authoriseJwt,userCarRouter);
+app.use("/products",dogFoodRouter);
+app.use("/checkout",authoriseJwt,userCheckoutRouter);
+app.use("/address",authoriseJwt,userAddressRouter);
+app.use("/pymnt",authoriseJwt,userPymntRouter);
+app.use("/profile",authoriseJwt,userProfileRouter);
+app.use("/wishlist",userWishlistRouter);
+
+app.use("/admin",adminLoginRouter);
+app.use("/product-view",authoriseAdminJwt,adminProductViewRouter);
+app.use("/product-add",authoriseAdminJwt,productAddRouter);
+app.use("/user-view",authoriseAdminJwt,adminUserViewRouter);
+app.use("/ctgry-add",authoriseAdminJwt,ctgryAddRouter);
+app.use("/ctgry-view",authoriseAdminJwt,adminCtgryViewRouter);
+app.use("/",userProductViewRouter);
+app.use("/order-history",authoriseJwt,userOrderHistRouter);
+app.get("/otp",(req,res)=>{
+  res.render("otpLogin")
+})
+
+app.use("/",authoriseAdminJwt,adminOrderRouter);
+app.use("/",authoriseAdminJwt,adminDashRouter);
+
+
 // app.use(express.static("views", {
 //   setHeaders: (res, path) => {
 //     const contentType = lookup(path);

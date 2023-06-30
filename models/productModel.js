@@ -49,7 +49,11 @@ const productSchema = new Schema({
     isHidden:{
       type:Boolean,
       default:false,
-    }
+    },
+    isFeatured:{
+      type:Boolean,
+      default:false,
+    },
   });
 
 
@@ -334,7 +338,6 @@ const orderSchema = new Schema({
     type: String,
     required: true,
   },
-
   
 });
 

@@ -67,9 +67,125 @@ router.get("/fetch",async (req,res)=>{
   let ctgrys = await ctgryModel.find();
   res.json(ctgrys);
 })
+
 router.get("/fetch/:id",async (req,res)=>{
    let {id} = req.params;
    let subCtgrys = await subCtgryModel.find({category:id})
    res.json(subCtgrys);
+})
+
+router.get("/api/ctgrys",async(req,res)=>{
+  try {
+    let sort = req.query.sort || "name,-1";
+    const search = req.query.s || "";
+    const total = await ctgryModel.countDocuments({
+            name: { $regex: search, $options: "i" },
+    })
+    const limit = !isNaN(parseInt(req.query.l)) && parseInt(req.query.l) <= 3
+    ? parseInt(req.query.l)||3
+    : 3;
+    const page = !isNaN(parseInt(req.query.p)) && parseInt(req.query.p) >= 0 && parseInt(req.query.p) <= Math.ceil(total/limit)    
+    ? parseInt(req.query.p)-1||0
+    :0;
+      
+    // Sort options
+    const sortOptions = sort.split(",");
+    const sortBy = {};
+    if (sortOptions.length === 2) {
+      sortBy[sortOptions[0]] = parseInt(sortOptions[1]);
+    } else {
+      sortBy[sortOptions[0]] = 1;
+    }
+    // Query for product collection
+    const categories = await ctgryModel.find(
+            { name: { $regex: search, $options: "i" } }
+    )
+      .sort(sortBy)
+      .skip(page * limit)
+      .limit(limit);
+
+    const response = {
+      error: false,
+      total,
+      page: page + 1,
+      limit,
+      categories
+    };
+    res.status(200).json(response);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: true, message: "Internal Server Error" });
+  }
+})
+
+
+router.get("/api/subCtgrys",async(req,res)=>{
+  try {
+    let sort = req.query.sort || "name,-1";
+    const search = req.query.s || "";
+    const regex = new RegExp(search, 'i');
+    const totalCount = await subCtgryModel.aggregate([
+      {
+        $match: {
+          $or: [
+            { name: { $regex: search, $options: "i" } },
+            { "category.name": { $regex: search, $options: "i" } }
+          ]
+        }
+      },
+      {
+        $lookup: {
+          from: "categories", // replace "categories" with the actual name of your category collection
+          localField: "category",
+          foreignField: "_id",
+          as: "category"
+        }
+      },
+      {
+        $count: "total"
+      }
+    ]);
+    
+    const total = totalCount.length > 0 ? totalCount[0].total : 0;
+    
+
+    const limit = !isNaN(parseInt(req.query.l)) && parseInt(req.query.l) <= 3
+    ? parseInt(req.query.l)||3
+    : 3;
+    const page = !isNaN(parseInt(req.query.p)) && parseInt(req.query.p) >= 0 && parseInt(req.query.p) <= Math.ceil(total/limit)    
+    ? parseInt(req.query.p)-1||0
+    :0;
+      
+    // Sort options
+    const sortOptions = sort.split(",");
+    const sortBy = {};
+    if (sortOptions.length === 2) {
+      sortBy[sortOptions[0]] = parseInt(sortOptions[1]);
+    } else {
+      sortBy[sortOptions[0]] = 1;
+    }
+    // Query for product collection
+    const subCategories = await subCtgryModel.find({
+      $or: [
+        { name: { $regex: search, $options: "i" } },
+        { "category.name": { $regex: search, $options: "i" } }
+      ]
+  })  .populate('category')
+      .sort(sortBy)
+      .skip(page * limit)
+      .limit(limit);
+
+    const response = {
+      error: false,
+      total,
+      page: page + 1,
+      limit,
+      subCategories
+    };
+    res.status(200).json(response);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: true, message: "Internal Server Error" });
+  }
 })
 export default router;

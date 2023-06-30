@@ -128,7 +128,7 @@
                     <div class="td price">${p.productId.salePrice}</div>
                     <div class="td quantity"><input type="number" class="mobile-input" min="1" max="${p.productId.stock}" value="${p.quantity}" placeholder="Qnty" onchange="updateQuantity(this,'${p.productId._id}')"></div>
                     <div class="td total">${p.productId.salePrice*p.quantity}</div>
-                    <div class="td purchase"><a href="/cart/checkout/item/${p._id}"><i class="fa-solid fa-bag-shopping" style="color:white"></i></a></div>
+                    {{!-- <div class="td purchase"><a href="/cart/checkout/item/${p._id}"><i class="fa-solid fa-bag-shopping" style="color:white"></i></a></div> --}}
                 </div>`;
             })
 

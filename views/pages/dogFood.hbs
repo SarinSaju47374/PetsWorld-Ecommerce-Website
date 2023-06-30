@@ -1,70 +1,128 @@
- <div class="go-up" id="scrollToTopBtn">
-        <i class="fa-solid fa-arrow-up"></i>
+<div class="go-up" id="scrollToTopBtn">
+  <i class="fa-solid fa-arrow-up"></i>
 </div>
 <div class="container-category">
-    <div class="category">
-        <a href=""
-            ><img
-            src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
-            alt=""
-        /></a>
-        <p>DOG FOOD</p>
-        </div>
-        <div class="category">
-        <a href=""
-            ><img
-            src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
-            alt=""
-        /></a>
-        <p>DOG FOOD</p>
-        </div>
-        <div class="category">
-        <a href=""
-            ><img
-            src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
-            alt=""
-        /></a>
-        <p>DOG FOOD</p>
-        </div>
-        <div class="category">
-        <a href=""
-            ><img
-            src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
-            alt=""
-        /></a>
-        <p>DOG FOOD</p>
-        </div>
-    </div>
-    <div class="container-content">
-        {{#each products}}
-            <div class="card">
-                <div class="preview">
-                    <a href="/product-descr?oid={{this._id}}"><img src="{{this.photo.[0].filepath}}.png" alt=""></a>
-                </div>
-                <h6>{{this.brandName}}</h6>
-                <h5>{{this.productName}}</h5>
-                <div class="star-rating" style="--rating:{{this.rating}}%;">
-                    <div class="star" id="starRating">
-                        ★★★★★
-                    </div>
-                </div>
-                <div class="coupon">
-                    <p></p>
-                </div>
-                <div class="price">
-                    <h6>Rs {{this.productPrice}}<h6>
-                    <h6>Rs {{this.salePrice}}</h6>
-                </div>
-                <div class="options">
-                    <a href="#"><i class="fa -solid fa-cart-shopping"></i></a>
-                    <a href="#"><i class="fa-solid fa-heart"></i></a>
-                    <a href="/product-descr?oid={{this._id}}"><i class="fa-solid fa-eye"></i></a>
-                </div>
+  <div class="category">
+    <a href=""><img
+        src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
+        alt=""
+      /></a>
+    <p>DOG FOOD</p>
+  </div>
+  <div class="category">
+    <a href=""><img
+        src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
+        alt=""
+      /></a>
+    <p>DOG TOYS</p>
+  </div>
+  <div class="category">
+    <a href=""><img
+        src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
+        alt=""
+      /></a>
+    <p>DOG  ESSENTIALS</p>
+  </div>
+  <div class="category">
+    <a href=""><img
+        src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
+        alt=""
+      /></a>
+    <p>DOG TREATS</p>
+  </div>
+</div>
 
-            </div>
-        {{/each}}
+<div class="main-container" style="position:relative">
+
+  <div class="sidebar-container">
+    <div class="category-section">
+      <h2>Category</h2>
+      <select id="ctgry">
+          <option value="">All</option>
+        <option value="category1">Category 1</option>
+        <option value="category2">Category 2</option>
+        <option value="category3">Category 3</option>
+        <!-- Add more categories here -->
+      </select>
+      <h2>Sub Category</h2>
+      <select id="subCtgry">
+        <option value="">All</option>
+        <option value="category1">Category 1</option>
+        <option value="category2">Category 2</option>
+        <option value="category3">Category 3</option>
+        <!-- Add more categories here -->
+      </select>
     </div>
-    <script>
+
+    <div class="price-section">
+      <h2>Price Range</h2>
+
+      <!-- With number fields -->
+      <div class="filter level-filter level-req">
+        <div id="rangeSlider" class="range-slider">
+          <div class="number-group">
+            <input
+              class="number-input"
+              type="number"
+              value="10"
+              min="0"
+              max="50"
+            />
+            to
+            <input
+              class="number-input"
+              type="number"
+              value="80"
+              min="0"
+              max="80"
+            />
+          </div>
+
+          <div class="range-group">
+            <input
+              class="range-input"
+              value="10"
+              min="1"
+              max="100"
+              step="1"
+              type="range"
+            />
+            <input
+              class="range-input"
+              value="80"
+              min="1"
+              max="100"
+              step="1"
+              type="range"
+            />
+          </div>
+        </div>
+      </div><!-- // filter level-filter -->
+    </div>
+
+    {{!-- <div class="filter-section">
+      <h2>Filter</h2>
+      <label>
+        <input type="radio" name="filter-option" value="all" checked />
+        All
+      </label>
+      <label>
+        <input type="radio" name="filter-option" value="option1" />
+        Option 1
+      </label>
+      <label>
+        <input type="radio" name="filter-option" value="option2" />
+        Option 2
+      </label>
+      <!-- Add more filter options here -->
+    </div> --}}
+  </div>
+
+  <div class="container-content" data-cat="{{cat}}&{{sub}}">
+     {{!-- dynamic data --}}
+  </div>
+</div>
+  <script>
         //   SCROLL JS
 
     // Get the button element
@@ -91,4 +149,58 @@
     scrollToTopBtn.addEventListener('click', scrollToTop);
 
     //   SCROLL JS
+    </script>
+    <script>
+        let container = document.querySelector(".container-content");
+         
+        //Filter options
+        let ctgry = document.getElementById("ctgry");
+        let subCtgry = document.getElementById("subCtgry");
+
+        document.addEventListener("DOMContentLoaded",()=>{
+            run("/api/products?l=10")
+            
+        })
+        async function run(url){
+            try{
+                let data = await fetch(url);
+                let prod = await data.json();
+                prod.products.forEach(pr=>{
+                    container.innerHTML+=`
+                        <div class="card">
+                            <div class="preview">
+                                <a href="/product-descr?oid=${pr._id}"><img src="${pr.photo[0].filepath}.png" alt=""></a>
+                            </div>
+                            <h6>${pr.brandName}</h6>
+                            <h5>${pr.productName}</h5>
+                            <div class="star-rating" style="--rating:${pr.rating}%;">
+                                <div class="star" id="starRating">
+                                    ★★★★★
+                                </div>
+                            </div>
+                            <div class="coupon">
+                                <p></p>
+                            </div>
+                            <div class="price">
+                                <h6>Rs ${pr.productPrice}<h6>
+                                <h6>Rs ${pr.salePrice}</h6>
+                            </div>
+                            <div class="options">
+                                <a href="#"><i class="fa -solid fa-cart-shopping"></i></a>
+                                <a href="#"><i class="fa-solid fa-heart"></i></a>
+                                <a href="/product-descr?oid=${pr._id}"><i class="fa-solid fa-eye"></i></a>
+                            </div>
+
+                        </div>
+                    `
+                })
+            }catch(err){
+                console.log("Err in DogFood hbs : ",err)
+            }
+         }
+        function runC(){
+          
+        }
+
+   
     </script>

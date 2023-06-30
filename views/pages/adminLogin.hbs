@@ -33,14 +33,14 @@
         let eye = document.querySelector(".eye");
         function togglePasswordVisibility() {
             event.preventDefault();
-        const passwordField = document.getElementById('passwordField');
-        if (passwordField.type === 'password') {
-            passwordField.type = 'text';
-            eye.innerHTML='<i class="fa-regular fa-eye">';
-        } else {
-            passwordField.type = 'password';
-            eye.innerHTML='<i class="fa-regular fa-eye-slash"></i>';
-        }
+            const passwordField = document.getElementById('passwordField');
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                eye.innerHTML='<i class="fa-regular fa-eye">';
+            } else {
+                passwordField.type = 'password';
+                eye.innerHTML='<i class="fa-regular fa-eye-slash"></i>';
+            }
         }
     </script>
  </body>

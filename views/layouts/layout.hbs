@@ -35,7 +35,47 @@
 
  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script>
+    document.addEventListener("DOMContentLoaded",()=>{
+       
+        var sidebarContainer = document.querySelector('.sidebar-container');
+  var footer = document.querySelector('.footer');
+  var sidebarHeight = sidebarContainer.offsetHeight;
+  var footerOffset = footer.offsetTop;
+  var scrollPosition = window.scrollY;
+  var isScrollingUp = false;
+  var prevScrollPosition = scrollPosition;
+
+  window.addEventListener('scroll', function() {
+    scrollPosition = window.scrollY;
+
+    // Determine scrolling direction
+    if (scrollPosition < prevScrollPosition) {
+      isScrollingUp = true;
+    } else {
+      isScrollingUp = false;
+    }
+
+    // Update previous scroll position
+    prevScrollPosition = scrollPosition;
+
+    // Scroll down: Move sidebar up
+    if (!isScrollingUp && scrollPosition + sidebarHeight >= footerOffset) {
+      sidebarContainer.style.transform = 'translateY(' + (footerOffset - scrollPosition - sidebarHeight) + 'px)';
+    }
+
+    // Scroll up: Adjust sidebar position
+    if (isScrollingUp) {
+      if (scrollPosition <= footerOffset - sidebarHeight) {
+        sidebarContainer.style.transform = 'translateY(0)';
+      } else if (scrollPosition < footerOffset) {
+        sidebarContainer.style.transform = 'translateY(' + (footerOffset - scrollPosition - sidebarHeight) + 'px)';
+      }
+    }
+  });
+    })
   AOS.init();
 </script>  
+ 
+</script>
 </body>
 </html>
