@@ -1,4 +1,4 @@
-import {ctgryModel, productModel,cartModel,addressModel,orderModel} from "../models/productModel.js"
+import {ctgryModel,subCtgryModel,productModel,cartModel,addressModel,orderModel} from "../models/productModel.js"
 import userModel from "../models/userModel.js"
 import adminModel from "../models/adminModel.js"
 import Token from "../models/tokenModel.js"
@@ -537,7 +537,10 @@ function userCartView(req,res){
     //cookie extraction
   let id = jwt2.verify(token,process.env.secretKeyU).user 
   console.log("This is id of cart view ",id)
-  res.render("userCart",{admin:false,user:true,id});
+  res.render("userCart",{admin:false,user:true,id,loggedIn:true
+  
+  });
+
 }
 async function userOrderHistView(req,res){
   //cookie extraction
@@ -561,26 +564,26 @@ async function userOrderHistView(req,res){
   let  userId = jwt2.verify(token,process.env.secretKeyU).user;
     try{
       let orders = await orderModel.find({user:userId}).populate('user').sort({date:-1});
-      res.render("userOrderHistory",{admin:false,user:true,orders});
+      res.render("userOrderHistory",{admin:false,user:true,orders,loggedIn:true});
     }catch(err){
       console.log("Error inside OrderHist Controller: ",err);
     }
  
 }
 function userWishlistView(req,res){
-    res.render("userWishlist",{admin:false,user:true});
+    res.render("userWishlist",{admin:false,user:true,loggedIn:true});
 }
 function userCheckout(req,res){
-    res.render("userCheckout",{admin:false,user:true});
+    res.render("userCheckout",{admin:false,user:true,loggedIn:true});
 }
 
 function userPymntView(req,res){
-    res.render("userPymntOpt",{admin:false,user:true});
+    res.render("userPymntOpt",{admin:false,user:true,loggedIn:true});
 }
 function userAddressView(req,res){
     const token = req.headers.cookie?.split("=")[1]; 
     let id = jwt2.verify(token,process.env.secretKeyU).user 
-    res.render("userAddress",{admin:false,user:true,id});
+    res.render("userAddress",{admin:false,user:true,id,loggedIn:true});
 }
 
 async function prodCheckout(req,res){
@@ -612,7 +615,7 @@ async function prodCheckout(req,res){
     console.log(cart.items)
     let item = cart.items.filter(val=>val._id.toString()==iid);
     let addr = await addressModel.findOne({ userId:userId, isShippingAddress: true })
-    res.render("userCheckout",{admin:false,user:true,item,addr,iid})
+    res.render("userCheckout",{admin:false,user:true,item,addr,iid,loggedIn:true})
   }catch(err){
     console.log(err);
     res.status(500).send("Internal Servor Error");
@@ -646,10 +649,10 @@ async function cartCheckout(req,res){
     let addr = await addressModel.findOne({ userId:userId, isShippingAddress: true })
     if(item.length>=1){
       console.log("cart aint empty")
-      res.render("userCheckout",{admin:false,user:true,item,addr,cid});
+      res.render("userCheckout",{admin:false,user:true,item,addr,cid,loggedIn:true});
     }else{
       console.log("cart is empty")
-      res.render("userCart",{admin:false,user:true,item,addr,cid,popped:true});
+      res.render("userCart",{admin:false,user:true,item,addr,cid,popped:true,loggedIn:true});
     }
   }catch(err){
     console.log(err);
@@ -686,7 +689,7 @@ async function cartPymntInit(req,res){
       return res.render("userPymntOpt",{admin:false,user:true,item,addr,idType,id})
     }else{
       item = cart.items.filter(val=>val._id.toString()==id)
-      return res.render("userPymntOpt",{admin:false,user:true,item,addr,idType,id})
+      return res.render("userPymntOpt",{admin:false,user:true,item,addr,idType,id,loggedIn:true})
     }
   }catch(err){
     console.log(err);
@@ -878,7 +881,7 @@ async function orderInvoice(req,res){
   try{
     let {id} = req.params;
     let order = await orderModel.findOne({_id:id}).populate("products.productId");
-    return res.render("userOrderInvoice",{admin:false,user:true,order})
+    return res.render("userOrderInvoice",{admin:false,user:true,order,loggedIn:true})
   }catch(err){
     console.log("Err: ",err)
   }
@@ -952,39 +955,51 @@ async function getProducts(req,res){
     try {
         const priceThreshold = 30;
         let sort = req.query.sort || "createdAt,-1";
-        let category = req.query.cat || "";
-        let subCategory = req.query.subCat|| "";
+        let category = req.query.cat  || "";
+        let subCategory = req.query.subCat || "";
         const priceAmount = parseFloat(req.query.s)||null;
        
         // Filter options
+      
         const filter = {};
         if (category !== "") {
-          filter.category = category;
+          const categoryId = await ctgryModel.findOne({ name: category }, "_id");
+          if (categoryId) {
+            filter.category = categoryId;
+          }
         }
         if (subCategory !== "") {
-          filter.subCategory = subCategory;
+          const subCategoryId = await subCtgryModel.findOne({ name: subCategory }, "_id");
+          if (subCategoryId) {
+            filter.subCategory = subCategoryId;
+          }
         }
         const search = req.query.s || "";
         const total = await productModel.countDocuments({
-            $or: [
+          $and: [
+            {
+              $or: [
                 { productName: { $regex: search, $options: "i" } },
                 { brandName: { $regex: search, $options: "i" } },
                 { description: { $regex: search, $options: "i" } },
                 { points: { $elemMatch: { $regex: search, $options: "i" } } },
                 {
-                    salePrice: {
-                      $gte: priceAmount - priceThreshold,
-                      $lte: priceAmount + priceThreshold,
-                    }
-                }
+                  salePrice: {
+                    $gte: priceAmount - priceThreshold,
+                    $lte: priceAmount + priceThreshold,
+                  },
+                },
                 // Add more fields to search here
               ],
-          ...filter
+            },
+            { isHidden: false }, // Add condition to filter by isHidden field
+            { ...filter },
+          ],
         })
           
         const categories  = await productModel.find()
-        const cat =  [...new Set(categories.map(cat=>cat.category))];''
-        const limit = !isNaN(parseInt(req.query.l)) && parseInt(req.query.l) <= 3
+        // const cat =  [...new Set(categories.map(cat=>cat.category))];''
+        const limit = !isNaN(parseInt(req.query.l)) && parseInt(req.query.l) <= 30
         ? parseInt(req.query.l)||3
         : 3;
         const page = !isNaN(parseInt(req.query.p)) && parseInt(req.query.p) >= 0 && parseInt(req.query.p) <= Math.ceil(total/limit)    
@@ -1031,14 +1046,12 @@ async function getProducts(req,res){
           .skip(page * limit)
           .limit(limit);
           
-        
-      
+  
         const response = {
           error: false,
           total,
           page: page + 1,
           limit,
-          categories:cat,
           products
         };
         
@@ -1048,6 +1061,215 @@ async function getProducts(req,res){
         res.status(500).json({ error: true, message: "Internal Server Error" });
       }
 }
+async function getCategories(req,res){
+  console.log("********************************************************")
+  try{
+    let ctgrys = await ctgryModel.find();
+  
+    res.json(ctgrys);
+  }catch(err){
+    console.log("Error inside getCategories: ",err)
+  }
+}
+// async function updateProductsApi(req, res) {
+//     try {
+//       const {
+//         productName,
+//         brandName,
+//         description,
+//         points,
+//         productPrice,
+//         salePrice,
+//         stock,
+//         category,
+//         subCategory,
+//         paymentOption,
+//         rating,
+//       } = req.body;
+  
+//       const updatedProduct = {
+//         productName,
+//         brandName,
+//         description,
+//         points: points.split(","),
+//         productPrice,
+//         salePrice,
+//         stock,
+//         category,
+//         subCategory,
+//         paymentOption,
+//         rating,
+//       };
+  
+//       await productModel.updateOne({ _id: req.params.id }, updatedProduct);
+//       console.log("Product modified successfully");
+  
+//       res.sendStatus(200);
+//     } catch (error) {
+//       console.error("Error:", error);
+//       res.sendStatus(500);
+//     }
+//   }
+  
+// async function getProducts(req,res){
+     
+//     try {
+//         const priceThreshold = 30;
+//         let sort = req.query.sort || "createdAt,-1";
+//         let category = req.query.cat || "";
+//         let subCategory = req.query.subCat|| "";
+//         const priceAmount = parseFloat(req.query.s)||null;
+       
+//         // Filter options
+//         const filter = {};
+//         if (category !== "") {
+//           filter.category = category;
+//         }
+//         if (subCategory !== "") {
+//           filter.subCategory = subCategory;
+//         }
+//         const search = req.query.s || "";
+//         const total = await productModel.countDocuments({
+//             $or: [
+//                 { productName: { $regex: search, $options: "i" } },
+//                 { brandName: { $regex: search, $options: "i" } },
+//                 { description: { $regex: search, $options: "i" } },
+//                 { points: { $elemMatch: { $regex: search, $options: "i" } } },
+//                 {
+//                     salePrice: {
+//                       $gte: priceAmount - priceThreshold,
+//                       $lte: priceAmount + priceThreshold,
+//                     }
+//                 }
+//                 // Add more fields to search here
+//               ],
+//           ...filter
+//         })
+          
+//         const categories  = await productModel.find()
+//         const cat =  [...new Set(categories.map(cat=>cat.category))];''
+//         const limit = !isNaN(parseInt(req.query.l)) && parseInt(req.query.l) <= 30
+//         ? parseInt(req.query.l)||3
+//         : 3;
+//         const page = !isNaN(parseInt(req.query.p)) && parseInt(req.query.p) >= 0 && parseInt(req.query.p) <= Math.ceil(total/limit)    
+//         ? parseInt(req.query.p)-1||0
+//         :0;
+          
+//         // Sort options
+//         const sortOptions = sort.split(",");
+//         const sortBy = {};
+//         if (sortOptions.length === 2) {
+//           sortBy[sortOptions[0]] = parseInt(sortOptions[1]);
+//         } else {
+//           sortBy[sortOptions[0]] = 1;
+//         }
+      
+        
+        
+
+//         // Query for product collection
+//         const products = await productModel.aggregate([
+//           {
+//             $lookup: {
+//               from: "categories",
+//               let: { categoryId: "$category" },
+//               pipeline: [
+//                 {
+//                   $match: {
+//                     $expr: {
+//                       $eq: ["$_id", "$$categoryId"],
+//                     },
+//                   },
+//                 },
+//                 {
+//                   $project: {
+//                     _id: 1,
+//                     name: 1,
+//                   },
+//                 },
+//               ],
+//               as: "category",
+//             },
+//           },
+//           {
+//             $lookup: {
+//               from: "subcategories",
+//               let: { subCategoryId: "$subCategory" },
+//               pipeline: [
+//                 {
+//                   $match: {
+//                     $expr: {
+//                       $eq: ["$_id", "$$subCategoryId"],
+//                     },
+//                   },
+//                 },
+//                 {
+//                   $project: {
+//                     _id: 1,
+//                     name: 1,
+//                   },
+//                 },
+//               ],
+//               as: "subCategory",
+//             },
+//           },
+//           {
+//             $unwind: {
+//               path: "$category",
+//               preserveNullAndEmptyArrays: true,
+//             },
+//           },
+//           {
+//             $unwind: {
+//               path: "$subCategory",
+//               preserveNullAndEmptyArrays: true,
+//             },
+//           },
+//           {
+//             $match: {
+//               $and: [
+//                 {
+//                   $or: [
+//                     { productName: { $regex: search, $options: "i" } },
+//                     { brandName: { $regex: search, $options: "i" } },
+//                     { description: { $regex: search, $options: "i" } },
+//                     { points: { $elemMatch: { $regex: search, $options: "i" } } },
+//                     {
+//                       salePrice: {
+//                         $gte: priceAmount - priceThreshold,
+//                         $lte: priceAmount + priceThreshold,
+//                       },
+//                     },
+//                     // Add more fields to search here
+//                   ],
+//                 },
+//                 { isHidden: false }, // Add condition to filter by isHidden field
+//                 { "category.name": category },
+//                 { "subCategory.name": subCategory },
+//               ],
+//             },
+//           },
+//           { $sort: sortBy },
+//           { $skip: page * limit },
+//           { $limit: limit },
+//         ]);
+        
+//         console.log(products);
+        
+//         const response = {
+//           error: false,
+//           total,
+//           page: page + 1,
+//           limit,
+//           products
+//         };
+        
+//         res.status(200).json(response);
+//       } catch (err) {
+//         console.log(err);
+//         res.status(500).json({ error: true, message: "Internal Server Error" });
+//       }
+// }
 
 async function updateProductsApi(req, res) {
     try {
@@ -1311,9 +1533,11 @@ async function getOrdersV2(req, res) {
 }
 
 async function getSpecificOrder(req,res){
+   
   let {oid}  = req.params;
   try{
     let order = await orderModel.findById(oid).populate('products.productId');
+    // console.log(order);
     res.json(order);
   }catch(err){
     console.log("Error in getSpecific Order: ",err);
@@ -1553,7 +1777,7 @@ async function dogFoodView(req,res){
     // let productsD = await fetch("/api/products");
     // let products = await productsD.json();
     // products = products.products.filter(item=>item.category==cat && item.subCategory==sub)
-    res.render("dogFood",{user:true,admin:false,cat,sub})
+    res.render("dogFood",{user:true,admin:false,cat,sub,loggedIn:true})
 }
 
 
@@ -1600,7 +1824,8 @@ export {
     modifyOrder,
     getUserDetails,
     updateUserDetails,
-    verifyPymnt
+    verifyPymnt,
+    getCategories
 };
 
  

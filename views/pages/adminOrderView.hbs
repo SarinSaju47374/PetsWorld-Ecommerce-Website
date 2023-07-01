@@ -56,8 +56,8 @@
                 <th>OrderId</th>
                 <th>Name</th>
                 <th>Delivery Address</th>
-                <th>Total Amount</th>
                 <th>Product Name</th>
+                <th>Amount</th>
                 <th>Payment Mode</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -294,7 +294,8 @@
         liTag+=`<li class="btn next" onclick="element(totalPages,${afterPages})">Next<span><i class="fa-solid fa-chevron-right"></i></span></li>`; 
         }
         ulTag.innerHTML=liTag;
-        console.log(page)
+       
+       
         pg=page;
         run(`/custom/orders?p=${page}`)
     }
@@ -335,6 +336,8 @@
                 document.querySelector(".order-popup").style.display="block"
                 document.querySelector("#modify-order-form table tbody").innerHTML="";
                 data.products.forEach(o=>{
+                  
+                  
                     let selectOptions = '';
                     switch (o.status) {
                         case 'orderPlaced':
@@ -383,7 +386,7 @@
                                 <td>${data.address.fName} ${data.address.lName}</td>
                                 <td class="addr">${data.address.addr},${data.address.city},${data.address.state},${data.address.country}</td>
                                 <td>${o.productId.productName}</td>
-                                <td>Rs ${data.totalPrice}</td>
+                                <td>Rs ${o.productId.salePrice}</td>
                                 <td>${data.paymentmode.toUpperCase()}</td>
                                 <td>${o.status}</td>
                                 <td><select class="order-status-dropdown" data-order-id="${data._id}" data-product-id="${o.productId._id}">
@@ -402,7 +405,6 @@
                  
                 //Order Management
                 document.querySelectorAll(".order-status-dropdown").forEach(elem=>{
-                    console.log(elem);
                     elem.addEventListener("input",async function(){
                          console.log("******************")
                         const orderId = this.getAttribute("data-order-id");

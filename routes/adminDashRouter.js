@@ -1,7 +1,8 @@
 import express from "express";
 import {} from "../controllers/controllers.js";
 import  moment from "moment";
-import {orderModel} from "../models/productModel.js";
+import {orderModel,ctgryModel,productModel} from "../models/productModel.js";
+import userModel from "../models/userModel.js";
 import { startOfDay, subDays, format } from 'date-fns';
 
 const router = express.Router();
@@ -99,5 +100,40 @@ router.get('/sales',async (res,req)=>{
 
 })
 
+router.get('/data',async(req,res)=>{
+    let users = await userModel.countDocuments();
+    let products =await productModel.countDocuments();
+    let categories = await ctgryModel.countDocuments();
+    const order = await orderModel.find().populate('products.productId')
+  
+      let total =0;
+      let cod =0;
+      let online = 0;
+      let placed=0;
+      let cancelled=0;
+      order.forEach(val=>{
+        if(val.paymentmode=="cod"){
+          cod+=1;
+        }else{
+          online+=1;
+        }
+        val.products.map((pr)=>{
+          if(pr.status=="orderDelivered"){
+            placed+=1;
+            total+=Number((pr.productId.salePrice*pr.quantity))
+          }else if((val.paymentmode=="online" && pr.status!="orderCancelled")){
+            total+=Number((pr.productId.salePrice*pr.quantity));
+          }else if(pr.status=="orderCancelled"){
+            cancelled+=1;
+          }
+        })
+      })
+
+      
+       
+      
+    res.json({users,products,categories,total,cod,online,placed,cancelled});
+   
+})
 
 export default router;

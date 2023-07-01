@@ -1,3 +1,8 @@
+<div class="search-cont2">
+    <input type="text" placeholder="Search in Cart...">
+    <div class="typing">.</div>
+    <a href=""><i class="fa-solid fa-magnifying-glass"></i></a></i>
+</div>
 <div class="go-up" id="scrollToTopBtn">
   <i class="fa-solid fa-arrow-up"></i>
 </div>
@@ -39,17 +44,11 @@
       <h2>Category</h2>
       <select id="ctgry">
           <option value="">All</option>
-        <option value="category1">Category 1</option>
-        <option value="category2">Category 2</option>
-        <option value="category3">Category 3</option>
         <!-- Add more categories here -->
       </select>
       <h2>Sub Category</h2>
       <select id="subCtgry">
         <option value="">All</option>
-        <option value="category1">Category 1</option>
-        <option value="category2">Category 2</option>
-        <option value="category3">Category 3</option>
         <!-- Add more categories here -->
       </select>
     </div>
@@ -127,7 +126,6 @@
 
     // Get the button element
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
-
     // Function to check the scroll position and toggle button visibility
     function toggleScrollToTopBtn() {
     if (window.pageYOffset > 100) {
@@ -150,7 +148,7 @@
 
     //   SCROLL JS
     </script>
-    <script>
+    <script> 
         let container = document.querySelector(".container-content");
          
         //Filter options
@@ -158,13 +156,18 @@
         let subCtgry = document.getElementById("subCtgry");
 
         document.addEventListener("DOMContentLoaded",()=>{
-            run("/api/products?l=10")
-            
+            let [cat,sub] = container.dataset.cat.split("&");
+            console.log(cat,sub);
+            run(`/api/products?l=30&cat=${cat}&subCat=${sub}`); 
+            runC(`/custom/categories`);   
         })
         async function run(url){
+          console.log("im inside run !")
             try{
                 let data = await fetch(url);
                 let prod = await data.json();
+             
+                
                 prod.products.forEach(pr=>{
                     container.innerHTML+=`
                         <div class="card">
@@ -198,8 +201,16 @@
                 console.log("Err in DogFood hbs : ",err)
             }
          }
-        function runC(){
-          
+        async function runC(url){
+          try{
+            let data = await fetch(url);
+            let ctr = await data.json();
+            ctr.forEach(val=>{
+              ctrgy.innerHTML+=`<option value="${val._id}">${val.name}</option>`
+            })
+          }catch(err){
+            console.log("Error inside runC: ",err);
+          }
         }
 
    

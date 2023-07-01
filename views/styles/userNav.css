@@ -137,6 +137,44 @@ nav a{
     height: 100%;
     color:orange;
 }
+  .search-cont2{
+    border:1px solid #008CBA;
+    width:20%;
+    height: 2rem;
+    margin:2rem auto;
+    display: flex;
+    justify-content: space-between;
+    overflow: hidden;
+    border-radius: 12px;
+    position: relative;
+}
+.search-cont2 input {
+    background-color: transparent;
+    border:none;
+    padding-left: 1rem;
+    color:white;
+    flex:1;
+}
+ 
+
+.search-cont2 input::placeholder{
+    color: rgb(251, 251, 251);
+}
+
+ 
+.search-cont2 input:focus{
+    outline:none;
+}
+.search-cont2 i{
+    background-color: #008CBA;
+    /* padding:3px; */
+    width:3rem;
+    /* vertical-align: center; */
+    display: grid;
+    place-items: center;
+    height: 100%;
+    color:orange;
+}
 .full-search{
   position: relative;
 }
@@ -592,7 +630,7 @@ ul li:hover>ul {
 
     /* CONTENT STYLES */
     .container-content{
-        max-width:90vw;
+        max-width:70vw;
         place-items:center;
         gap:20px;
     }

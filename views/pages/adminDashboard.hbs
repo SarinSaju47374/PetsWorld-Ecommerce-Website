@@ -1,5 +1,5 @@
 <main>
-<h1>Orders</h1>
+<h1>DashBoard</h1>
  
  
 {{!-- Product Add --}}
@@ -149,17 +149,37 @@ https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js
  <script>
   const pymnt = document.getElementById('pymnt');
   const ordrStats = document.getElementById('orderStats');
-
-  new Chart(pymnt, {
+  let p = document.querySelectorAll(".preview .card p");
+  let placed;
+  let cancelled;
+  let cod;
+  let online;
+  let toal
+  let categories;
+  let users;
+  let products;
+  document.addEventListener("DOMContentLoaded",async()=>{
+    let data = await fetch('/data')
+        let det = await data.json();
+        placed=det.placed;
+        cancelled=det.cancelled;
+        cod=det.cod;
+        online=det.online;
+        total=det.total;
+        categories=det.categories;
+        users=det.users;
+        products=det.products
+    console.log(cod,online);
+      new Chart(pymnt, {
     type: 'doughnut',
     data: {
   labels: [
-    'Red',
-    'Blue',
+    'COD',
+    'ONLINE',
   ],
   datasets: [{
     label: 'My First Dataset',
-    data: [30,50],
+    data: [cod,online],
     backgroundColor: [
       'rgb(255, 99, 132)',
       'rgb(54, 162, 235)',
@@ -181,12 +201,12 @@ https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js
     type: 'doughnut',
     data: {
   labels: [
-    'Red',
-    'Blue',
+    'Cancelled',
+    'Placed',
   ],
   datasets: [{
     label: 'My First Dataset',
-    data: [30,50],
+    data: [cancelled,placed],
     backgroundColor: [
       'rgb(115 128 236)',
       'rgb(250 158 86)',
@@ -202,6 +222,31 @@ https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js
       }
     }
   });
+  p[0].innerHTML=users;
+  p[1].innerHTML=`Rs ${total}`;
+  p[2].innerHTML=products;
+  p[3].innerHTML=categories;
+ 
+  })
+
+
+
+async function fetchData(){
+    try{
+        let data = await fetch('/data')
+        let det = await data.json();
+        placed=det.placed;
+        cancelled=det.cancelled;
+        cod=det.cod;
+        online=det.online;
+        total=det.total;
+        categories=det.categories;
+        users=det.users;
+        products=det.products
+    }catch(err){
+        console.log(err);
+    }
+}
 </script>
 
 <script src="/JS/adminContent.js"></script>
@@ -217,20 +262,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js
 
   
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
-<script>
-    document.addEventListener("DOMContentLoaded",()=>{
-        fetchData();
-    })
-    async function fetchData(){
-        try{
-            let data = await fetch("/sales");
-            let finalData = await data.json();
-            console.log(finalData);
-        }catch(err){
-            console.log(err);
-        }
-    }
-</script>
+
+
 </body>
 </html>
