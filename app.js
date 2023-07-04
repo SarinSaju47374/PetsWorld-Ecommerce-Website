@@ -102,6 +102,8 @@ import handleAddressRouter from "./routes/handleAddressRouter.js"
 import adminOrderRouter from "./routes/adminOrderRouter.js"
 import adminDashRouter from "./routes/adminDashRouter.js"
 import userProfileRouter from "./routes/userProfileRouter.js"
+import adminAnalyticsRouter from "./routes/adminAnalyticsRouter.js"
+import adminCouponsRouter from "./routes/adminCouponsRouter.js"
 //API routers
 import productApi from "./routes/productApi.js";
 import userApi from "./routes/userApi.js";
@@ -149,6 +151,9 @@ async function sendEmail() {
   // Genensole.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 }
 // sendEmail().catch(console.error);
+app.get("/crop",(req,res)=>{
+  res.render("crop",{admin:false,user:false})
+})
 
 //API
 app.use("/api",productApi);
@@ -173,6 +178,7 @@ app.use("/address",authoriseJwt,userAddressRouter);
 app.use("/pymnt",authoriseJwt,userPymntRouter);
 app.use("/profile",authoriseJwt,userProfileRouter);
 app.use("/wishlist",userWishlistRouter);
+app.use("/order-history",authoriseJwt,userOrderHistRouter);
 
 app.use("/admin",adminLoginRouter);
 app.use("/product-view",authoriseAdminJwt,adminProductViewRouter);
@@ -181,13 +187,14 @@ app.use("/user-view",authoriseAdminJwt,adminUserViewRouter);
 app.use("/ctgry-add",authoriseAdminJwt,ctgryAddRouter);
 app.use("/ctgry-view",authoriseAdminJwt,adminCtgryViewRouter);
 app.use("/",userProductViewRouter);
-app.use("/order-history",authoriseJwt,userOrderHistRouter);
+app.use("/",authoriseAdminJwt,adminCouponsRouter);
 app.get("/otp",(req,res)=>{
   res.render("otpLogin")
 })
 
 app.use("/",authoriseAdminJwt,adminOrderRouter);
 app.use("/",authoriseAdminJwt,adminDashRouter);
+app.use("/",authoriseAdminJwt,adminAnalyticsRouter);
 
 
 // app.use(express.static("views", {
@@ -217,7 +224,6 @@ app.get("/sendMail",(req,res)=>{
   }
   
 })
-
 
 let port  = 2000;
 app.listen(port,()=>{

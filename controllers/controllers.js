@@ -736,6 +736,7 @@ async function cartPay(req,res){
           total+=item.productId.salePrice*item.quantity;
           products.push({
             productId:item.productId._id,
+            salePrice:item.productId.salePrice,
             quantity:item.quantity,
             status:"orderPlaced",
             orderPlaced:orderDate, 
@@ -833,6 +834,7 @@ async function verifyPymnt(req,res){
           total+=item.productId.salePrice*item.quantity;
           products.push({
             productId:item.productId._id,
+            salePrice:item.productId.salePrice, 
             quantity:item.quantity,
             status:"orderPlaced",
             orderPlaced:orderDate, 
@@ -958,7 +960,8 @@ async function getProducts(req,res){
         let category = req.query.cat  || "";
         let subCategory = req.query.subCat || "";
         const priceAmount = parseFloat(req.query.s)||null;
-       
+        const minPrice = parseFloat(req.query.minPrice) || null;
+        const maxPrice = parseFloat(req.query.maxPrice) || null;
         // Filter options
       
         const filter = {};
@@ -973,6 +976,21 @@ async function getProducts(req,res){
           if (subCategoryId) {
             filter.subCategory = subCategoryId;
           }
+        }
+        const priceFilter = {};
+        if (minPrice !== null && maxPrice !== null) {
+          priceFilter.salePrice = {
+            $gte: minPrice,
+            $lte: maxPrice
+          };
+        } else if (minPrice !== null) {
+          priceFilter.salePrice = {
+            $gte: minPrice
+          };
+        } else if (maxPrice !== null) {
+          priceFilter.salePrice = {
+            $lte: maxPrice
+          };
         }
         const search = req.query.s || "";
         const total = await productModel.countDocuments({
@@ -994,6 +1012,7 @@ async function getProducts(req,res){
             },
             { isHidden: false }, // Add condition to filter by isHidden field
             { ...filter },
+            priceFilter
           ],
         })
           
@@ -1038,6 +1057,7 @@ async function getProducts(req,res){
             },
             { isHidden: false }, // Add condition to filter by isHidden field
             { ...filter },
+            priceFilter
           ],
         })
           .populate("category", "name") // Populate the "category" field and retrieve only the "name" property
@@ -1067,6 +1087,16 @@ async function getCategories(req,res){
     let ctgrys = await ctgryModel.find();
   
     res.json(ctgrys);
+  }catch(err){
+    console.log("Error inside getCategories: ",err)
+  }
+}
+async function getSubCategories(req,res){
+  console.log(req.params.cid)
+  try{
+    let subCtgrys = await subCtgryModel.find({category:new ObjectId(req.params.cid)});
+  
+    res.json(subCtgrys);
   }catch(err){
     console.log("Error inside getCategories: ",err)
   }
@@ -1825,7 +1855,8 @@ export {
     getUserDetails,
     updateUserDetails,
     verifyPymnt,
-    getCategories
+    getCategories,
+    getSubCategories
 };
 
  

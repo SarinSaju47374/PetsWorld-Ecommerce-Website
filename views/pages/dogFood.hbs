@@ -65,7 +65,7 @@
               type="number"
               value="10"
               min="0"
-              max="50"
+               
             />
             to
             <input
@@ -73,7 +73,7 @@
               type="number"
               value="80"
               min="0"
-              max="80"
+               
             />
           </div>
 
@@ -82,7 +82,7 @@
               class="range-input"
               value="10"
               min="1"
-              max="100"
+               
               step="1"
               type="range"
             />
@@ -90,7 +90,7 @@
               class="range-input"
               value="80"
               min="1"
-              max="100"
+               
               step="1"
               type="range"
             />
@@ -146,29 +146,90 @@
     // Add click event listener to scroll to the top when the button is clicked
     scrollToTopBtn.addEventListener('click', scrollToTop);
 
+
+    (function() {
+  var parent = document.querySelector("#rangeSlider");
+  if (!parent) return;
+
+  var rangeS = parent.querySelectorAll("input[type=range]");
+  var numberS = parent.querySelectorAll("input[type=number]");
+
+  rangeS.forEach(function(el) {
+    el.addEventListener("input", function() {
+      var slide1 = parseFloat(rangeS[0].value);
+      var slide2 = parseFloat(rangeS[1].value);
+
+      if (slide1 > slide2) {
+        [slide1, slide2] = [slide2, slide1];
+      }
+
+      numberS[0].value = slide1;
+      numberS[1].value = slide2;
+      run(`/api/products?l=30&minPrice=${numberS[0].value}&maxPrice=${numberS[1].value}`);
+    });
+  });
+
+  numberS.forEach(function(el) {
+    el.addEventListener("input", function() {
+      var number1 = parseFloat(numberS[0].value);
+      var number2 = parseFloat(numberS[1].value);
+
+      if (number1 > number2) {
+        var tmp = number1;
+        numberS[0].value = number2;
+        numberS[1].value = tmp;
+      }
+      
+      rangeS[0].value = number1;
+      rangeS[1].value = number2;
+    });
+  });
+})();
+
+
     //   SCROLL JS
     </script>
     <script> 
         let container = document.querySelector(".container-content");
-         
+         var parent = document.querySelector("#rangeSlider"); 
         //Filter options
-        let ctgry = document.getElementById("ctgry");
+        var rangeS = parent.querySelectorAll("input[type=range]");
+        var numberS = parent.querySelectorAll("input[type=number]");
         let subCtgry = document.getElementById("subCtgry");
+        let ctgry = document.getElementById("ctgry");
+        let search2 = document.querySelector(".search-cont2");
+        
 
-        document.addEventListener("DOMContentLoaded",()=>{
+        document.addEventListener("DOMContentLoaded",async()=>{
             let [cat,sub] = container.dataset.cat.split("&");
             console.log(cat,sub);
-            run(`/api/products?l=30&cat=${cat}&subCat=${sub}`); 
-            runC(`/custom/categories`);   
+            try{
+              let data = await fetch(`/api/products`)
+              let prod = await data.json();
+              let prices = prod.products.map(val=>{
+                  return val.salePrice
+                })
+              numberS[1].setAttribute("max", Math.max(...prices))  ;
+              rangeS[1].setAttribute("max", Math.max(...prices))  ;
+              run(`/api/products?l=30&cat=${cat}&subCat=${sub}`); 
+              runC(`/custom/categories`);
+            }catch(err){
+              console.log("Error inside the DOM CONTENT LOADED: ",err)
+            }
+               
+        })
+        search2.addEventListener("input",function(e){
+          run(`/api/products?l=30&s=${e.target.value.trim()}`)
         })
         async function run(url){
-          console.log("im inside run !")
+         
             try{
                 let data = await fetch(url);
                 let prod = await data.json();
-             
-                
-                prod.products.forEach(pr=>{
+                container.innerHTML=""
+                console.log(prod);
+                if(prod.products.length>=1){
+                  prod.products.forEach(pr=>{
                     container.innerHTML+=`
                         <div class="card">
                             <div class="preview">
@@ -197,6 +258,13 @@
                         </div>
                     `
                 })
+                }else{
+                  console.log("Im in else")
+                  container.innerHTML=`
+                      <img src="https://www.freeiconspng.com/thumbs/dog-png/dog-png-30.png" alt="Doggy">
+                      <h4>No Product With that option you Selected</h4>
+                  `
+                }
             }catch(err){
                 console.log("Err in DogFood hbs : ",err)
             }
@@ -206,12 +274,31 @@
             let data = await fetch(url);
             let ctr = await data.json();
             ctr.forEach(val=>{
-              ctrgy.innerHTML+=`<option value="${val._id}">${val.name}</option>`
+              ctgry.innerHTML+=`<option value="${val._id}">${val.name}</option>`
             })
           }catch(err){
             console.log("Error inside runC: ",err);
           }
         }
+        ctgry.addEventListener("input",async function(){
+          run(`/api/products?l=30&cat=${this.options[this.selectedIndex].textContent}`)
+          try{
+            let data  = await fetch(`/custom/subCategories/${this.value}`);
+            let subCtr = await data.json();
+            subCtgry.innerHTML="";
+            subCtr.forEach(val=>{
+              subCtgry.innerHTML+=`<option value="${val.name}">${val.name}</option>`
+            })
+          }catch(err){
+            console.log("Error in the dogFood ctgry change part :",err)
+          }
 
+        })
+        subCtgry.addEventListener("input",async function(){
+          run(`/api/products?l=30&cat=${ctgry.options[ctgry.selectedIndex].textContent}&subCat=${this.value}`)
+        })
+        numberS[0].addEventListener("input",function(){
+          console.log("vbeep")
+        })
    
     </script>

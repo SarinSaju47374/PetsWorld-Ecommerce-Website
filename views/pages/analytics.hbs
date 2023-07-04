@@ -1,0 +1,193 @@
+<main>
+<h1>DashBoard</h1>
+ 
+ 
+{{!-- Product Add --}}
+
+    <div class="table-admin">
+        <h2>View the Report</h2> 
+         <canvas id="myChart"></canvas>
+         
+         <form action="#" method="POST" onsubmit="submitFrm(event)" class="filter">
+            <select name="timeFrame" class="action">
+                <option class="form-btn opt" value="weekly">Weekly</option>
+                <option class="form-btn opt" value="monthly">Monthly</option>
+                <option class="form-btn opt" value="yearly">Yearly</option>
+            </select>
+            <div class="date">
+                <input type="date" name="startDate" id="startDate">
+            </div>
+            <div class="date">
+                <input type="date" name="endDate" id="endDate">
+            </div>
+            <button class="form-btn">
+                Apply
+            </button>
+         </div>
+         </form> 
+    </div>
+    <div class="preview">
+        <div class="table">
+         <table>
+            <thead>
+            <tr>
+                <th>orderId</th>
+                <th>Order Date</th>
+                <th>Full Name</th>
+                <th>Product Name</th>
+                <th>Total Amount</th>
+                <th></th>
+                <th>Featured</th>
+                <th>Preview</th>
+                <th></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+             {{!-- DYNAMIC DATA --}}
+            </tbody>
+        </table>
+    </div>
+ 
+</main>
+
+{{!-- END OF MAIN --}}
+
+<div class="right">
+    <div class="top">
+        <button id="menu-btn">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="theme-toggler">
+            <i class="fa-solid fa-sun active"></i>
+            <i class="fa-solid fa-moon"></i>
+        </div>
+        <div class="profile">
+            <div class="info">
+                <p>Hey , <b>Sarin </b></p>
+                <small class="text-muted">ADMIN</small>
+            </div>
+            <div class="profile-photo">
+                <img src="/images/profile.jpg" alt="#">
+            </div>
+        </div>
+    </div>
+    
+    
+</div>
+<script src="
+https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js
+"></script>
+ <script>
+    
+    //Date Validation
+    const endDateInput = document.getElementById('endDate');
+    const currentDate = new Date().toISOString().split('T')[0];
+    endDateInput.max = currentDate;
+    //Date Validation
+
+   const ctx = document.getElementById('myChart');
+    const filter = document.querySelector(".filter")
+    // Initial data for monthly sales
+    let labels = ['Loading'];
+    let data = ['loading'];
+
+    // Initial chart configuration
+    const chartConfig = {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+        label: 'Sales',
+        data: data,
+        borderWidth: 1,
+        backgroundColor: 'rgba(54, 162, 235, 0.5)'
+        }]
+    },
+    options: {
+        scales: {
+        y: {
+            beginAtZero: true
+        }
+        }
+    }
+    };
+
+    // Create the chart
+    const chart = new Chart(ctx, chartConfig);
+
+   
+     
+
+    async function submitFrm(e){
+        e.preventDefault();
+        const jsonObject = {};
+        let formData = new FormData(filter);
+        formData.forEach((value, key) => {
+            jsonObject[key] = value;
+        });
+        try{
+            console.log("I am here !")
+            let data = await fetch('/analytics/data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonObject),
+            });
+            let info = await data.json();
+            labels = Object.keys(info.data);
+            data = labels.map((label) => info.data[label])
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.update()
+        }catch(err){
+            console.log(err)
+        }
+    }
+    document.addEventListener("DOMContentLoaded",async()=>{
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 35);
+        try{
+            console.log("I am here !")
+            let data = await fetch('/analytics/data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    timeFrame: 'weekly',
+                    startDate: startDate.toISOString(),
+                    endDate: endDate.toISOString(),
+                }),
+            });
+            let info = await data.json();
+            labels = Object.keys(info.data);
+            data = labels.map((label) => info.data[label])
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.update()
+        }catch(err){
+            console.log(err)
+        }
+    })
+
+
+ 
+</script>
+
+<script src="/JS/adminContent.js"></script>
+<script>
+    const sideBarOpts = document.querySelectorAll(".sidebar a");
+     
+
+    sideBarOpts.forEach(a=>{
+        a.classList.remove("active");
+    })
+    sideBarOpts[0].classList.add("active");
+</script>
+
+
+</body>
+</html>

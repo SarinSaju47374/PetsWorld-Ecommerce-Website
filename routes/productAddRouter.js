@@ -18,7 +18,7 @@ router.post("/",upload.array('photos'),async(req,res)=>{
         description,
         points,
         productPrice,
-        salePrice,
+        discount,
         stock,
         ctgryId,
         subCtgryId,
@@ -61,12 +61,14 @@ router.post("/",upload.array('photos'),async(req,res)=>{
           filepath: file.path.replace(/views/gi,""),
         };
       });
+    let salePrice = productPrice*Number(discount)/100
     await productModel.create({
         productName:productName,
         brandName:brandName,
         description:description,
         points:points.split(","),
         productPrice:productPrice,
+        discount:discount,
         salePrice:salePrice,
         stock:stock,
         category:ctgryId,

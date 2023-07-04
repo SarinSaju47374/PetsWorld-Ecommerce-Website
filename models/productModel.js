@@ -1,62 +1,76 @@
-import {model,Schema} from "mongoose";
+import { model, Schema } from "mongoose";
 
 //products schema
 const productSchema = new Schema({
-    productName: {
-        type:String,
-    },
-    brandName:{
-      type:String
-    },
-    description: {
-        type:String,
-    },
-    points: {
-        type:[String],
-    },
-    productPrice: {
-        type:Number,
-    },
-    salePrice:{
-        type:Number,
-    },
-    stock: {
-        type:Number,
-    },
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: 'category',
-      required: true,
-    },
-    subCategory:{
-      type: Schema.Types.ObjectId,
-      ref: 'subCategory',
-      required: true,
-    },
-    createdAt:{
-        type:Date,
-        default:()=>Date.now(),
-    },
-    paymentOption:{
-        type:String,
-    },
-    rating:{
-        type:Number,
-    },
-    photo: {
-        type:[{title: String,filepath: String,}]
-    },
-    isHidden:{
-      type:Boolean,
-      default:false,
-    },
-    isFeatured:{
-      type:Boolean,
-      default:false,
-    },
-  });
+  productName: {
+    type: String,
+  },
+  brandName: {
+    type: String,
+  },
+  description: {
+    type: String,
+  },
+  points: {
+    type: [String],
+  },
+  productPrice: {
+    type: Number,
+  },
+  discount: Number,
+  salePrice: {
+    type: Number,
+  },
+  stock: {
+    type: Number,
+  },
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: "category",
+    required: true,
+  },
+  subCategory: {
+    type: Schema.Types.ObjectId,
+    ref: "subCategory",
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: () => Date.now(),
+  },
+  paymentOption: {
+    type: String,
+  },
+  rating: {
+    type: Number,
+  },
+  photo: {
+    type: [{ title: String, filepath: String }],
+  },
+  isHidden: {
+    type: Boolean,
+    default: false,
+  },
+  isFeatured: {
+    type: Boolean,
+    default: false,
+  },
+});
 
-
+const couponSchema = new  Schema({
+  coupon: {
+    type: String,
+    required: true,
+  },
+  discount: {
+    type: Number,
+    required: true,
+  },
+  minPrice: {
+    type: Number,
+    required: true,
+  },
+});
 
 // //cart schema
 // const cartSchema = new Schema(
@@ -112,7 +126,7 @@ const productSchema = new Schema({
 //       },
 //       quantity:Number,
 //     },
-//   ],} 
+//   ],}
 //   ,{
 //   collection:"cart"
 // });
@@ -128,11 +142,11 @@ const productSchema = new Schema({
 //         type: Schema.Types.ObjectId,
 //         ref: 'product',
 //         required: true,
-//       }, 
+//       },
 //       quantity:Number,
 
 //     },
-//   ],} 
+//   ],}
 //   ,{
 //   collection:"cart"
 // });
@@ -141,14 +155,14 @@ const cartSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: 'user',
+      ref: "user",
       required: true,
     },
     items: [
       {
         productId: {
           type: Schema.Types.ObjectId,
-          ref: 'product',
+          ref: "product",
           required: true,
         },
         quantity: Number,
@@ -156,7 +170,7 @@ const cartSchema = new Schema(
     ],
   },
   {
-    collection: 'cart',
+    collection: "cart",
   }
 );
 
@@ -186,54 +200,48 @@ const cartSchema = new Schema(
 //   next();
 // });
 
-
-
-
- 
-
-
 const addressSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
-    ref: 'user',
-    required: true
+    ref: "user",
+    required: true,
   },
-  country:{
-    type:String,
-    required:true,
+  country: {
+    type: String,
+    required: true,
   },
   fName: {
     type: String,
-    requried:true
+    requried: true,
   },
-  lName :String,
-  addr:{
+  lName: String,
+  addr: {
     type: String,
-    required: true
+    required: true,
   },
   city: {
     type: String,
-    required: true
+    required: true,
   },
   state: {
     type: String,
-    required: true
+    required: true,
   },
-  pinCode : {
+  pinCode: {
     type: String,
-    required: true
+    required: true,
   },
-  ph:{
-    type:Number,
-    required:true,
+  ph: {
+    type: Number,
+    required: true,
   },
   isShippingAddress: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
-addressSchema.pre('save', async function(next) {
+addressSchema.pre("save", async function (next) {
   if (this.isShippingAddress) {
     // Remove the isShippingAddress flag from other addresses for the same user
     await this.constructor.updateMany(
@@ -259,56 +267,57 @@ addressSchema.pre('save', async function(next) {
 //       type: String,
 //       required: true,
 //     },
-  
+
 // });
 const orderSchema = new Schema({
   date: Date,
   user: {
     type: Schema.Types.ObjectId,
-    ref: 'user',
+    ref: "user",
   },
   address: {
-    country:{
-      type:String,
-      required:true,
+    country: {
+      type: String,
+      required: true,
     },
     fName: {
       type: String,
-      requried:true
+      requried: true,
     },
-    lName :String,
-    addr:{
+    lName: String,
+    addr: {
       type: String,
-      required: true
+      required: true,
     },
     city: {
       type: String,
-      required: true
+      required: true,
     },
     state: {
       type: String,
-      required: true
+      required: true,
     },
-    pinCode : {
+    pinCode: {
       type: String,
-      required: true
+      required: true,
     },
-    ph:{
-      type:Number,
-      required:true,
+    ph: {
+      type: Number,
+      required: true,
     },
   },
   products: [
     {
-      productId:{
+      productId: {
         type: Schema.Types.ObjectId,
-        ref: 'product',
+        ref: "product",
       },
-      quantity:Number,
+      salePrice: Number,
+      quantity: Number,
       status: {
         type: String,
         required: true,
-        default:"orderPlaced",
+        default: "orderPlaced",
       },
       orderPlaced: {
         type: Date,
@@ -317,18 +326,18 @@ const orderSchema = new Schema({
         type: Date,
       },
       orderOnRoute: {
-        type: Date
+        type: Date,
       },
       orderDelivered: {
-        type: Date
+        type: Date,
       },
-      orderCancelled:{
-        type:Date
+      orderCancelled: {
+        type: Date,
       },
-      expectedDelivery:{
-        type:Date
-      }
-    }
+      expectedDelivery: {
+        type: Date,
+      },
+    },
   ],
   paymentmode: {
     type: String,
@@ -338,7 +347,6 @@ const orderSchema = new Schema({
     type: String,
     required: true,
   },
-  
 });
 
 // const wishlistSchema = new mongoose.Schema({
@@ -352,46 +360,60 @@ const orderSchema = new Schema({
 //   }
 // });
 
+const categorySchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    isHidden: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    collection: "category",
+  }
+);
+const subCategorySchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "category",
+      required: true,
+    },
+    photo: {
+      type: String,
+      required: true,
+    },
+    isHidden: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    collection: "subCategory",
+  }
+);
 
-const categorySchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  isHidden: {
-    type: Boolean,
-    default: false,
-  },
-},{
-  collection:"category"
-})
-const subCategorySchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  category: {
-    type: Schema.Types.ObjectId,
-    ref: 'category',
-    required: true,
-  },
-  photo: {
-    type: String,
-    required: true,
-  },
-  isHidden: {
-    type: Boolean,
-    default: false,
-  },
-},{
-  collection:"subCategory"
-})
-
-const productModel = model('product', productSchema);
-const cartModel = model('cart', cartSchema);
-const addressModel = model('address',addressSchema)
-const orderModel = model('orders',orderSchema);
-const ctgryModel = model('category',categorySchema);
-const subCtgryModel = model('subCategory',subCategorySchema);
-export {productModel,cartModel,addressModel,orderModel,ctgryModel,subCtgryModel};
+const productModel = model("product", productSchema);
+const couponModel = model("coupon", couponSchema);
+const cartModel = model("cart", cartSchema);
+const addressModel = model("address", addressSchema);
+const orderModel = model("orders", orderSchema);
+const ctgryModel = model("category", categorySchema);
+const subCtgryModel = model("subCategory", subCategorySchema);
+export {
+  productModel,
+  cartModel,
+  addressModel,
+  orderModel,
+  ctgryModel,
+  subCtgryModel,
+  couponModel,
+};
