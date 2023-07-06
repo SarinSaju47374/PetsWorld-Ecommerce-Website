@@ -18,6 +18,7 @@
         <input type="number" name="discount" id = "discount" placeholder="Enter the Default Discount" max="100" required>
         <input type="number" name="stock" placeholder="Enter Thew Stock" required>
         <select name="ctgryId" id="ctgry" required>
+            <option value="" selected>Add Category</option>
             //Dynamic Data for Category
         </select>
         <select name="subCtgryId" id="subCtgry" required>
@@ -99,7 +100,7 @@
             let info = await data.json();
             
             if(info && info.length>0){
-                document.getElementById("ctgry").innerHTML="";
+                {{!-- document.getElementById("ctgry").innerHTML=""; --}}
                 info.forEach(val=>{
                     document.getElementById("ctgry").innerHTML+=`<option value="${val._id}">${val.name}</option>`
                 })

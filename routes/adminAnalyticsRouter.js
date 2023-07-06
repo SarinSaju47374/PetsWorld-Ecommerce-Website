@@ -43,7 +43,7 @@ router.post("/analytics/data", async (req, res) => {
         date: "$date",
         fullName:{ $concat: ["$address.fName", " ", "$address.lName"] },
         productName:"$product.productName",
-        salePrice: "$product.salePrice",
+        salePrice: "$products.salePrice",
         status: "$products.status",
       },
     },

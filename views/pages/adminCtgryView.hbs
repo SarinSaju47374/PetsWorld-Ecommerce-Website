@@ -21,6 +21,7 @@
             <tr>
                 <th>Category Id</th>
                 <th>Category Name</th>
+                <th>Category Offer(%)</th>
                 <th>Hide</th>
                 <th>Update</th>
             </tr>
@@ -40,6 +41,7 @@
                 <th>Sub-Category Id</th>
                 <th>Sub-Category Name</th>
                 <th>Cateogory</th>
+                <th>Preview</th>
                 <th>Hide</th>
                 <th>Update</th>
             </tr>
@@ -59,7 +61,7 @@
 {{!-- END OF ORDERS --}}
 {{!-- FORM FOR MODIFYING EXISTING DATA --}}
   <div class="form-popup">
-     <h2>Modify Product</h2>
+     <h2>Modify Category</h2>
     <form id="modify-form">
      
       <div class="form-row">
@@ -68,32 +70,17 @@
       </div>
       <div class="form-row">
         <label for="productName">Category Name</label>
-        <input type="text" id="productName" name="productName" placeholder="productName" required>
+        <input type="text" id="name" name="name" placeholder="Catetgory Name" required>
+      </div>
+      <div class="form-row">
+        <label for="brandName">Category Offer</label>
+        <input type="number" id="offer" name="offer" placeholder="Enter the cateogory Offer" max="100" required>
       </div>
       <button type="submit" class="modify">Modify</button>
       <button type="button" class="close" onclick="closeForm()">Close</button>
       <input type="number" class="number" name="number" hidden>   
     </form>
 
-  </div>
-  {{!-- END OF FORM FOR MODIFYING EXISTING DATA --}}
-{{!-- FORM FOR MODIFYING EXISTING Sub Category DATA --}}
-  <div class="form-popup subform-popup">
-     <h2>Modify Product</h2>
-    <form id="modify-form">
-     
-      <div class="form-row">
-        <label for="id">ID</label>
-        <input type="text" id="id" name="id" placeholder="Id" readonly>
-      </div>
-      <div class="form-row">
-        <label for="productName">SubCategory Name</label>
-        <input type="text" id="productName" name="productName" placeholder="productName" required>
-      </div>
-      <button type="submit" class="modify">Modify</button>
-      <button type="button" class="close" onclick="closeForm()">Close</button>
-      <input type="number" class="number" name="number" hidden>   
-    </form>
   </div>
   {{!-- END OF FORM FOR MODIFYING EXISTING DATA --}}
 </main>
@@ -164,14 +151,6 @@
     sideBarOpts[6].classList.add("active");
 </script>
 
- 
- 
-   
-
- 
-
-   
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
 <script>
     //REQUIRED DOM DATA
@@ -219,7 +198,7 @@
                 <tr>
                     <td>${c._id}</td>
                     <td>${c.name}</td>
-                     
+                    <td>${c.offer}</td>
                     ${
                         c.isHidden
                         ? `<td><a href="#" onclick="showHidePopupUn(event, '${c._id}')" class="butn btn-updt"><i class="fa-solid fa-thumbs-down"></i></a></td>`
@@ -280,8 +259,7 @@
 
         } catch (error) {
             // Handle any errors that occurred during the fetch
-            console.log('Error:', error.message);
-                
+            console.log('Error:', error.message);      
         }
     }
     //RUN FETCHING DATA
@@ -360,7 +338,66 @@
 
     //ALERT POPOUP BEFORE DELETE
    
-         
+
+    //form popup   
+    //MODAL FOR DATA UPDATION
+    async function openForm(id,pg){
+        document.querySelector(".form-popup").style.display = "block";
+        let dataD = await fetch(`/custom/categories/${id}`);
+        let data = await dataD.json();
+        console.log(data);
+        document.querySelector("#id").value = data._id;
+        document.querySelector("#name").value = data.name;
+        document.querySelector("#offer").value = data.offer;
+        document.querySelector(".form-popup .number").value = pg ; 
+    }
+    //MODAL FOR DATA UPDATION
+
+    function closeForm() {
+        document.querySelector(".form-popup").style.display = "none";
+    }
+    //form popup
+
+    //Form Submission
+    const form = document.querySelector("#modify-form");
+    form.addEventListener("submit",async(e)=>{
+        e.preventDefault();
+        const formData = new FormData(form);
+        const id = formData.get("id");
+        const name = formData.get("name");
+        const offer = formData.get("offer");
+        const page = formData.get("number");
+        const body = {
+            name,
+            offer,
+            page
+        };
+        try{
+            const response = await fetch(`/custom/categories/${id}`, {
+            method: "PUT",
+            headers: {
+            "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) {
+            throw new Error("Request failed with status: " + response.status);
+        }
+        Swal.fire({
+            position: 'top-end',
+            icon: 'success',
+            title: 'Your work has been saved',
+            showConfirmButton: false,
+            timer: 1500
+        })
+        run(`ctgry-add/api/ctgrys?p=${page}`);
+        closeForm();
+        }catch(err){
+            console.log(err)
+        }
+    })
+    //Form Submission
+
     document.addEventListener("DOMContentLoaded", async function() {
         // DOM manipulation and other code here
           run('ctgry-add/api/ctgrys');
@@ -443,7 +480,7 @@
         // Handle any network or other errors
             console.error('Error:', error);
         }
-
+        
         }
         });
     }
@@ -480,7 +517,7 @@
         });
     }
 
-    //MODAL FOR DATA UPDATION
+    {{!-- //MODAL FOR DATA UPDATION
     async function openForm(id,pg){
         document.querySelector(".form-popup").style.display = "block";
         let dataD = await fetch(`ctgry-add/api/ctgrys/${id}`);
@@ -506,78 +543,9 @@
         document.querySelector(".form-popup").style.display = "none";
     }
 
-    const form = document.querySelector("#modify-form");
+    const form = document.querySelector("#modify-form"); --}}
 
-    //FORM SUBMISSION AFTER MODIFICATION
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        const id = formData.get("id");
-        const productName = formData.get("productName");
-        const brandName = formData.get("brandName");
-        const description = formData.get("description");
-        const points = formData.get("points");
-        const productPrice = formData.get("productPrice");
-        const salePrice = formData.get("salePrice");
-        const stock = formData.get("stock");
-        const category = formData.get("category");
-        const subCategory = formData.get("subCategory");
-        const paymentOption = formData.get("paymentOption");
-        const rating = formData.get("rating");
-        const page = formData.get("number");
-
-        const body = {
-            productName,
-            brandName,
-            description,
-            points,
-            productPrice,
-            salePrice,
-            stock,
-            category,
-            subCategory,
-            paymentOption,
-            rating,
-            page
-        };
-
-        try {
-        const response = await fetch(`ctgry-add/api/ctgrys/${id}`, {
-            method: "PUT",
-            headers: {
-            "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        });
-        if (!response.ok) {
-            throw new Error("Request failed with status: " + response.status);
-        }
-
-        if(flag==1){
-            //Beautiful code that triggers the "input" event 
-            input.value=input.value;
-            const event = new Event("input");
-            input.dispatchEvent(event);
-            
-        }else if(flag==2){
-            console.log(category)
-            console.log(category.value)
-            run(`ctgry-add/api/ctgrys?cat=${category}`)
-        }else if(flag==3){
-            run(`ctgry-add/api/ctgrys?p=${page}`)
-        }
-
-        
-        // Update the modified data in the table or perform any other necessary actions
-
-        // Hide the form
-        document.querySelector(".form-popup").style.display = "none";
-        } catch (error) {
-        console.log("Error:", error.message);
-        }
-    });
-    //FORM SUBMISSION AFTER MODIFICATION
+    
         
         
     </script>

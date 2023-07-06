@@ -1809,6 +1809,7 @@ async function getOrdersV2(req, res) {
   }
 }
 
+
 async function getSpecificOrder(req, res) {
   let { oid } = req.params;
   try {
@@ -1817,6 +1818,54 @@ async function getSpecificOrder(req, res) {
     res.json(order);
   } catch (err) {
     console.log("Error in getSpecific Order: ", err);
+  }
+}
+async function getSpecificCategories(req, res) {
+  let { id } = req.params;
+  try {
+    let ctgry = await ctgryModel.findById(id);
+    res.json(ctgry);
+  } catch (err) {
+    console.log("Error in getSpecificCategory: ", err);
+  }
+}
+async function modifySpecificCategories(req, res) {
+  let { id } = req.params;
+  let {name,offer} = req.body;
+  try {
+    await ctgryModel.updateOne({_id:id},{
+      name:name,
+      offer:Number(offer),
+    });
+    // Retrieve all the products belonging to the category
+    let products = await productModel.find({ category: id });
+
+    // Iterate through each product and update the discount and salePrice fields
+    for (let product of products) {
+      if(offer!=0){
+        // Calculate the new discount and salePrice values
+        let discount = (Number(offer) / 100) * product.productPrice;
+        let salePrice = product.productPrice - discount;
+
+        // Update the product with the new values
+        product.discount = Number(offer);
+        product.salePrice = salePrice;
+      }else{
+        // Calculate the new discount and salePrice values
+        let discount = (Number(5) / 100) * product.productPrice;
+        let salePrice = product.productPrice - discount;
+
+        // Update the product with the new values
+        product.discount = 5;
+        product.salePrice = salePrice;
+      }
+
+      // Save the updated product
+      await product.save();
+    }
+    res.json({"success":true});
+  } catch (err) {
+    console.log("Error in getSpecificCategory: ", err);
   }
 }
 
@@ -2107,4 +2156,6 @@ export {
   getCategories,
   getSubCategories,
   orderCouponStatus,
+  getSpecificCategories,
+  modifySpecificCategories,
 };
