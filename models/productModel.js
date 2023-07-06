@@ -17,7 +17,10 @@ const productSchema = new Schema({
   productPrice: {
     type: Number,
   },
-  discount: Number,
+  discount: {
+    type:Number,
+    default:2,
+  },
   salePrice: {
     type: Number,
   },
@@ -70,6 +73,23 @@ const couponSchema = new  Schema({
     type: Number,
     required: true,
   },
+  expires:Date,
+}, {timestamps: true});
+couponSchema.index({createdAt: 1},{expireAfterSeconds: 3600});
+
+const walletSchema = new Schema({
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+    required: true,
+    unique: true,
+  },
+  balance: {
+    type: Number,
+    default: 0,
+  },
+},{   
+  collection: "wallet",
 });
 
 // //cart schema
@@ -404,6 +424,7 @@ const subCategorySchema = new Schema(
 const productModel = model("product", productSchema);
 const couponModel = model("coupon", couponSchema);
 const cartModel = model("cart", cartSchema);
+const walletModel = model('wallet', walletSchema);
 const addressModel = model("address", addressSchema);
 const orderModel = model("orders", orderSchema);
 const ctgryModel = model("category", categorySchema);
@@ -416,4 +437,6 @@ export {
   ctgryModel,
   subCtgryModel,
   couponModel,
+  walletModel,
+  couponSchema,
 };
