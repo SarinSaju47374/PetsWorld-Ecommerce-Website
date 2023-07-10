@@ -6,6 +6,8 @@ import {
   addressModel,
   orderModel,
   couponModel,
+  walletModel,
+  transactionModel,
 } from "../models/productModel.js";
 import userModel from "../models/userModel.js";
 import adminModel from "../models/adminModel.js";
@@ -494,7 +496,23 @@ async function userProductDescr(req, res) {
     //     }
     //   });
     // let product = products.products.find(item=>item._id==req.query.oid)
-    let token = req.headers.cookie?.split("=")[1];
+      //cookie extraction
+  let cookieHeaderValue = req.headers.cookie;
+  let token = null;
+  console.log("im inside the CartView!");
+  if (cookieHeaderValue) {
+    let cookies = cookieHeaderValue.split(";");
+
+    for (let cookie of cookies) {
+      let [cookieName, cookieValue] = cookie.trim().split("=");
+
+      if (cookieName === "token") {
+        token = cookieValue;
+        break;
+      }
+    }
+  }
+  //cookie extraction
     // console.log(token);
     if (token) {
       let userId = new ObjectId(
@@ -607,7 +625,23 @@ function userPymntView(req, res) {
   res.render("userPymntOpt", { admin: false, user: true, loggedIn: true });
 }
 function userAddressView(req, res) {
-  const token = req.headers.cookie?.split("=")[1];
+  //cookie extraction
+  let cookieHeaderValue = req.headers.cookie;
+  let token = null;
+
+  if (cookieHeaderValue) {
+    let cookies = cookieHeaderValue.split(";");
+
+    for (let cookie of cookies) {
+      let [cookieName, cookieValue] = cookie.trim().split("=");
+
+      if (cookieName === "token") {
+        token = cookieValue;
+        break;
+      }
+    }
+  }
+  //cookie extraction
   let id = jwt2.verify(token, process.env.secretKeyU).user;
   res.render("userAddress", { admin: false, user: true, id, loggedIn: true });
 }
@@ -922,15 +956,115 @@ async function cartPay(req, res)   {
       } else if (idType == "iid") {
       }
     } else {
+
+      //Online
+      let {wallet} = req.body;
       let cart = await cartModel
         .findOne({ _id: id })
         .populate("items.productId");
       let total = 0;
+      let products = [];
+      let qnty = 0;
+      const orderDate = new Date(); //The order Date
+      const expectedDelivery = new Date();
+      expectedDelivery.setDate(expectedDelivery.getDate() + 4); ///Adding 4 days to orderplaced date.
+      //looping in the cartItems
       cart.items.forEach((item) => {
         total += (item.productId.salePrice * item.quantity)-(item.productId.salePrice * item.quantity*discount/100);
-      });
-      let data = await genrateRazorPay(total * 100);
-      return res.json({ order: data, id: process.env.RAZOR_ID,discount:discount });
+        products.push({
+          productId: item.productId._id,
+          salePrice: (item.productId.salePrice)-(item.productId.salePrice*discount/100),
+          quantity: item.quantity,
+          status: "orderPlaced",
+          orderPlaced: orderDate,
+          expectedDelivery: expectedDelivery,
+        });
+        qnty += item.quantity;
+      })
+      if(wallet){
+        let wallet = await walletModel.findOne({userId:userId});
+        if(wallet.balance >= total){
+          //create a transaction 
+          let transaction = await transactionModel.create({
+            walletId:wallet._id,
+            amount:total,
+            type:"deduction",
+            date:new Date(),
+          }
+          )
+          
+          //directly reduce the wallet amount and create the order Invoice
+          wallet.balance -=transaction.amount;
+          wallet.transactions.push(new ObjectId(transaction._id));
+          await wallet.save();
+          //create the order after reducing the amount from the wallet
+          let newOrder = await orderModel.create({
+            date: orderDate,
+            user: userId,
+            address: {
+              country: addr.country,
+              fName: addr.fName,
+              lName: addr.lName,
+              addr: addr.addr,
+              city: addr.city,
+              state: addr.state,
+              pinCode: addr.pinCode,
+              ph: addr.ph,
+            },
+            products: [...products],
+            paymentmode: pymnt,
+            totalPrice: total,
+            quantity: qnty,
+          });
+          async function reduceStock() {
+            for (const item of cart.items) {
+              await productModel.updateOne(
+                { _id: item.productId._id },
+                { $inc: { stock: -item.quantity } }
+              );
+            }
+            await cartModel.deleteOne({ _id: id });
+          }
+          reduceStock();
+  
+          let coupons = await couponModel
+            .find({ minPrice: { $lte: total } })
+            .sort({ minPrice: -1 })
+            .limit(1);
+          console.log("Inside cartPay "+coupons[0]);
+  
+          if (coupons[0]) {
+            let user = await userModel.findOne({ _id: userId });
+            console.log("Inside cartPay "+user);
+  
+            let { coupon, discount, minPrice ,expires} = coupons[0];
+  
+            // Check if the user already has the same coupon applied
+            let couponExists = user.coupons.some((c) => c.coupon === coupon);
+  
+            if (!couponExists) {
+              user.coupons.push({
+                coupon: coupon,
+                discount: discount,
+                minPrice: minPrice,
+                expires: expires,
+              });
+              await user.save();
+              return res.json({ url: `/cart/order/${newOrder._id}/${coupons[0].coupon}` });
+            }
+            return res.json({ url: `/cart/order/${newOrder._id}`});
+            
+          } else {
+            return res.json({ url: `/cart/order/${newOrder._id}`});
+          }
+        }else{
+          let data = await genrateRazorPay((total-wallet.balance)*100,wallet.balance);
+          return res.json({ order: data, id: process.env.RAZOR_ID,discount:discount });
+        }
+      }else{
+        let data = await genrateRazorPay(total * 100);
+        return res.json({ order: data, id: process.env.RAZOR_ID,discount:discount });
+      }
     }
   } catch (err) {
     console.log("Err: ", err);
@@ -976,7 +1110,7 @@ async function verifyPymnt(req, res) {
     expectedDelivery.setDate(expectedDelivery.getDate() + 4); ///Adding 4 days to orderplaced date.
     //looping in the cartItems
     cart.items.forEach((item) => {
-      total += (item.productId.salePrice * item.quantity)-(item.productId.salePrice * item.quantity*ordr.discount/100);;
+      total += (item.productId.salePrice * item.quantity)-(item.productId.salePrice * item.quantity*ordr.discount/100);
       products.push({
         productId: item.productId._id,
         salePrice: (item.productId.salePrice)-(item.productId.salePrice*ordr.discount/100),
@@ -988,6 +1122,24 @@ async function verifyPymnt(req, res) {
       qnty += item.quantity;
     });
     console.log(products);
+     
+    let wallet = await walletModel.findOne({userId:userId});
+    
+      //create a transaction 
+      let transaction = await transactionModel.create({
+        walletId:wallet._id,
+        amount:wallet.balance,
+        type:"deduction",
+        date:new Date(),
+      }
+      )
+      
+      //directly reduce the wallet amount and create the order Invoice
+      wallet.balance=0;
+      console.log(wallet.balance);
+      wallet.transactions.push(new ObjectId(transaction._id));
+      await wallet.save();
+    
 
     //adding it to  order collection
     let newOrder = await orderModel.create({
@@ -1126,6 +1278,46 @@ async function orderStatus(req, res) {
 }
 
 async function orderCancel(req, res) {
+ 
+  let { oid, pid } = req.body;
+  try {
+    let orders = await orderModel.findById(oid);
+    let product = orders.products.find((val) => val.productId == pid);
+    let prod = await productModel.findById(pid);
+
+ 
+    prod.stock += product.quantity;
+    await prod.save();
+    product.status = "orderCancelled";
+    let amount = product.salePrice*product.quantity;
+    product.orderCancelled = new Date();
+ 
+    await orders.save();
+    
+    let wallet = await walletModel.findOne({userId:orders.user});
+         
+    //create a transaction 
+    let transaction = await transactionModel.create({
+      walletId:wallet._id,
+      amount:amount,
+      type:"recharge",
+      date:new Date(),
+    }
+    )
+ 
+    //return the amount back to the wallet
+    wallet.balance+=amount;
+    wallet.transactions.push(new ObjectId(transaction._id));
+    
+    await wallet.save();
+ 
+    res.json({ sent: true });
+  } catch (err) {
+    console.log("Error in order cancel controller: ", err);
+    res.json({ sent: false });
+  }
+}
+async function orderReturn(req, res) {
   let { oid, pid } = req.body;
   try {
     let orders = await orderModel.findById(oid);
@@ -1135,9 +1327,25 @@ async function orderCancel(req, res) {
     console.log(product, product.quantity);
     prod.stock += product.quantity;
     await prod.save();
-    product.status = "orderCancelled";
-    product.orderCancelled = new Date();
+    product.status = "orderReturned";
+    let amount = product.salePrice*product.quantity;
+    product.orderReturned = new Date();
     await orders.save();
+    let wallet = await walletModel.findOne({userId:orders.user});
+         
+    //create a transaction 
+    let transaction = await transactionModel.create({
+      walletId:wallet._id,
+      amount:amount,
+      type:"recharge",
+      date:new Date(),
+    }
+    )
+
+    //return the amount back to the wallet
+    wallet.balance+=amount;
+    wallet.transactions.push(new ObjectId(transaction._id));
+    await wallet.save();
     res.json({ sent: true });
   } catch (err) {
     console.log("Error in order cancel controller: ", err);
@@ -2148,6 +2356,7 @@ export {
   getOrdersV2,
   adminOrderInvoice,
   orderCancel,
+  orderReturn,
   getSpecificOrder,
   modifyOrder,
   getUserDetails,

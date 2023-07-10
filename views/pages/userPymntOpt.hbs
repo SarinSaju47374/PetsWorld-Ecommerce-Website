@@ -47,6 +47,8 @@
                     <h3>Cash On Delivery</h3>
                     <p class="amount">Rs {{calculateTotal item}}</p>
                 </label>
+                <input id="walletCheckbox" type="checkbox" class="wallet-checkbox" onchange="toggleRadioButton()">
+                <label for="walletCheckbox" class="wallet-label">Wallet</label>
                 <input type="text" value="{{idType}}" hidden>
                 <div class="action-frm">
                     <button type = "submit">Pay</button>
@@ -115,15 +117,13 @@
 </div>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-     
+     const onlinePaymentRadio = document.getElementById('pymnt-online');
+    const codPaymentRadio = document.getElementById('pymnt-cod');
+
+    var search2 = document.getElementById("coup")
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM loaded');
         fetchCoupon();
-        const onlinePaymentRadio = document.getElementById('pymnt-online');
-        const codPaymentRadio = document.getElementById('pymnt-cod');
-        var search2 = document.getElementById("coup")
-    
-        
         onlinePaymentRadio.addEventListener('change', function() {
         pymnt = "online";
         });
@@ -182,6 +182,17 @@
     codPaymentRadio.addEventListener('change', function() {
         console.log("Cash on Delivery selected");
     });
+    var checkbox=false;
+    function toggleRadioButton() {
+        checkbox = document.getElementById("walletCheckbox").checked;
+        var radioButton = document.getElementById("pymnt-cod");
+
+        if (checkbox) {
+            radioButton.disabled = true;
+        } else {
+            radioButton.disabled = false;
+        }
+    }
 
     async function srch(url){
         ul2.innerHTML="";
@@ -226,40 +237,45 @@
             window.location.href=urlData.url;
 
         }else if(pymnt=="online"){
+            alert("online")
             let order = await fetch(`/cart/pymnt2/chkout/${idType}/${id}`,{
                 method: 'POST',
-                body:JSON.stringify({pymnt:"online",couponName:couponName}),
+                body:JSON.stringify({pymnt:"online",couponName:couponName,wallet:checkbox}),
                 headers: {
                 'Content-Type': 'application/json'
                 }
             });
             let ordr = await order.json();
-            console.log(ordr);
-            var options = {
-                "key": ordr.id, // Enter the Key ID generated from the Dashboard
-                "amount": ordr.order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-                "currency": "INR",
-                "name": "Pets World",
-                "description": "Test Transaction",
-                "order_id": ordr.order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-                "handler": function (response){
-                     verifyPayment(response,ordr,idType,id);
-                },
-                "notes": {
-                    "address": "Razorpay Corporate Office"
-                },
-            };
-            var rzp1 = new Razorpay(options);
-            rzp1.on('payment.failed', function (response){
-                    alert(response.error.code);
-                    alert(response.error.description);
-                    alert(response.error.source);
-                    alert(response.error.step);
-                    alert(response.error.reason);
-                    alert(response.error.metadata.order_id);
-                    alert(response.error.metadata.payment_id);
-            });
-            rzp1.open();
+
+            if(ordr.url){
+                window.location.href=ordr.url;
+            }else{
+                var options = {
+                    "key": ordr.id, // Enter the Key ID generated from the Dashboard
+                    "amount": ordr.order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                    "currency": "INR",
+                    "name": "Pets World",
+                    "description": "Test Transaction",
+                    "order_id": ordr.order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                    "handler": function (response){
+                        verifyPayment(response,ordr,idType,id);
+                    },
+                    "notes": {
+                        "address": "Razorpay Corporate Office"
+                    },
+                };
+                var rzp1 = new Razorpay(options);
+                rzp1.on('payment.failed', function (response){
+                        alert(response.error.code);
+                        alert(response.error.description);
+                        alert(response.error.source);
+                        alert(response.error.step);
+                        alert(response.error.reason);
+                        alert(response.error.metadata.order_id);
+                        alert(response.error.metadata.payment_id);
+                });
+                rzp1.open();
+            }
         }
     }
     //Form Submission

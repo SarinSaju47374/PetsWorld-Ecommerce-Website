@@ -45,6 +45,10 @@ hbs.registerHelper('convert', function(date) {
   const formattedDate = date.toLocaleDateString();
   return formattedDate;
 });
+hbs.registerHelper('parser', function(data) {
+  const photo = JSON.parse(data).filepath
+  return photo;
+});
  
 
  
@@ -55,6 +59,7 @@ app.set('views',[path.join(__dirname, 'views'),path.join(__dirname, 'views/pages
 app.use("/styles",express.static(path.join(__dirname,"views","styles")));
 app.use("/uploads",express.static(path.join(__dirname,"views","uploads")));
 app.use("/categories",express.static(path.join(__dirname,"views","categories")));
+app.use("/profiles",express.static(path.join(__dirname,"views","profiles")));
 app.use("/images",express.static(path.join(__dirname,"views","images")));
 app.use("/JS",express.static(path.join(__dirname,"views","JS")));
 app.use(express.static('node_modules'));
@@ -94,7 +99,7 @@ import userProductDescrRouter from "./routes/userProductDescrRouter.js";
 import dogFoodRouter from "./routes/dogFoodRouter.js";
 import userCarRouter from "./routes/userCartRouter.js";
 import userOrderHistRouter from "./routes/userOrderHistRouter.js";
-import userWishlistRouter from "./routes/userWishlistRouter.js"
+// import userWishlistRouter from "./routes/userWishlistRouter.js"
 import userCheckoutRouter from "./routes/userCheckoutRouter.js"
 import userPymntRouter from "./routes/userPymntRouter.js"
 import userAddressRouter from "./routes/userAddressRouter.js"
@@ -104,13 +109,14 @@ import adminDashRouter from "./routes/adminDashRouter.js"
 import userProfileRouter from "./routes/userProfileRouter.js"
 import adminAnalyticsRouter from "./routes/adminAnalyticsRouter.js"
 import adminCouponsRouter from "./routes/adminCouponsRouter.js"
+import walletRouter from "./routes/walletRouter.js"
 //API routers
 import productApi from "./routes/productApi.js";
 import userApi from "./routes/userApi.js";
 import customUserApi from "./routes/customApi.js";
 import cartApi from "./routes/cartApi.js"
 import userModel from "./models/userModel.js";
-
+import { walletModel } from "./models/productModel.js";
 //DataRouter
 import dataRouter from "./routes/dataRouter.js";
 
@@ -177,9 +183,9 @@ app.use("/checkout",authoriseJwt,userCheckoutRouter);
 app.use("/address",authoriseJwt,userAddressRouter);
 app.use("/pymnt",authoriseJwt,userPymntRouter);
 app.use("/profile",authoriseJwt,userProfileRouter);
-app.use("/wishlist",userWishlistRouter);
+// app.use("/wishlist",userWishlistRouter);
 app.use("/order-history",authoriseJwt,userOrderHistRouter);
-
+app.use("/",authoriseJwt,walletRouter);
 app.use("/admin",adminLoginRouter);
 app.use("/product-view",authoriseAdminJwt,adminProductViewRouter);
 app.use("/product-add",authoriseAdminJwt,productAddRouter);
@@ -225,6 +231,23 @@ app.get("/sendMail",(req,res)=>{
   
 })
 
+//Simulation of adding balance to users wallet
+app.get("/save",async (req,res)=>{
+  const walletData = {
+    userId: '64a8007f58b6020233782b16',
+    balance: 54543.456789,
+  };
+  
+  // Create the wallet using the schema
+  try{
+    const wallet =   await walletModel.create(walletData);
+    res.json("wallet created")
+  }catch{
+    res.json({"error":err})
+  }
+  
+   
+})
 let port  = 2000;
 app.listen(port,()=>{
     console.log(`App is listening at ${port}`)

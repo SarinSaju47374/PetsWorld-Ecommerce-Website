@@ -1,6 +1,6 @@
 
 <main>
-<h1>DashBoard</h1>
+<h1>Sales Report</h1>
  
  
 {{!-- Product Add --}}
@@ -10,7 +10,7 @@
          <canvas id="myChart"></canvas>
          
          <form action="#" method="POST" onsubmit="submitFrm(event)" class="filter">
-            <select name="timeFrame" class="action">
+            <select name="timeFrame" class="action" id="timeFrame">
                 <option class="form-btn opt" disabled value="weekly">Select</option>
                 <option class="form-btn opt" value="weekly">Weekly</option>
                 <option class="form-btn opt" value="monthly">Monthly</option>
@@ -194,9 +194,12 @@ https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js
   });
 } --}}
    function exportToPDF() {
+    let timeFrame =document.getElementById("timeFrame").value;
+    let startDate =new Date(document.getElementById("startDate").value).toLocaleDateString();
+    let endDate =new Date(document.getElementById("endDate").value).toLocaleDateString();
     const element = document.getElementById("example");
     const opt = {
-        filename: 'output.pdf',
+        filename:`${timeFrame} SalesReport(${startDate} to ${endDate}).pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -287,7 +290,7 @@ https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js
     sideBarOpts.forEach(a=>{
         a.classList.remove("active");
     })
-    sideBarOpts[0].classList.add("active");
+    sideBarOpts[3].classList.add("active");
 </script>
 
 

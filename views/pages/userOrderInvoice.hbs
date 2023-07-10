@@ -275,15 +275,16 @@
     {{#if couponName}}
         <div class="coupon" data-cp="{{couponName}}"></div>
     {{/if}}
-    <div class="checkout-bs-form">
+    <div class="checkout-bs-form"  style="z-index:23;">
         <h4 style="color:#f5d6b2">Reason To Cancel The Order</h4>
         <form method="POST" onsubmit="submitFrm(event)">
 
             <div class="address"><textarea id="addr" name="addr" id="addr" rows="4" cols="40"
-                    placeholder="Whats the reason that you are cancelling the order!" required></textarea></div>
+                    placeholder="Whats the reason that you are cancelling?returning the order!" required></textarea></div>
 
             <input type="text" name="oid" id="oid" hidden>
             <input type="text" name="pid" id="pid" hidden>
+            <input type="text" name="type" id="types" hidden>
             <button type="submit" class="changeAdd">Submit</button>
             <a style="background-color:red" onclick="clsForm()" class="changeAdd">Close</a>
         </form>
@@ -378,9 +379,20 @@
         }
         function cancel(oid, pid) {
             console.log(oid, pid);
+            console.log(form)
             form.style.display = "block";
             document.querySelector("#oid").value = oid;
             document.querySelector("#pid").value = pid;
+            document.querySelector("#types").value = "cancel";
+            
+        }
+        function returnOrdr(oid, pid) {
+            console.log(oid, pid);
+            form.style.display = "block";
+            document.querySelector("#oid").value = oid;
+            document.querySelector("#pid").value = pid;
+            document.querySelector("#types").value = "returnOrdr";
+            
         }
         async function submitFrm(event) {
             event.preventDefault();
@@ -388,9 +400,9 @@
                 oid: document.querySelector("#oid").value,
                 pid: document.querySelector("#pid").value
             }
-
+            let type = document.getElementById("types").value;
             try {
-                const response = await fetch('/cart/order/cancel', {
+                const response = await fetch(`/cart/order/${type}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -470,6 +482,7 @@
                         <div>
                             <h4>${val.productId.productName}</h4>
                             <h5>${new Date(val.orderDelivered).toLocaleDateString()}</h5>
+                            <a href="#" onclick="returnOrdr(${products._id},${val.productId._id})" class="cancel-order-btn">Return Order</a>
                             <div class="status-slider">
                                 <div class="slider-item">Order Placed</div>
                                 <div class="slider-item">Order Shipped</div>
@@ -509,7 +522,7 @@
                     imageAlt: 'Custom image',
                 })
             }
-             
+             fetchStatus();
             // Fetch the status every 5 seconds
             let id = setInterval(fetchStatus, 5000);
             clearInterval(id);

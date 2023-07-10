@@ -23,6 +23,7 @@ const productSchema = new Schema({
   },
   salePrice: {
     type: Number,
+    set: (value) => parseFloat(value.toFixed(2)),
   },
   stock: {
     type: Number,
@@ -77,20 +78,6 @@ const couponSchema = new  Schema({
 }, {timestamps: true});
 couponSchema.index({createdAt: 1},{expireAfterSeconds: 3600});
 
-const walletSchema = new Schema({
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: 'user',
-    required: true,
-    unique: true,
-  },
-  balance: {
-    type: Number,
-    default: 0,
-  },
-},{   
-  collection: "wallet",
-});
 
 // //cart schema
 // const cartSchema = new Schema(
@@ -332,7 +319,10 @@ const orderSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "product",
       },
-      salePrice: Number,
+      salePrice: {
+        type:Number,
+        set: (value) => parseFloat(value.toFixed(2)),
+      },
       quantity: Number,
       status: {
         type: String,
@@ -348,11 +338,14 @@ const orderSchema = new Schema({
       orderOnRoute: {
         type: Date,
       },
+      orderCancelled: {
+        type: Date,
+      },
       orderDelivered: {
         type: Date,
       },
-      orderCancelled: {
-        type: Date,
+      orderReturned:{
+        type:Date,
       },
       expectedDelivery: {
         type: Date,
@@ -424,11 +417,59 @@ const subCategorySchema = new Schema(
     collection: "subCategory",
   }
 );
+const walletSchema = new Schema({
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+    required: true,
+  },
+  balance: {
+    type: Number,
+    default: 0,
+    set: (value) => parseFloat(value.toFixed(2)),
+  },
+  transactions: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'transaction',
+    },
+  ],
+},
+{
+  collection: "wallet",
+});
 
+const transactionSchema = new Schema({
+  walletId: {
+    type: Schema.Types.ObjectId,
+    ref: 'wallet',
+    required: true,
+  },
+  amount: {
+    type: Number,
+    required: true,
+    set: (value) => parseFloat(value.toFixed(2)),
+  },
+  type: {
+    type: String,
+    enum: ['recharge', 'deduction'],
+    required: true,
+  },
+  date: {
+    type: Date,
+    default: ()=>Date.now(),
+  },
+},
+{
+  collection: "transaction",
+});
+
+const walletModel = model('wallet', walletSchema);
+const transactionModel = model('transaction', transactionSchema);
 const productModel = model("product", productSchema);
 const couponModel = model("coupon", couponSchema);
 const cartModel = model("cart", cartSchema);
-const walletModel = model('wallet', walletSchema);
+ 
 const addressModel = model("address", addressSchema);
 const orderModel = model("orders", orderSchema);
 const ctgryModel = model("category", categorySchema);
@@ -442,5 +483,6 @@ export {
   subCtgryModel,
   couponModel,
   walletModel,
+  transactionModel,
   couponSchema,
 };

@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 const { model, Schema } = mongoose;
 import { couponSchema } from "./productModel.js";
 const userSchema = new Schema({
+  photo: {
+    type: String,
+  },
   userName: {
     type: String,
     required: true,

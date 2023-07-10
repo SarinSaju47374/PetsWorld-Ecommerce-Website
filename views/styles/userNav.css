@@ -111,8 +111,8 @@
   }
 
   .search-cont {
-    border: 1px solid #008CBA;
-    width: 100%;
+    border: 1px solid #c87419f7;
+    width: 80%;
     height: 2rem;
     /* margin:2rem auto; */
     display: flex;
@@ -193,6 +193,8 @@
   }
 
   .full-search {
+    display: flex;
+    justify-content: center;
     position: relative;
   }
 

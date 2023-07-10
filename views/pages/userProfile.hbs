@@ -28,7 +28,11 @@
       <div class="profile-photo">
        <label for="upload-photo">
         <input type="file" id="upload-photo" accept="image/*">
-        <img id="profile-image" src="https://cdn0.iconfinder.com/data/icons/user-pictures/100/unknown2-512.png" alt="Profile Photo">
+        {{#if user.photo}}
+          <img id="profile-image" name="photo" src="{{parser user.photo}}" alt="Profile Photo">
+          {{else}}
+          <img id="profile-image" name="photo" src="https://cdn0.iconfinder.com/data/icons/user-pictures/100/unknown2-512.png" alt="Profile Photo">       
+        {{/if}}
         <span id="upload-label">Click to upload</span>
       </label>
       </div>
@@ -52,8 +56,8 @@
         </header>
         <section class="crd-section">
           <h2>Wallet Details</h2>
-          <p>Bitcoin: 1A2B3C4D5E6F7G8H9I0J</p>
-          <p>Ethereum: ABCDEFGHIJKLMNOPQRSTUVWXYZ</p>
+          <p>Balance: {{wallet.balance}}</p>
+          <button style="background-color:transparent;border:1px solid white;cursor:pointer;border-radius:12px;padding:.55rem;color:white;margin-top:.55rem;" onclick="window.location.href='/wallet-hist'">Wallet History</button>
         </section>
       </div>
     </div>
@@ -114,6 +118,22 @@
         };
 
         reader.readAsDataURL(file);
+        
+        const formData = new FormData();
+        formData.append('photo', file);
+        fetch('/profile/photo', {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => response.json())
+          .then(data => {
+            // Handle the response from the server, such as updating the UI or saving the photo URL to the database
+            console.log(data.imageUrl);
+          })
+          .catch(error => {
+            // Handle any errors that occur during the upload process
+            console.error(error);
+          });
     } else {
         profileImage.src = 'https://cdn0.iconfinder.com/data/icons/user-pictures/100/unknown2-512.png';
     }
@@ -170,6 +190,7 @@
     }
     }
 
+     
   </script>
 </body>
 </html>

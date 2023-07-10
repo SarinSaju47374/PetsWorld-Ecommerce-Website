@@ -1,5 +1,5 @@
 import express from "express";
-import {userCartView,prodCheckout,cartCheckout,cartPymntInit,cartPay,orderInvoice,orderStatus,orderCancel,verifyPymnt,orderCouponStatus} from "../controllers/controllers.js";
+import {userCartView,prodCheckout,cartCheckout,cartPymntInit,cartPay,orderInvoice,orderStatus,orderCancel,orderReturn,verifyPymnt,orderCouponStatus} from "../controllers/controllers.js";
 import jwt2 from "jsonwebtoken";
 const router = express.Router();
 
@@ -13,5 +13,6 @@ router.post("/pymnt/verify",verifyPymnt)
 router.get("/order/:id/:coupon?",orderInvoice);
 router.get("/order2/real-time/:id",orderStatus);
 router.post("/order/cancel",orderCancel);
+router.post("/order/returnOrdr",orderReturn);
 router.get("/order/couponStatus/:id",orderCouponStatus)
 export default router;

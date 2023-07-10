@@ -8,7 +8,7 @@ let genrateRazorPay = (amount)=>{
         var options = {
             amount: amount,  
             currency: "INR",
-            receipt: "order_rcptid_11"
+            receipt: "order_rcptid_11",
           };
           instance.orders.create(options, function(err, order) {
             if(err){
