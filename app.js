@@ -50,7 +50,11 @@ hbs.registerHelper('parser', function(data) {
   return photo;
 });
  
-
+hbs.registerHelper('limit', function (arr, limit) {
+  if (!Array.isArray(arr)) { return []; }
+  let array = arr.filter(val=>val.category.name==="DOG" && val.subCategory.name==="FOOD")
+  return array.slice(0, limit);
+});
  
 //HBS and Static files configuration
 app.set("view engine","hbs");
@@ -61,6 +65,7 @@ app.use("/uploads",express.static(path.join(__dirname,"views","uploads")));
 app.use("/categories",express.static(path.join(__dirname,"views","categories")));
 app.use("/profiles",express.static(path.join(__dirname,"views","profiles")));
 app.use("/images",express.static(path.join(__dirname,"views","images")));
+app.use("/videos",express.static(path.join(__dirname,"views","videos")));
 app.use("/JS",express.static(path.join(__dirname,"views","JS")));
 app.use(express.static('node_modules'));
 
@@ -97,7 +102,7 @@ import ctgryAddRouter from "./routes/ctgryAddRouter.js"
 import adminCtgryViewRouter from "./routes/adminCtgryViewRouter.js"
 import userProductDescrRouter from "./routes/userProductDescrRouter.js";
 import dogFoodRouter from "./routes/dogFoodRouter.js";
-import userCarRouter from "./routes/userCartRouter.js";
+import userCartRouter from "./routes/userCartRouter.js";
 import userOrderHistRouter from "./routes/userOrderHistRouter.js";
 // import userWishlistRouter from "./routes/userWishlistRouter.js"
 import userCheckoutRouter from "./routes/userCheckoutRouter.js"
@@ -165,7 +170,7 @@ app.get("/crop",(req,res)=>{
 app.use("/api",productApi);
 // app.use("/products",productsApi);
 app.use("/api",userApi);
-app.use("/api",cartApi);
+app.use("/api",cartApi); 
 app.use("/",handleAddressRouter);
 app.use("/data",dataRouter);
 app.use("/custom",customUserApi);
@@ -173,11 +178,11 @@ app.use("/custom",customUserApi);
 //Rendering Page
 // app.use("/admin",productMngmtRouter);
 app.use("/login",userLoginRouter);
-
+app.use("/",userProductViewRouter);
 app.use("/register",userRegisterRouter);
 app.use("/forgot",forgotPageRouter);
 app.use("/product-descr",userProductDescrRouter); 
-app.use("/cart",authoriseJwt,userCarRouter);
+app.use("/cart",authoriseJwt,userCartRouter);
 app.use("/products",dogFoodRouter);
 app.use("/checkout",authoriseJwt,userCheckoutRouter);
 app.use("/address",authoriseJwt,userAddressRouter);
@@ -185,14 +190,14 @@ app.use("/pymnt",authoriseJwt,userPymntRouter);
 app.use("/profile",authoriseJwt,userProfileRouter);
 // app.use("/wishlist",userWishlistRouter);
 app.use("/order-history",authoriseJwt,userOrderHistRouter);
-app.use("/",authoriseJwt,walletRouter);
 app.use("/admin",adminLoginRouter);
+app.use("/wallet-hist",authoriseJwt,walletRouter);
 app.use("/product-view",authoriseAdminJwt,adminProductViewRouter);
 app.use("/product-add",authoriseAdminJwt,productAddRouter);
 app.use("/user-view",authoriseAdminJwt,adminUserViewRouter);
 app.use("/ctgry-add",authoriseAdminJwt,ctgryAddRouter);
 app.use("/ctgry-view",authoriseAdminJwt,adminCtgryViewRouter);
-app.use("/",userProductViewRouter);
+
 app.use("/",authoriseAdminJwt,adminCouponsRouter);
 app.get("/otp",(req,res)=>{
   res.render("otpLogin")

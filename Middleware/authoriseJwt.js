@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken"
 
 //User Verification Middleware
 const authoriseJwt = (req,res,next)=>{
+  console.log("Inside  Middleware")
     //cookie extraction
   let cookieHeaderValue = req.headers.cookie;
   let token = null;
@@ -20,16 +21,19 @@ const authoriseJwt = (req,res,next)=>{
   }
   //cookie extraction
     if(token){
+
          jwt.verify(token,process.env.secretKeyU,(err,user)=>{
             if(err){
                 res.render("403Error")
             }else{
+              console.log("Token is valid")
                 next();
             }
         })
          
     }else{
-        res.redirect("/login");
+      console.log("Token aint Valid")
+        return res.redirect("/login");
         
     }
 }

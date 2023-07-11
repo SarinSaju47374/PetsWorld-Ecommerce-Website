@@ -3,7 +3,7 @@ import { walletModel } from "../models/productModel.js";
 import jwt2 from "jsonwebtoken";
 const router = express.Router();
 
-router.get("/wallet-hist",async (req,res)=>{
+router.get("/",async (req,res)=>{
     //cookie extraction
   let cookieHeaderValue = req.headers.cookie;
   let token = null;

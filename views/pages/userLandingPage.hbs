@@ -1,10 +1,26 @@
- <div class="go-up" id="scrollToTopBtn">
+ 
+ 
+<div class="go-up" id="scrollToTopBtn">
         <i class="fa-solid fa-arrow-up"></i>
 </div>
-<div class="banner" data-aos="zoom-out-down">
+{{!-- <div class="banner" data-aos="zoom-out-down">
     <img src="https://cdn.shopify.com/s/files/1/1199/8502/files/Drools_Desktop.png?v=1680942323" alt="#">
+</div> --}}
+<div class="banner-video">
+   
+        <video autoplay loop muted plays-inline class="background-clip">
+            <source src="/videos/adPedigree.mp4" type="video/mp4">    
+        </video>
+        
+        <div class="content-banner">
+            <h4>
+                Explore More
+            </h4>
+            <a href="#container-category">Start Shopping</a>
+        </div>
+   
 </div>
-<div class="container-category">
+<div class="container-category" id="container-category">
     <div class="category" data-aos="zoom-in">
         <a href="/products?cat=DOG&sub=FOOD"
             ><img
@@ -39,9 +55,12 @@
         </div>
     </div>
     
-    <div class="container-content">
-        {{#each products}}
-            <div class="card" data-aos="fade-up">
+    <div class="container-content featured">
+        <h3>FEATURED <span>PRODUCTS</span></h3>
+        <div class="content-cards">
+            {{#each products}}
+            {{#if this.isFeatured}}
+                <div class="card" data-aos="fade-up">
                 <div class="preview">
                     <a href="/product-descr?oid={{this._id}}"><img src="{{this.photo.[0].filepath}}.png" alt=""></a>
                 </div>
@@ -66,24 +85,64 @@
                 </div>
 
             </div>
+            {{/if}}
         {{/each}}
+        </div>
+        
+    </div>
+    <div class="container-content featured">
+        <h3>YOUR <span>DOG</span> WOULD LOVE <span>IT</span></h3>
+        <div class="content-cards">
+            {{#each (limit products 10)}}
+           
+                <div class="card" data-aos="fade-up">
+                <div class="preview">
+                    <a href="/product-descr?oid={{this._id}}"><img src="{{this.photo.[0].filepath}}.png" alt=""></a>
+                </div>
+                <h6>{{this.brandName}}</h6>
+                <h5>{{this.productName}}</h5>
+                <div class="star-rating" style="--rating:{{this.rating}}%;">
+                    <div class="star" id="starRating">
+                        ★★★★★
+                    </div>
+                </div>
+                <div class="coupon">
+                    <p></p>
+                </div>
+                <div class="price">
+                    <h6>Rs {{this.productPrice}}<h6>
+                    <h6>Rs {{this.salePrice}}</h6>
+                </div>
+                <div class="options">
+                    <button style="background-color:transparent;border:none;cursor:pointer" onclick='cartAdder("{{this._id}}")'><i class="fa-solid fa-cart-shopping"></i></button>
+                    <a href=""><i class="fa-solid fa-heart"></i></a>
+                    <a href="/product-descr?oid={{this._id}}"><i class="fa-solid fa-eye"></i></a>
+                </div>
+
+            </div>
+         
+        {{/each}}
+        </div>
+        
     </div>
     <div class="banner" data-aos="zoom-out-down">
-        <img src="https://cdn.shopify.com/s/files/1/1199/8502/files/Royal_Canin_Desktop_1920x.webp?v=1678883460" alt="#">
+        <img class="mySlides w3-animate-fading" src="https://cdn.shopify.com/s/files/1/1199/8502/files/Royal_Canin_Desktop_1920x.webp?v=1678883460" data-aos="fade-left" alt="#">
+        <img class="mySlides w3-animate-fading" src="https://cdn.shopify.com/s/files/1/1199/8502/files/Baybot_Desktop_Banner_1_1920x.webp?v=1677581795" data-aos="fade-left" alt="#">
     </div>
-    <div class="banner" data-aos="zoom-out-down">
+    {{!-- <div class="banner" data-aos="zoom-out-down">
         <img src="https://cdn.shopify.com/s/files/1/1199/8502/files/Baybot_Desktop_Banner_1_1920x.webp?v=1677581795" alt="#">
-    </div>
+    </div> --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-  
+        let totalPages;
+        let pg;
         //cart Adder
         async function cartAdder(prId){
             console.log(prId)
             
             //Specific Cookie Extractor code am AMIGOS********
             let cookieHeaderValue = document.cookie;
-            let token = null;
+            let token;
 
             if (cookieHeaderValue) {
                 let cookies = cookieHeaderValue.split(";");
@@ -147,4 +206,118 @@
         scrollToTopBtn.addEventListener('click', scrollToTop);
 
         //   SCROLL JS
+        // *************PAGINATION UI******************
+
+    const ulTag = document.querySelector("ul");
+    
+    function element(totalPages,page){
+        flag=3;
+        let liTag = "";
+        let beforePages = page-1;
+        let afterPages = page+1;
+        let activeLi;
+        
+        if(page>1){
+            liTag+=`<li class="btn prev" onclick="element(totalPages,${beforePages})"><span><i class="fa-solid fa-chevron-left"></i></span>Prev</li>`;
+        }
+        if(page>2){
+            liTag+=`<li class="numb ${activeLi}" onclick="element(totalPages,1)"><span>1</span></li>`;
+            if(page>3){
+            liTag+=`<li class="dots"><span>....</span></li>`
+            }
+        }
+        
+        {{!-- //how many pages or li show before the current li
+        if(page==1){
+            afterPages=afterPages+2;
+        }else if( page==2){
+            afterPages=afterPages+1;
+        }
+        
+        //how many pages or li show before the current li
+        if(page==totalPages){
+            beforePages=beforePages-2;
+        }else if( page==totalPages-1){
+            beforePages=beforePages-1;
+        }
+         --}}
+        for(let pageLength=beforePages;pageLength<=afterPages;pageLength++){
+            if(pageLength>totalPages|| pageLength <= 0){
+            continue;
+            }
+            if(pageLength<1){
+            pageLength = pageLength+1;
+            }
+            if(page==pageLength){
+            activeLi="active";
+            }else{
+            activeLi="";
+            }
+            liTag+=`<li class="numb ${activeLi}" onclick="element(totalPages,${pageLength})"><span>${pageLength}</span></li>`;
+        }
+        
+        if(page<totalPages-1){
+            if(page<totalPages-2){
+            liTag+=`<li class="dots"><span>....</span></li>`
+            }
+            liTag+=`<li class="numb" onclick="element(totalPages,${totalPages})"><span>${totalPages}</span></li>`;
+        }
+        
+        if(page<totalPages){
+        liTag+=`<li class="btn next" onclick="element(totalPages,${afterPages})">Next<span><i class="fa-solid fa-chevron-right"></i></span></li>`; 
+        }
+        ulTag.innerHTML=liTag;
+        pg=page;
+        run(link+`&p=${pg}`)
+    }
+    
+    // *************PAGINATION UI******************
+    async function categoryRender(){
+        let container = document.getElementById("container-category");
+        try{
+            const data = await fetch("/custom/subCategories");
+            const ctgrys = await data.json();
+            console.log(ctgrys);
+            ctgrys.forEach(val=>{
+                val.photo = JSON.parse(val.photo);
+                container.innerHTML=`
+                  <div class="category" data-aos="zoom-in">
+                    <a href="/products?cat=${val.category.name}&sub=${val.name}">
+                        <div class="img-ctgry">
+                            <img
+                                src="${val.photo.filepath}"
+                                alt=""
+                                style={border-radius:25px;}
+                            />
+                        </div>
+                    </a>
+                    <p>${val.category.name} ${val.name}</p>
+                  </div>
+            ` 
+            })
+        }catch(err){
+            console.log(err);
+        }
+        
+         
+    }
+    document.addEventListener("DOMContentLoaded",()=>{
+        categoryRender();
+    })
+    </script>
+    <script>
+        var myIndex = 0;
+        carousel();
+
+        function carousel() {
+        var i;
+        var x = document.getElementsByClassName("mySlides");
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";  
+        }
+        myIndex++;
+        if (myIndex > x.length) {myIndex = 1}    
+        x[myIndex-1].style.display = "block";  
+        setTimeout(carousel, 3000);    
+        }
     </script>

@@ -1,5 +1,5 @@
 import express from "express";
-import { getUsersV2,getOrdersV2,getSpecificOrder,modifyOrder,getCategories,getSubCategories,getSpecificCategories,modifySpecificCategories} from "../controllers/controllers.js" 
+import { getUsersV2,getOrdersV2,getSpecificOrder,modifyOrder,getCategories,getSubCategories,getSpecificCategories,modifySpecificCategories,getAllSubCategories} from "../controllers/controllers.js" 
 const router = express.Router();
 import jwt2 from "jsonwebtoken";
 import userModel from "../models/userModel.js";
@@ -12,6 +12,7 @@ router.get("/categories",getCategories)
 router.get("/categories/:id",getSpecificCategories)
 router.put("/categories/:id",modifySpecificCategories)
 router.get("/subCategories/:cid",getSubCategories)
+router.get("/subCategories",getAllSubCategories)
 router.post("/orders",modifyOrder);
 
 router.get("/user-coupone",async (req,res)=>{

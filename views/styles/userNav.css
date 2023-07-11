@@ -35,7 +35,6 @@
     margin: 0;
     padding: 0;
     box-sizing: inherit;
-    /* scroll-behavior: smooth; */
     background-color: var(--main-body);
     color: var(--main-text);
     overflow-x: hidden;
@@ -44,6 +43,30 @@
     flex-direction: column;
     justify-content: space-between;
     margin-top: 4rem;
+  }
+  body {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  /* Create a custom scrollbar for WebKit browsers (Chrome, Safari, and Opera) */
+  ::-webkit-scrollbar {
+    width: 0.5rem; /* Adjust the width of the scrollbar as needed */
+  }
+  
+  ::-webkit-scrollbar-track {
+    background-color:transparent;/* Adjust the background color of the scrollbar track */
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color:orange; /* Adjust the color of the scrollbar thumb */
+    border-radius:5rem;
+  }
+  
+  /* Apply scrollbar styles to the sidebar and content */
+  .sidebar,
+  .content {
+    overflow-y: auto; /* Enable vertical scrolling */
   }
 
   #scrollToTopBtn {
@@ -59,6 +82,7 @@
     place-items: center;
     font-size: 2rem;
     color: rgba(255, 255, 255, 0.892);
+    z-index:5;
   }
 
   #scrollToTopBtn.scroll {
@@ -112,7 +136,7 @@
 
   .search-cont {
     border: 1px solid #c87419f7;
-    width: 80%;
+    width: 100% !important;
     height: 2rem;
     /* margin:2rem auto; */
     display: flex;
@@ -128,6 +152,7 @@
     padding-left: 1rem;
     color: white;
     flex: 1;
+    width:100% !important;
   }
 
 
@@ -146,14 +171,14 @@
     width: 3rem;
     /* vertical-align: center; */
     display: grid;
-    place-items: center;
+    place-items: center; 
     height: 100%;
     color: orange;
   }
 
   .search-cont2 {
     border: 1px solid #008CBA;
-    width: 20%;
+    width: 60%;
     height: 2rem;
     margin: 2rem auto;
     display: flex;
@@ -196,6 +221,7 @@
     display: flex;
     justify-content: center;
     position: relative;
+    padding:0;
   }
 
   .full-search ul {
@@ -228,6 +254,8 @@
 
   .main-container {
     display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .full-search ul li a:hover {
@@ -336,6 +364,25 @@
     top: -6px;
     left: -1px;
   }
+
+
+  /* category styling */
+  .img-ctgry{
+    height:8rem;
+    width:8rem;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  .img-ctgry img{
+    height:100%;
+    width:100%;
+    object-fit: center;
+    transition: all .67s ease;
+  }
+  .img-ctgry img:hover{
+    transform: scale(1.1);
+  }
+  /* category styling */
    
   .coupon-parent{
     position: relative;
@@ -357,7 +404,7 @@
   }
   
   .coupon-parent ul li{
-  width:100%;  
+    width:100%;  
   }
   .coupon-parent ul li a {
     text-align: center;
@@ -372,7 +419,196 @@
   .main-container{
   display: flex;
   }
-  
+  /* sidebar container */
+  .sidebar-container {
+    
+    top: 1rem;
+    left: 0;
+    width: 13rem;
+    padding: 20px;
+    background-color: #0c7de057;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+  }
+
+  .sidebar-container h2 {
+    margin-top: 0;
+  }
+
+  .category-section select {
+    width: 100%;
+    margin-bottom: 10px;
+    height: 1.5rem;
+    outline: none;
+    border-radius: 12px;
+  }
+
+  .price-section {
+    margin-top: 20px;
+  }
+
+  .slider-container input[type="range"] {
+    width: 100%;
+  }
+
+  .price-inputs input[type="number"] {
+    width: 80px;
+  }
+
+  .filter-section label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .number-group {
+    flex: 1 0 auto;
+    text-align: right;
+    height: 30px;
+    font-weight: 300;
+    font-size: 13px;
+    color: #fff;
+    width: 10rem;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .number-group .number-input {
+    width: 36px;
+    height: 30px;
+    text-align: center;
+    color: #ffffff;
+    background-color: #3D3E3F;
+    border: 0;
+  }
+
+  .number-group .number-input:first-of-type {
+    margin-right: 7px;
+  }
+
+  .number-group .number-input:last-of-type {
+    margin-left: 7px;
+  }
+
+  .number-group .number-input::-webkit-outer-spin-button,
+  .number-group .number-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+
+
+
+  .range-group {
+    position: relative;
+    flex: 0 0 100%;
+    height: 47px;
+    width: 10rem;
+    margin: 0;
+  }
+
+  .range-group .range-input {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    margin-bottom: 0;
+    -webkit-appearance: none;
+    width: 100%;
+    border-bottom: 0;
+  }
+
+  .range-group .range-input:focus {
+    outline: 0;
+  }
+
+  .range-group .range-input::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 2px;
+    cursor: pointer;
+    animation: .2s;
+    background: #3FAFFA;
+    border-radius: 1px;
+    box-shadow: none;
+    border: 0;
+  }
+
+  .range-group .range-input::-webkit-slider-thumb {
+    z-index: 2;
+    position: relative;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #3FAFFA;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -7px;
+  }
+
+  .range-group .range-input::-moz-range-track {
+    width: 100%;
+    height: 2px;
+    cursor: pointer;
+    animation: .2s;
+    background: #3FAFFA;
+    border-radius: 1px;
+    box-shadow: none;
+    border: 0;
+  }
+
+  .range-group .range-input::-moz-range-thumb {
+    z-index: 2;
+    position: relative;
+    box-shadow: 0px 0px 0px #000;
+    border: 1px solid #2497e3;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #3FAFFA;
+    cursor: pointer;
+  }
+
+  .range-group .range-input::-ms-track {
+    width: 100%;
+    height: 5px;
+    cursor: pointer;
+    animation: .2s;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+  }
+
+  .range-group .range-input::-ms-fill-lower,
+  .range-group .range-input::-ms-fill-upper {
+    background: #3FAFFA;
+    border-radius: 1px;
+    box-shadow: none;
+    border: 0;
+  }
+
+  .range-group .range-input::-ms-thumb {
+    z-index: 2;
+    position: relative;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #3FAFFA;
+    cursor: pointer;
+  }
+
+  /* For demo purposes */
+
+
+  .filter {
+    /*   margin: 0 auto; */
+    width: 100%;
+    /*   max-width: 80%; */
+  }
+
+  #rangeSlider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 1rem auto;
+  }
+  /* sidebar container */
   .coupon-parent ul li a:hover {
     background-color: #f69a07;
     text-align: center;
@@ -492,7 +728,20 @@
   /* CATEGORIES */
 
   /* CONTAINER-CONTENT STYLES */
-  .container-content {
+  .container-content{
+    margin: 0 auto;
+    text-align: center;
+    margin-bottom:2rem;
+  }
+  .container-content h3{
+    font-family: 'Maven Pro', sans-serif;
+    margin-bottom: 2rem;
+    color:orange;
+  }
+  .container-content span{
+    color:white;
+  }
+  .container-content .content-cards{
 
     max-width: 90vw;
     margin: 0rem auto;
@@ -610,21 +859,146 @@
 
 
   /* BANNER */
-  .banner {
+  .banner-video {
     width: 100%;
-    height: auto;
+    min-height: 90vh;
     object-fit: cover;
     overflow: hidden;
     margin-bottom: 2REM;
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.4);
+    display:flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .banner {
+    width: 100%;
+    min-height: 90vh;
+    object-fit: cover;
+    overflow: hidden;
+    margin-bottom: 2REM;
+    position: relative;
+ 
+    display:flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .banner img {
+  .banner-video video {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-
+ .banner-video .content-banner{
+  display: flex;
+  align-items: center;
+  flex-direction: column; 
+  height: 20%;
+ }
+ .banner-video .content-banner a{
+    font-size: 23px;
+    color:white;
+    text-decoration: none;
+    border: 2px solid white;
+    padding: 15px 25px;
+    border-radius: 50px;
+    transition: all 1s ease;
+  }
+ .banner-video .content-banner a:hover{
+    font-size: 23px;
+    color:rgb(21, 20, 18);
+    background-color: rgba(255, 255, 255, 0.591);
+     
+  }
+  /* .mySlides {
+    display: none;
+    animation: fade-in 3s ease-in-out infinite;
+    z-index:-1;
+  } */
+  
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  .background-clip{
+    position:absolute;
+    top:0;
+    bottom:0;
+    z-index: -1;
+  }
   /* BANNER */
+
+
+ /* pagination */
+ .pagination{
+    display: grid;
+    place-items: center;
+  }
+  .pagination ul{
+    /* background-color:gray; */
+    list-type:none;
+    display:flex;
+    align-items:center;
+    padding:8px;
+    border-radius:50px;
+    height: fit-content;
+    margin-top: 1rem;
+    width:fit-content;
+  }
+  .pagination ul li{
+    list-style:none;
+    line-height:45px;
+    text-align:center;
+    font-size:1.2rem;
+    cursor:pointer;
+    border-radius:50%;
+    color:white;
+    margin:0;
+    
+  }
+  .pagination ul li.numb{
+    height:35px;
+    width:35px;
+    margin:0 3px;
+    font-size: 1rem;
+    display:flex;
+    justify-content: center;
+    align-items: center;    
+  }
+  .pagination ul li.btn{
+  
+    padding:0 20px;
+    color:#1682e8;
+  }
+  .pagination ul li.dots{
+    font-size:20px;
+    cursor:default;
+  }
+  .pagination ul li.prev{
+    color:var(--color-dark);
+    font-size: 1rem;
+    border-radius:25px 5px 5px 25px;
+  }
+  .pagination ul li.next{
+    color:var(--color-dark);
+    font-size: 1rem;
+    border-radius: 5px 25px 25px 5px;
+  }
+
+  .pagination ul li.numb:hover,
+  .pagination ul li.active,
+  .pagination ul li.btn:hover{
+    background-color:orange;
+    color:white;
+  }
+
+ /* pagination */
+
+
   /* FOOTER */
   footer {
     color: white;
@@ -836,15 +1210,26 @@
     }
 
     /* BANNER */
+    .search-cont2{
+      width:20%;
+    }
+
+
+
+
+    
+
 
 
     /* CONTENT STYLES */
     .container-content {
       max-width: 70vw;
-      place-items: center;
+      text-align: center;
       gap: 20px;
     }
-
+    .container-content h3{
+      margin-bottom: 3rem;
+    }
     .card {
       width: 13rem;
       border-radius: 22px;
@@ -946,7 +1331,9 @@
     .main-container {
       display: flex;
     }
-
+    /* sidebar container */
+    
+    /* sidebar container */
     .dropdown li ul li a:hover {
       background-color: #f69a07;
       text-align: center;
@@ -963,193 +1350,14 @@
       display: block;
     }
 
-    .sidebar-container {
-      position: absolute;
-      top: 1rem;
-      left: 0;
-      width: 13rem;
-      padding: 20px;
-      background-color: #0c7de057;
-      border-radius: 15px;
-    }
-
-    .sidebar-container h2 {
-      margin-top: 0;
-    }
-
-    .category-section select {
-      width: 100%;
-      margin-bottom: 10px;
-      height: 1.5rem;
-      outline: none;
-      border-radius: 12px;
-    }
-
-    .price-section {
-      margin-top: 20px;
-    }
-
-    .slider-container input[type="range"] {
-      width: 100%;
-    }
-
-    .price-inputs input[type="number"] {
-      width: 80px;
-    }
-
-    .filter-section label {
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .number-group {
-      flex: 1 0 auto;
-      text-align: right;
-      height: 30px;
-      font-weight: 300;
-      font-size: 13px;
-      color: #fff;
-      width: 10rem;
+    .main-container {
       display: flex;
-      justify-content: space-between;
+
     }
-
-    .number-group .number-input {
-      width: 36px;
-      height: 30px;
-      text-align: center;
-      color: #ffffff;
-      background-color: #3D3E3F;
-      border: 0;
-    }
-
-    .number-group .number-input:first-of-type {
-      margin-right: 7px;
-    }
-
-    .number-group .number-input:last-of-type {
-      margin-left: 7px;
-    }
-
-    .number-group .number-input::-webkit-outer-spin-button,
-    .number-group .number-input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-    }
-
-
-
-    .range-group {
-      position: relative;
-      flex: 0 0 100%;
-      height: 47px;
-      width: 10rem;
-      margin: 0;
-    }
-
-    .range-group .range-input {
+    .sidebar-container{
       position: absolute;
-      left: 0;
-      bottom: 0;
-      margin-bottom: 0;
-      -webkit-appearance: none;
-      width: 100%;
-      border-bottom: 0;
     }
-
-    .range-group .range-input:focus {
-      outline: 0;
-    }
-
-    .range-group .range-input::-webkit-slider-runnable-track {
-      width: 100%;
-      height: 2px;
-      cursor: pointer;
-      animation: .2s;
-      background: #3FAFFA;
-      border-radius: 1px;
-      box-shadow: none;
-      border: 0;
-    }
-
-    .range-group .range-input::-webkit-slider-thumb {
-      z-index: 2;
-      position: relative;
-      height: 18px;
-      width: 18px;
-      border-radius: 50%;
-      background: #3FAFFA;
-      cursor: pointer;
-      -webkit-appearance: none;
-      margin-top: -7px;
-    }
-
-    .range-group .range-input::-moz-range-track {
-      width: 100%;
-      height: 2px;
-      cursor: pointer;
-      animation: .2s;
-      background: #3FAFFA;
-      border-radius: 1px;
-      box-shadow: none;
-      border: 0;
-    }
-
-    .range-group .range-input::-moz-range-thumb {
-      z-index: 2;
-      position: relative;
-      box-shadow: 0px 0px 0px #000;
-      border: 1px solid #2497e3;
-      height: 18px;
-      width: 18px;
-      border-radius: 50%;
-      background: #3FAFFA;
-      cursor: pointer;
-    }
-
-    .range-group .range-input::-ms-track {
-      width: 100%;
-      height: 5px;
-      cursor: pointer;
-      animation: .2s;
-      background: transparent;
-      border-color: transparent;
-      color: transparent;
-    }
-
-    .range-group .range-input::-ms-fill-lower,
-    .range-group .range-input::-ms-fill-upper {
-      background: #3FAFFA;
-      border-radius: 1px;
-      box-shadow: none;
-      border: 0;
-    }
-
-    .range-group .range-input::-ms-thumb {
-      z-index: 2;
-      position: relative;
-      height: 18px;
-      width: 18px;
-      border-radius: 50%;
-      background: #3FAFFA;
-      cursor: pointer;
-    }
-
-    /* For demo purposes */
-
-
-    .filter {
-      /*   margin: 0 auto; */
-      width: 100%;
-      /*   max-width: 80%; */
-    }
-
-    #rangeSlider {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
-      margin: 1rem auto;
-    }
+    
 
     /* //css */
   }

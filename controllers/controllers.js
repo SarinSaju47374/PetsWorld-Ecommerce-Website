@@ -546,14 +546,14 @@ async function userProductDescr(req, res) {
         console.log(qnty);
       }
 
-      res.render("userProductDescr", {
+      return res.render("userProductDescr", {
         admin: false,
         user: true,
         product,
         qnty,
       });
     }
-    res.render("userProductDescr", { admin: false, user: true, product, qnty });
+    return res.render("userProductDescr", { admin: false, user: true, product, qnty });
   }
 }
 
@@ -1550,6 +1550,15 @@ async function getSubCategories(req, res) {
     console.log("Error inside getCategories: ", err);
   }
 }
+async function getAllSubCategories(req, res) {
+
+  try {
+    let subCtgrys = await subCtgryModel.find().populate('category');
+    res.json(subCtgrys);
+  } catch (err) {
+    console.log("Error inside getCategories: ", err);
+  }
+}
 // async function updateProductsApi(req, res) {
 //     try {
 //       const {
@@ -2135,6 +2144,7 @@ async function getUserAddress(req, res) {
 // }
 
 async function getCart(req, res) {
+   
   try {
     const userId = new ObjectId(req.params.id); // Extract the user ID from the request query
 
@@ -2172,143 +2182,164 @@ async function getCart(req, res) {
 }
 
 // ********** Time Consuming Code ************ the next code solves this issue og slowness
-// async function addToCart(req,res){
-//   let id =  new ObjectId(req.query.prId);
-//   console.log(id);
-//   let product = await productModel.findOne({_id:id});
-//   // console.log("product: ",product)
-//   let token = req.query.tk;
-//   console.log("token: ",token)
-//   if(token){
-//     let userId = new ObjectId(jwt2.verify(token,process.env.secretKeyU).user);
-//     let cart = await cartModel.findOne({userId:userId});
-//     if(!cart){
-//       console.log("cart exists")
-//       if(product){
-//         console.log("product exists in product collection")
-//         await cartModel.create({
-//           userId:userId,
-//           items:[
-//             {
-//               productId:id,
-//               productName:product.productName,
-//               brandName:product.brandName,
-//               description:product.decription,
-//               productPrice:product.productPrice,
-//               salePrice:product.salePrice,
-//               stock:product.stock,
-//               category:product.category,
-//               subCategory:product.subCategory,
-//               paymentOption:product.paymentOption,
-//               rating:product.rating,
-//               quantity:1,
-//             }
-//           ]
-//         })
-//         console.log("added to cart")
-//       }
-//     }else{
-//       console.log("Cart Exits with such Product")
-//       try {
-//         const existingCart = await cartModel.findOneAndUpdate(
-//           { _id: cart._id, 'items.productId': id },
-//           { $inc: { 'items.$.quantity': 1 } },
-//           { new: true }
-//         );
+async function addToCart(req, res) {
+  try {
+    const id = new ObjectId(req.query.prId);
+    console.log(id);
+    const product = await productModel.findOne({ _id: id });
+    // console.log("product: ",product)
+    const token = req.query.tk;
+    console.log("token: ", token);
 
-//         if(!existingCart){
-//           console.log("inSide else of cart existence but no such product .")
-//           const updatedCart = await cartModel.findByIdAndUpdate(
-//             cart._id,
-//             { $push: { items: {
-//               productId:id,
-//               productName:product.productName,
-//               brandName:product.brandName,
-//               description:product.decription,
-//               productPrice:product.productPrice,
-//               salePrice:product.salePrice,
-//               stock:product.stock,
-//               category:product.category,
-//               subCategory:product.subCategory,
-//               paymentOption:product.paymentOption,
-//               rating:product.rating,
-//               quantity:1,
-//              } } }
+    if (token !== "undefined") {
+      const userId = new ObjectId(jwt2.verify(token, process.env.secretKeyU).user);
+      let cart = await cartModel.findOne({ userId: userId });
 
-//           );
+      if (!cart) {
+        console.log("Cart does not exist");
+        if (product) {
+          console.log("Product exists in the product collection");
+          await cartModel.create({
+            userId: userId,
+            items: [
+              {
+                productId: id,
+                productName: product.productName,
+                brandName: product.brandName,
+                description: product.decription,
+                productPrice: product.productPrice,
+                salePrice: product.salePrice,
+                stock: product.stock,
+                category: product.category,
+                subCategory: product.subCategory,
+                paymentOption: product.paymentOption,
+                rating: product.rating,
+                quantity: 1,
+              },
+            ],
+          });
+          return res.json({ "success": true });
+        }
+      } else {
+        console.log("Cart exists with such product");
+        const existingCartItem = cart.items.find((item) => item.productId.equals(id));
 
-//           // Product ID not found, push the whole product to the cart
-//           // console.log('Product added to cart:', updatedCart);
-//         }
-//       } catch (error) {
-//         console.error('Error adding product to cart:', error);
-//       }
+        if (existingCartItem) {
+          console.log("Product already exists in cart, incrementing quantity");
+          existingCartItem.quantity += 1;
+          await cart.save();
+        } else {
+          console.log("Product does not exist in cart, adding it");
+          cart.items.push({
+            productId: id,
+            productName: product.productName,
+            brandName: product.brandName,
+            description: product.decription,
+            productPrice: product.productPrice,
+            salePrice: product.salePrice,
+            stock: product.stock,
+            category: product.category,
+            subCategory: product.subCategory,
+            paymentOption: product.paymentOption,
+            rating: product.rating,
+            quantity: 1,
+          });
+          await cart.save();
+        }
+        return res.json({ "success": true });
+      }
+    } else {
+      return res.json({ redirect: "/login" });
+    }
+  } catch (error) {
+    console.error("Error adding product to cart:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
 
-//     }
-//   }else{
-//       res.json({redirect:"/login"});
-//   }
-
-// }
 
 //
 
 //Faster Code then Before
-async function addToCart(req, res) {
-  const productId = new ObjectId(req.query.prId);
-  const token = req.query.tk;
+// async function addToCart(req, res) {
+//   console.log("Im here inside Add to Cart!")
+//   const productId = new ObjectId(req.query.prId);
+//   const token = req.query.tk;
+//   let cond = false
+//   console.log("The Token is : ",token)
+ 
+//   if (token) {
+//     console.log("IM trying to verify the JWT")
+//     console.log("The Token is : ",token)
+//     console.log("The Cond is : ",cond)
+//     const userId = new ObjectId(
+//       jwt2.verify(token, process.env.secretKeyU).user
+//     );
+//     let cart = await cartModel.findOne({ userId });
 
-  if (token!=null) {
-    const userId = new ObjectId(
-      jwt2.verify(token, process.env.secretKeyU).user
-    );
-    let cart = await cartModel.findOne({ userId });
+//     if (!cart) {
+//       // Cart doesn't exist, create a new cart and add the product
+//       const product = await productModel.findOne({ _id: productId });
 
-    if (!cart) {
-      // Cart doesn't exist, create a new cart and add the product
-      const product = await productModel.findOne({ _id: productId });
+//       if (product) {
+//         await cartModel.create({
+//           userId,
+//           items: [
+//             {
+//               productId,
+//               quantity: 1,
+//             },
+//           ],
+//         });
+//       }
 
-      if (product) {
-        await cartModel.create({
-          userId,
-          items: [
-            {
-              productId,
-              quantity: 1,
-            },
-          ],
-        });
-      }
+//       return res.json({"success":true});
+//     } else {
+//       // Cart exists, perform updates in bulk
+//       const existingCartItem = cart.items.find((item) =>
+//         item.productId.equals(productId)
+//       );
 
-      return res.json({"success":true});
-    } else {
-      // Cart exists, perform updates in bulk
-      const existingCartItem = cart.items.find((item) =>
-        item.productId.equals(productId)
-      );
+//       if (existingCartItem) {
+//         // Product already exists in the cart, increase the quantity
+//         existingCartItem.quantity += 1;
+//       } else {
+//         // Product doesn't exist in the cart, add the product
+//         const product = await productModel.findOne({ _id: productId });
 
-      if (existingCartItem) {
-        // Product already exists in the cart, increase the quantity
-        existingCartItem.quantity += 1;
-      } else {
-        // Product doesn't exist in the cart, add the product
-        const product = await productModel.findOne({ _id: productId });
+//         if (product) {
+//           cart.items.push({
+//             productId,
+//             quantity: 1,
+//           });
+//         }
+//       }
+//       await cart.save();
+//       return res.json({"success":true});
+//     }
+//   } else {
+//     res.redirect("/login");
+//   }
+// }
+// async function addToCart(req, res) {
+   
+//   const productId = new ObjectId(req.query.prId);
+//   const token = req.query.tk;
+  
+//   console.log("The Token before  : ",token);
+//   console.log("The Token before  : ",typeof token);
+//   console.log("The Token before  : ",token,1);
 
-        if (product) {
-          cart.items.push({
-            productId,
-            quantity: 1,
-          });
-        }
-      }
-      await cart.save();
-      return res.json({"success":true});
-    }
-  } else {
-    res.redirect("/login");
-  }
-}
-
+//   if(token == "undefined"){
+//     console.log("token is undefined  amigos which is very very very weird")
+//   }
+ 
+//   // if (typeof req.query.tk !== undefined && req.query.tk !== null && req.query.tk !== "") {
+//   //   console.log("There is a token: ",req.query.tk)
+//   // } else {
+//   //   return res.redirect("/login");
+//   // }
+// }
 async function dogFoodView(req, res) {
   let { cat, sub } = req.query;
   // let productsD = await fetch("/api/products");
@@ -2364,6 +2395,7 @@ export {
   verifyPymnt,
   getCategories,
   getSubCategories,
+  getAllSubCategories,
   orderCouponStatus,
   getSpecificCategories,
   modifySpecificCategories,

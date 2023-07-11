@@ -365,10 +365,10 @@
 
     document.addEventListener("DOMContentLoaded", async function() {
         // DOM manipulation and other code here
-          run('ctgry-add/api/ctgrys');
-          runS('ctgry-add/api/subCtgrys');
-        const response = await fetch("ctgry-add/api/ctgrys"); // Replace with your API endpoint URL
-        const response2 = await fetch("ctgry-add/api/subCtgrys"); // Replace with your API endpoint URL
+            run('ctgry-add/api/ctgrys');
+            runS('ctgry-add/api/subCtgrys');
+            const response = await fetch("ctgry-add/api/ctgrys"); // Replace with your API endpoint URL
+            const response2 = await fetch("ctgry-add/api/subCtgrys"); // Replace with your API endpoint URL
             if (!response.ok) {
                 throw new Error('Request failed with status: ' + response.status);
             }

@@ -30,7 +30,7 @@ const authoriseAdminJwt = (req,res,next)=>{
         })
          
     }else{
-        res.redirect("/admin")
+        return res.redirect("/admin")
          
     }
 }
