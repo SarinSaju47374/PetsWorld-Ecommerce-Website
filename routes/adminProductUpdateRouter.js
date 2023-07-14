@@ -7,7 +7,7 @@ import { productModel } from "../models/productModel.js";
 const router = express.Router();
 
 router.get("/",productAdd);
-router.use(express.json());router.use(express.json());
+router.use(express.json());
 
 const upload = multer({ dest: 'views/uploads/' });
 router.post("/",upload.array('photos'),async(req,res)=>{
@@ -17,7 +17,7 @@ router.post("/",upload.array('photos'),async(req,res)=>{
         description,
         points,
         productPrice,
-        salePrice,
+        discount,
         stock,
         category,
         subCategory,
@@ -25,7 +25,7 @@ router.post("/",upload.array('photos'),async(req,res)=>{
         rating,
      } = req.body;
        
-     
+    let salePrice = (productPrice-productPrice*Number(discount)/100);
     await productModel.updateOne({_id:},{
         productName:productName,
         description:description,
@@ -37,7 +37,6 @@ router.post("/",upload.array('photos'),async(req,res)=>{
         subCategory:subCategory,
         paymentOption:paymentOption,
         rating:rating,
-        photo:photos
     })
      
     res.send("Sucess");

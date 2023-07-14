@@ -17,7 +17,7 @@
         <!-- card left -->
         <div class = "product-imgs">
           <div class = "img-display">
-            <div class = "img-showcase first" style="background-image:url('{{product.photo.[0].filepath}}.png')">
+            <div class = "img-showcase first" style="background-image:url('{{product.photo.[0].filepath}}')">
               <!-- <img class="example" src = "https://cdn.britannica.com/79/232779-050-6B0411D7/German-Shepherd-dog-Alsatian.jpg" alt = "shoe image"> -->
               <span class="lens"></span>
             </div>
@@ -27,7 +27,7 @@
             {{# each product.photo}}
               <div class = "img-item">
                 <a href = "#" >
-                  <img src = '{{this.filepath}}.png' alt = "{{this.title}}">
+                  <img src = '{{this.filepath}}' alt = "{{this.title}}">
                 </a>
               </div>
             {{/each}}
@@ -37,13 +37,10 @@
         <div class = "product-content">
           <h2 class = "product-title">{{product.productName}}</h2>
           
-          <div class = "product-rating">
-            <i class = "fas fa-star"></i>
-            <i class = "fas fa-star"></i>
-            <i class = "fas fa-star"></i>
-            <i class = "fas fa-star"></i>
-            <i class = "fas fa-star-half-alt"></i>
-            <span>3(21)</span>
+          <div class="star-rating" style="--rating:{{product.rating}}%;">
+              <div class="star" id="starRating">
+                  ★★★★★
+              </div>
           </div>
 
           <div class = "product-price">
@@ -56,40 +53,34 @@
             <p>{{product.description}}</p>
              
             <ul>
-              <li>Available: <span>in stock</span></li>
-              <li>Category: <span>{{product.category}}</span></li>
+              <li>Available: 
+                {{#if (condition product.stock)}}
+                  In Stock
+                  {{else}}
+                  Out Of Stock
+                {{/if}}
+              <li>Category: <span>{{product.category.name}} {{product.subCategory.name}}</span></li>
               <li>Brand: <span>{{product.brandName}}</span></li>
-              <li>Shipping Area: <span>All over the world</span></li>
+              <li>Shipping Area: <span>India</span></li>
               <li>Shipping Fee: <span>Free</span></li>
             </ul>
           </div>
 
           <div class = "purchase-info">
+            {{#if (condition product.stock)}}
+              <button type = "button" class = "btn" onclick='cartAdder("{{product._id}}")'>
+                Add to Cart <i class = "fas fa-shopping-cart"></i>
+              </button>
+              {{else}}
+              <button type = "button" class = "btn" onclick='noStock()'>
+                Add to Cart <i class = "fas fa-shopping-cart"></i>
+              </button>
+            {{/if}}
             
-            <button type = "button" class = "btn" onclick='cartAdder("{{product._id}}")'>
-              Add to Cart <i class = "fas fa-shopping-cart"></i>
-            </button>
             <a href="#"><i class="fa-solid fa-heart" style="font-size: 1.56rem;"></i></a>
           </div>
 
-          <div class = "social-links">
-            <p>Share At: </p>
-            <a href = "#">
-              <i class = "fab fa-facebook-f"></i>
-            </a>
-            <a href = "#">
-              <i class = "fab fa-twitter"></i>
-            </a>
-            <a href = "#">
-              <i class = "fab fa-instagram"></i>
-            </a>
-            <a href = "#">
-              <i class = "fab fa-whatsapp"></i>
-            </a>
-            <a href = "#">
-              <i class = "fab fa-pinterest"></i>
-            </a>
-          </div>
+          
         </div>
       </div>
     </div>
@@ -97,6 +88,14 @@
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+      function noStock(){
+          Swal.fire({
+              icon: 'info',
+              title: 'Sorry!',
+              text: 'No Stock Amigo!',
+              footer: 'Try Saving this Product to your WishList.'
+          })
+      }
      async function cartAdder(prId) {
           //Specific Cookie Extractor code am AMIGOS********
           let cookieHeaderValue = document.cookie;

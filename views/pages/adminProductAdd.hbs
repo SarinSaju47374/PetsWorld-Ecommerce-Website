@@ -1,10 +1,5 @@
 <main>
 <h1>ADD PRODUCT</h1>
-<div class="date">
-    <input type="date">
-</div>
-
- 
 {{!-- Product Add --}}
 
 <div class="form-admin">
@@ -22,9 +17,11 @@
             //Dynamic Data for Category
         </select>
         <select name="subCtgryId" id="subCtgry" required>
+            <option value="" selected>Add SubCategory</option>
             //Dynamic Data for SubCategory
         </select>
-        <input type="text" name="paymentOption" placeholder="paymentOption" required>
+        {{!-- <input type="text" name="paymentOption" placeholder="paymentOption" required> --}}
+        <input type="text" id="image-ratio-input" name="imageRatio" placeholder="Enter image ratio (e.g., 16:9)">
         <input type="number" name="rating" placeholder="Initial rating" required>
         <div class="file-input-wrapper">
             <label for="file-input" class="file-label">
@@ -118,7 +115,7 @@
             let info = await data.json();
             
             if(info && info.length>0){
-                document.getElementById("subCtgry").innerHTML="";
+                document.getElementById("subCtgry").innerHTML=`<option value="">Add SubCategory</option>`;
                 info.forEach(val=>{
                     document.getElementById("subCtgry").innerHTML+=`<option value="${val._id}">${val.name}</option>`
                 })

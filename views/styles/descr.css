@@ -282,7 +282,7 @@ color: var(--main-text);
       left:32rem;
       background-size: 400% 400%;
       background-color: red;
-      z-index: 21;
+      z-index: 9;
     }
     .first:hover .lens{
       display:block;

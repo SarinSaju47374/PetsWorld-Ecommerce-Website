@@ -12,13 +12,7 @@
             <input type="text" placeholder="Search here..">
             <i  class="fa-solid fa-magnifying-glass" style = "margin-right:1rem"></i>
         </div>
-        <select class="category">
-             <option value="">All</option>
-        </select>
-        <select class="subCategory">
-            <option value="">All</option>
-        </select>
-
+         
     </div>
     <div class="table">
          <table>
@@ -142,6 +136,7 @@
     
 </div>
 {{!-- <script src="/JS/adminContent.js"></script> --}}
+<script src="/JS/adminContent.js"></script>
 <script>
     const sideBarOpts = document.querySelectorAll(".sidebar a");
      
@@ -340,7 +335,7 @@
                     switch (o.status) {
                         case 'orderPlaced':
                         selectOptions = `
-                           
+                            <option value="">Select Status</option>
                             <option value="orderShipped">Order Shipped</option>
                             <option value="orderOnRoute">Order On-Route</option>
                             <option value="orderDelivered">Order Delivered</option>
@@ -348,7 +343,7 @@
                         break;
                         case 'orderShipped':
                         selectOptions = `
-                             
+                
                             <option value="orderShipped" disabled selected>Order Shipped</option>
                             <option value="orderOnRoute">Order On-Route</option>
                             <option value="orderDelivered">Order Delivered</option>
@@ -356,7 +351,7 @@
                         break;
                         case 'orderOnRoute':
                         selectOptions = `
-                            
+                     
                             <option value="orderShipped" disabled>Order Shipped</option>
                             <option value="orderOnRoute" disabled selected>Order On-Route</option>
                             <option value="orderDelivered">Order Delivered</option>
@@ -364,7 +359,7 @@
                         break;
                         case 'orderDelivered':
                         selectOptions = `
-                          
+                         
                             <option value="orderShipped" disabled>Order Shipped</option>
                             <option value="orderOnRoute" disabled>Order On-Route</option>
                             <option value="orderDelivered" disabled selected>Order Delivered</option>
@@ -372,7 +367,7 @@
                         break;
                         case 'orderCancelled':
                         selectOptions = `
-                            
+                        
                             <option value="orderShipped" disabled>Order Shipped</option>
                             <option value="orderOnRoute" disabled>Order On-Route</option>
                             <option value="orderDelivered" disabled>Order Delivered</option>
@@ -387,7 +382,8 @@
                                 <td>Rs ${o.salePrice}</td>
                                 <td>${data.paymentmode.toUpperCase()}</td>
                                 <td>${o.status}</td>
-                                <td><select class="order-status-dropdown" data-order-id="${data._id}" data-product-id="${o.productId._id}">
+                                <td>
+                                    <select class="order-status-dropdown" data-order-id="${data._id}" data-product-id="${o.productId._id}">
                                         ${selectOptions}
                                     </select>
                                 </td>

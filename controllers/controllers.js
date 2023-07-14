@@ -8,6 +8,7 @@ import {
   couponModel,
   walletModel,
   transactionModel,
+  wishlistModel,
 } from "../models/productModel.js";
 import userModel from "../models/userModel.js";
 import adminModel from "../models/adminModel.js";
@@ -86,7 +87,7 @@ async function ctgryUpdate(req, res) {
 async function adminProductView(req, res) {
   if (req.query.oid) {
     let oid = req.query.oid;
-    let productData = await fetch("http://127.0.0.1:2000/api/products");
+    let productData = await fetch(`${process.env.BASE_URL}/api/product`);
     let products = await productData.json();
     let product = products.filter((item) => item._id == oid)[0];
     console.log(product);
@@ -119,7 +120,7 @@ async function adminProductView(req, res) {
     );
     res.json({ success: true });
   } else {
-    const productData = await fetch("http://127.0.0.1:2000/api/products");
+    const productData = await fetch(`${process.env.BASE_URL}/api/products`);
     const products = await productData.json();
     res.render("adminProductView", { admin: true, user: false, products });
   }
@@ -159,14 +160,14 @@ async function adminProductUpdate(req, res) {
     }
   );
 
-  const productData = await fetch("http://127.0.0.1:2000/products");
+  const productData = await fetch(`${process.env.BASE_URL}/products`);
   const products = await productData.json();
   res.render("adminProductView", { admin: true, user: false, products });
 }
 async function adminCtgryView(req, res) {
   if (req.query.oid) {
     let oid = req.query.oid;
-    let ctgryData = await fetch("http://127.0.0.1:2000/products/categories");
+    let ctgryData = await fetch(`${process.env.BASE_URL}/products/categories`);
     let ctgrys = await ctgryData.json();
     let ctgry = ctgrys.filter((item) => item._id == oid)[0];
     console.log(ctgry);
@@ -179,7 +180,7 @@ async function adminCtgryView(req, res) {
         isHide: false,
       }
     );
-    const ctgryData = await fetch("http://127.0.0.1:2000/products/categories");
+    const ctgryData = await fetch(`${process.env.BASE_URL}/products/categories`);
     const ctgrys = await ctgryData.json();
     res.render("adminCtgryView", { admin: true, user: false, ctgrys });
   } else if (req.query.hide_oid) {
@@ -190,7 +191,7 @@ async function adminCtgryView(req, res) {
         isHide: true,
       }
     );
-    const ctgryData = await fetch("http://127.0.0.1:2000/products/categories");
+    const ctgryData = await fetch(`${process.env.BASE_URL}/products/categories`);
     const ctgrys = await ctgryData.json();
     res.render("adminCtgryView", { admin: true, user: false, ctgrys });
   } else {
@@ -209,7 +210,7 @@ async function adminUserView(req, res) {
         { isBlocked: false }
       );
     }
-    let userData = await fetch("http://127.0.0.1:2000/api/users");
+    let userData = await fetch(`${process.env.BASE_URL}/api/users`);
     let users = await userData.json();
     res.render("adminUserView", { admin: true, user: false, users });
   } else if (req.query.block_oid) {
@@ -219,11 +220,11 @@ async function adminUserView(req, res) {
     if (user && !user.isBlocked) {
       const user = await userModel.updateOne({ _id: oid }, { isBlocked: true });
     }
-    let userData = await fetch("http://127.0.0.1:2000/api/users");
+    let userData = await fetch(`${process.env.BASE_URL}/api/users`);
     let users = await userData.json();
     res.render("adminUserView", { admin: true, user: false, users });
   } else {
-    let userData = await fetch("http://127.0.0.1:2000/api/users");
+    let userData = await fetch(`${process.env.BASE_URL}/api/users`);
     let users = await userData.json();
     res.render("adminUserView", { admin: true, user: false, users });
   }
@@ -419,7 +420,7 @@ async function handleAddr(req, res) {
 //users
 
 async function userProductView(req, res) {
-  let productsD = await fetch("http://127.0.0.1:2000/api/products");
+  let productsD = await fetch(`${process.env.BASE_URL}/api/products`);
   let productsInfo = await productsD.json();
   let products = productsInfo.products;
 
@@ -480,7 +481,7 @@ async function userProductDescr(req, res) {
     let qnty = 1;
     // let productsD = await fetch("http:///127.0.0.1:2000/api/products");
     // let products = await productsD.json();
-    let product = await productModel.findById(req.query.oid);
+    let product = await productModel.findById(req.query.oid).populate("category", "name").populate("subCategory", "name");
     product.photo.forEach((photo) => {
       if (photo.filepath) {
         photo.filepath = photo.filepath.replace(/\\/g, "/");
@@ -1405,22 +1406,23 @@ async function getProducts(req, res) {
     const priceAmount = parseFloat(req.query.s) || null;
     const minPrice = parseFloat(req.query.minPrice) || null;
     const maxPrice = parseFloat(req.query.maxPrice) || null;
+    let cid;
     // Filter options
 
     const filter = {};
     if (category !== "") {
-      const categoryId = await ctgryModel.findOne({ name: category }, "_id");
+      const categoryId = await ctgryModel.findOne({ name: category });
+      console.log(categoryId)
       if (categoryId) {
-        filter.category = categoryId;
+        filter.category = categoryId._id;
+        cid = categoryId._id
       }
     }
     if (subCategory !== "") {
-      const subCategoryId = await subCtgryModel.findOne(
-        { name: subCategory },
-        "_id"
-      );
+      const subCategoryId = await subCtgryModel.findOne({ name: subCategory,category:cid});
+      console.log(subCategoryId)
       if (subCategoryId) {
-        filter.subCategory = subCategoryId;
+        filter.subCategory = subCategoryId._id;
       }
     }
     const priceFilter = {};
@@ -1457,7 +1459,7 @@ async function getProducts(req, res) {
           ],
         },
         { isHidden: false }, // Add condition to filter by isHidden field
-        { ...filter },
+        filter,
         priceFilter,
       ],
     });
@@ -1764,14 +1766,15 @@ async function updateProductsApi(req, res) {
       description,
       points,
       productPrice,
-      salePrice,
+      discount,
       stock,
       category,
       subCategory,
       paymentOption,
       rating,
     } = req.body;
-
+    let salePrice = productPrice-productPrice*Number(discount)/100;
+    
     const updatedProduct = {
       productName,
       brandName,
@@ -1964,8 +1967,8 @@ async function getOrdersV2(req, res) {
     });
 
     const limit =
-      !isNaN(parseInt(req.query.l)) && parseInt(req.query.l) <= 3
-        ? parseInt(req.query.l) || 3
+      !isNaN(parseInt(req.query.l)) && parseInt(req.query.l) <= 30
+        ? parseInt(req.query.l) || 30
         : 3;
     const page =
       !isNaN(parseInt(req.query.p)) &&
@@ -2005,10 +2008,10 @@ async function getOrdersV2(req, res) {
         model: productModel,
       })
       .select("-products") // Exclude the products field from the query result
-      .sort(sortBy)
+      .sort('-date')
       .skip(page * limit)
       .limit(limit);
-
+    
     const response = {
       error: false,
       total,
@@ -2256,6 +2259,129 @@ async function addToCart(req, res) {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }
+async function addToWishlist(req, res) {
+  console.log("Santios")
+  let token = req.query.tk;
+  const prId = new ObjectId(req.query.prId);
+  
+  try {
+    if (token !== "undefined") {
+      let userId = jwt2.verify(token,process.env.secretKeyU).user;
+      console.log(userId,prId,req.query.prId)
+      // Check if the product already exists in the user's wishlist
+      const wishlist = await wishlistModel.findOne({ userId });
+      const productExists = wishlist && wishlist.items.some(item => item.productId._id.equals(prId));
+      if (productExists) {
+        return res.status(200).json({"success":true,"addition":false})
+      }
+      // Add the product to the user's wishlist
+      await wishlistModel.findOneAndUpdate(
+        { userId },
+        { $push: { items: { productId: prId } } },
+        { upsert: true }
+      );
+      res.status(200).json({ "success": true,"addition":true});
+    }else{
+      res.json({"redirect":"/login"})
+    }
+  } catch (err) {
+    console.log(err)
+  }
+}
+async function removeFromWishlist(req, res) {
+  
+  const prId = req.query.prId;
+  //cookie extraction
+  let cookieHeaderValue = req.headers.cookie;
+  let token = null;
+
+  if (cookieHeaderValue) {
+    let cookies = cookieHeaderValue.split(";");
+
+    for (let cookie of cookies) {
+      let [cookieName, cookieValue] = cookie.trim().split("=");
+
+      if (cookieName === "token") {
+        token = cookieValue;
+        break;
+      }
+    }
+  }
+  //cookie extraction
+  try {
+    if (token) {
+      const userId = jwt2.verify(token, process.env.secretKeyU).user;
+
+      // Find the user's wishlist
+      const wishlist = await wishlistModel.findOne({ userId });
+       
+      // Check if the wishlist exists
+      if (!wishlist) {
+        return res.json({"success":false});
+      }
+
+      // Remove the specified productIds from the wishlist
+      wishlist.items = wishlist.items.filter(item => item.productId!=prId.toString());
+       
+      // Save the updated wishlist
+      await wishlist.save();
+
+      res.status(200).json({ "success": true });
+    } else {
+      res.json({ redirect: '/login' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+}
+
+async function getWishlist(req, res) {
+  //cookie extraction
+  let cookieHeaderValue = req.headers.cookie;
+  let token = null;
+
+  if (cookieHeaderValue) {
+    let cookies = cookieHeaderValue.split(";");
+
+    for (let cookie of cookies) {
+      let [cookieName, cookieValue] = cookie.trim().split("=");
+
+      if (cookieName === "token") {
+        token = cookieValue;
+        break;
+      }
+    }
+  }
+  //cookie extraction
+
+   
+
+  try {
+    if (token) {
+      const userId = jwt2.verify(token, process.env.secretKeyU).user;
+
+      // Retrieve the wishlist for the user
+      const wishlist = await wishlistModel.findOne({ userId }).populate('items.productId');
+      
+      // Check if the wishlist exists
+      if (!wishlist) {
+        return res.status(404).json({ error: 'Wishlist not found.' });
+      }
+      
+      // Extract the product details from the populated items
+      const products = wishlist.items.map(item => item.productId);
+
+      res.status(200).json({ wishlist: products });
+    } else {
+      res.json({ redirect: "/login" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+}
+
 
 
 //
@@ -2372,7 +2498,10 @@ export {
   userAddressView,
   updateProductsApi,
   getCart,
+  getWishlist,
   addToCart,
+  addToWishlist,
+  removeFromWishlist,
   handleAddr,
   getUserAddress,
   resendMail,

@@ -362,16 +362,27 @@ const orderSchema = new Schema({
   },
 });
 
-// const wishlistSchema = new mongoose.Schema({
-//   product: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: 'Product',
-//   },
-//   user: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: 'User',
-//   }
-// });
+const wishlistSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
+    },
+    items: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: "product",
+          required: true,
+        },
+      },
+    ],
+  },
+  {
+    collection: "wishlist",
+  }
+);
 
 const categorySchema = new Schema(
   {
@@ -469,7 +480,7 @@ const transactionModel = model('transaction', transactionSchema);
 const productModel = model("product", productSchema);
 const couponModel = model("coupon", couponSchema);
 const cartModel = model("cart", cartSchema);
- 
+const wishlistModel = model("wishlist",wishlistSchema);
 const addressModel = model("address", addressSchema);
 const orderModel = model("orders", orderSchema);
 const ctgryModel = model("category", categorySchema);
@@ -485,4 +496,5 @@ export {
   walletModel,
   transactionModel,
   couponSchema,
+  wishlistModel,
 };

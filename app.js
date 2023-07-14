@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 import path from "path";
 import jwt2 from "jsonwebtoken"
 import morgan from "morgan"
+import multer from "multer";
+import sharp from "sharp";
+
 // At the component you want to use confetti
 // import ConfettiGenerator from "confetti-js";
 // import hbs from "hbs";
@@ -50,10 +53,18 @@ hbs.registerHelper('parser', function(data) {
   return photo;
 });
  
-hbs.registerHelper('limit', function (arr, limit) {
+hbs.registerHelper('limitDog', function (arr, limit) {
   if (!Array.isArray(arr)) { return []; }
   let array = arr.filter(val=>val.category.name==="DOG" && val.subCategory.name==="FOOD")
   return array.slice(0, limit);
+});
+hbs.registerHelper('limitCat', function (arr, limit) {
+  if (!Array.isArray(arr)) { return []; }
+  let array = arr.filter(val=>val.category.name==="CAT" && val.subCategory.name==="FOOD")
+  return array.slice(0, limit);
+});
+hbs.registerHelper('condition', function (num1) {
+  return num1>=2;
 });
  
 //HBS and Static files configuration
@@ -104,7 +115,7 @@ import userProductDescrRouter from "./routes/userProductDescrRouter.js";
 import dogFoodRouter from "./routes/dogFoodRouter.js";
 import userCartRouter from "./routes/userCartRouter.js";
 import userOrderHistRouter from "./routes/userOrderHistRouter.js";
-// import userWishlistRouter from "./routes/userWishlistRouter.js"
+import userWishlistRouter from "./routes/userWishlistRouter.js"
 import userCheckoutRouter from "./routes/userCheckoutRouter.js"
 import userPymntRouter from "./routes/userPymntRouter.js"
 import userAddressRouter from "./routes/userAddressRouter.js"
@@ -120,6 +131,7 @@ import productApi from "./routes/productApi.js";
 import userApi from "./routes/userApi.js";
 import customUserApi from "./routes/customApi.js";
 import cartApi from "./routes/cartApi.js"
+import wishlistApi from "./routes/wishlistApi.js"
 import userModel from "./models/userModel.js";
 import { walletModel } from "./models/productModel.js";
 //DataRouter
@@ -171,6 +183,8 @@ app.use("/api",productApi);
 // app.use("/products",productsApi);
 app.use("/api",userApi);
 app.use("/api",cartApi); 
+app.use("/api",wishlistApi); 
+
 app.use("/",handleAddressRouter);
 app.use("/data",dataRouter);
 app.use("/custom",customUserApi);
@@ -188,7 +202,7 @@ app.use("/checkout",authoriseJwt,userCheckoutRouter);
 app.use("/address",authoriseJwt,userAddressRouter);
 app.use("/pymnt",authoriseJwt,userPymntRouter);
 app.use("/profile",authoriseJwt,userProfileRouter);
-// app.use("/wishlist",userWishlistRouter);
+app.use("/wishlist",userWishlistRouter);
 app.use("/order-history",authoriseJwt,userOrderHistRouter);
 app.use("/admin",adminLoginRouter);
 app.use("/wallet-hist",authoriseJwt,walletRouter);
@@ -253,6 +267,60 @@ app.get("/save",async (req,res)=>{
   
    
 })
+
+app.get("/testamigo",(req,res)=>{
+  res.render("justATest")
+})
+
+
+
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads'); // Save files to the 'uploads' directory
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+const upload = multer({ storage: storage });
+
+// Endpoint for file upload and cropping
+app.post('/upload', upload.array('croppedImages'), async (req, res) => {
+  try {
+    const croppedImages = req.files;
+
+    // Check if any images were uploaded
+    if (!croppedImages || croppedImages.length === 0) {
+      return res.status(400).json({ message: 'No images were uploaded.' });
+    }
+
+    // Process the cropped images
+    const processedImages = await Promise.all(
+      croppedImages.map(async (image) => {
+        const croppedBuffer = await sharp(image.path)
+          .resize(500) // Adjust the desired size as needed
+          .toBuffer();
+
+        // Save the cropped image to a test directory
+        const testPath = path.join('test', image.originalname);
+        await sharp(croppedBuffer).toFile(testPath);
+
+        return {
+          filename: image.originalname,
+          path: testPath,
+        };
+      })
+    );
+
+    res.status(200).json({ message: 'Images cropped and saved successfully.', processedImages });
+  } catch (error) {
+    console.error('Error while processing images:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+});
+
+
 let port  = 2000;
 app.listen(port,()=>{
     console.log(`App is listening at ${port}`)

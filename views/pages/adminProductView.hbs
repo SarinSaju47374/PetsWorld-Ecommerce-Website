@@ -74,25 +74,13 @@
         <input type="text" id="productPrice" name="productPrice" placeholder="productPrice"  required>
       </div>
       <div class="form-row">
-        <label for="salePrice">Sale Price</label>
-        <input type="text" id="salePrice" name="salePrice" placeholder="salePrice" required>
+        <label for="iscount">Discount</label>
+        <input type="number" name="discount" id = "discount" placeholder="Enter the Default Discount" max="100" required>
       </div>
       <div class="form-row">
         <label for="stock">Stock</label>
         <input type="text" id="stock" name="stock" placeholder="stock" required>
-      </div>
-      <div class="form-row">
-        <label for="category">Category</label>
-        <input type="text" id="category" name="category" placeholder="category" required>
-      </div>
-      <div class="form-row">
-        <label for="subCategory">Sub Category</label>
-        <input type="text" id="subCategory" name="subCategory"placeholder="subCategory" required>
-      </div>
-      <div class="form-row">
-        <label for="paymentOption">Payment Option</label>
-        <input type="text" id="paymentOption" name="paymentOption" placeholder="paymentOption" required>
-      </div>
+      </div>   
       <div class="form-row">
         <label for="rating">Rating</label>
         <input type="text" id="rating" name="rating" placeholder="rating" required>
@@ -133,21 +121,13 @@
 <script src="/JS/adminContent.js"></script>
 <script>
     const sideBarOpts = document.querySelectorAll(".sidebar a");
-     
-
     sideBarOpts.forEach(a=>{
         a.classList.remove("active");
     })
     sideBarOpts[4].classList.add("active");
 </script>
 
- 
- 
-   
 
- 
-
-   
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
 <script>
@@ -218,7 +198,7 @@
                     <td>
                         ${
                         p.photo[0] && p.photo[0].filepath
-                            ? `<img src="${p.photo[0].filepath}.png" alt="" style="width:100px;height:60px" accept="image/png">`
+                            ? `<img src="${p.photo[0].filepath}" alt="" style="width:100px;height:60px" accept="image/png">`
                             : 'No Image Available'
                         }
                     </td>
@@ -434,11 +414,8 @@
         document.querySelector("#description").value = data[0].description;
         document.querySelector("#points").value = data[0].points.join(",");
         document.querySelector("#productPrice").value = data[0].productPrice;
-        document.querySelector("#salePrice").value = data[0].salePrice;
+        document.querySelector("#discount").value = data[0].discount;
         document.querySelector("#stock").value = data[0].stock;
-        document.querySelector("#category").value = data[0].category;
-        document.querySelector("#subCategory").value = data[0].subCategory;
-        document.querySelector("#paymentOption").value = data[0].paymentOption;
         document.querySelector("#rating").value = data[0].rating;
         document.querySelector(".form-popup .number").value = pg ; 
     }
@@ -453,7 +430,6 @@
     //FORM SUBMISSION AFTER MODIFICATION
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        
         const formData = new FormData(form);
         const id = formData.get("id");
         const productName = formData.get("productName");
@@ -461,10 +437,8 @@
         const description = formData.get("description");
         const points = formData.get("points");
         const productPrice = formData.get("productPrice");
-        const salePrice = formData.get("salePrice");
+        const discount = formData.get("discount");
         const stock = formData.get("stock");
-        const category = formData.get("category");
-        const subCategory = formData.get("subCategory");
         const paymentOption = formData.get("paymentOption");
         const rating = formData.get("rating");
         const page = formData.get("number");
@@ -475,10 +449,8 @@
             description,
             points,
             productPrice,
-            salePrice,
+            discount,
             stock,
-            category,
-            subCategory,
             paymentOption,
             rating,
             page

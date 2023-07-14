@@ -23,27 +23,24 @@
       <div class="menu-section">
         <ul>
           <ul class="dropdown">
-            <li><a href="#">DOG</a>
+            <li><a href="/products?cat=DOG">DOG</a>
                 <ul>
-                    <li><a href="">Toys</a></li>
-                    <li><a href="">Food</a></li>
-                    <li><a href="#">Treats</a> </li>
-                    <li><a href="">Health Care</a></li>
+                    <li><a href="/products?cat=DOG&sub=TOYS">Toys</a></li>
+                    <li><a href="/products?cat=DOG&sub=FOOD">Food</a></li>
+                    <li><a href="/products?cat=DOG&sub=TREATS">Treats</a> </li>
                 </ul>
             </li>
           </ul>
           <ul class="dropdown">
-            <li><a href="#">CAT</a>
+            <li><a href="/products?cat=CAT">CAT</a>
                 <ul>
-                    <li><a href="">Toys</a></li>
-                    <li><a href="">Food</a></li>
-                    <li><a href="#">Treats</a> </li>
-                    <li><a href="">Health Care</a></li>
+                    <li><a href="/products?cat=CAT&sub=TOYS">Toys</a></li>
+                    <li><a href="/products?cat=CAT&sub=FOOD">Food</a></li>
+                    <li><a href="/products?cat=CAT&sub=TREATS">Treats</a> </li>
                 </ul>
             </li>
           </ul>
-          <li class="dropdown"><a href="#">COMBO PACK</a></li>
-          <li class="dropdown"><a href="#">LEARN WITH #PETSWORLD</a></li>
+          
           <li class="dropdown"><a href="/ORDER-HISTORY">ORDERS</a></li>
           <li class="dropdown"><a href="#" onclick="callMe()">COUPONS</a></li>
         </ul>
@@ -97,26 +94,21 @@
             <a href="#"> <i class="fa-solid fa-dog"></i> DOG</a>
             <div class="level-1">
               <ul>
-                <li>FOOD</li>
-                <li>TOYS</li>
-                <li>HEALTH</li>
-                <li>TREATS</li>
+                <li><a href="">FOOD</a></li>
+                <li><a href="">TOYS</a></li>
+                <li><a href="">TREATS</a></li>
               </ul>
             </div>
           </li>
           <li>
             <a href="#"> <i class="fa-solid fa-cat"></i> CAT</a>
-          </li>
-          <li>
-            <a href="#">
-              <i class="fa-brands fa-leanpub"></i> LEARN WITH #PETSWORLD</a
-            >
-          </li>
-          <li>
-            <a href="#"> <i class="fa-solid fa-paw"></i> LEARN ABOUT BREEDS</a>
-          </li>
-          <li>
-            <a href="#"> <i class="fa-solid fa-gift"></i> COUPONS</a>
+            <div class="level-1">
+              <ul>
+                <li><a href="">FOOD</a></li>
+                <li><a href="">TOYS</a></li>
+                <li><a href="">TREATS</a></li>
+              </ul>
+            </div>
           </li>
         </ul>
         <ul>
@@ -126,15 +118,19 @@
           <li>
             <a href="#">
               <div class="cart">
-                <span>3</span>
+                <span id="mob-cart">3</span>
                 <a href="/cart"><i class="fa-solid fa-cart-shopping"></i></a>
               </div>
               Cart</a
             >
           </li>
-          <li>
-            <a href="#"> <i class="fa-solid fa-right-to-bracket"></i> Login</a>
-          </li>
+          {{#if loggedIn}} 
+              <li><i class="fa-solid fa-right-from-bracket"></i> <a href="/login">Logout</a></li>
+              <li><a href="/profile"><i class="fa-solid fa-user"></i> Profile</a></li>
+          {{else}}
+              <li><i class="fa-solid fa-right-to-bracket"></i><a href="/login">Login</a></li>
+              <li><i class="fa-regular fa-id-card"></i><a href="/register">Register</a></li>
+          {{/if}}
         </ul>
       </div>
     </nav>
@@ -208,8 +204,10 @@
           console.log(data);
           if (data.qnty){
             document.querySelector(".option-section .cart").innerHTML+=`<span class="cart-number" data-aos="flip-left">${data.qnty}</span>`
+            document.getElementById("mob-cart").innerHTML=`${data.qnty}`
           }else{
-            document.querySelector(".option-section .cart").innerHTML+=``
+            document.querySelector(".option-section .cart").innerHTML+=`<span class="cart-number" data-aos="flip-left">0</span>`
+            document.getElementById("mob-cart").innerHTML=`0`
           }
         }
       } catch (err) {

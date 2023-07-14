@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/products",getProducts);
 router.get("/products/:id",async (req,res)=>{
-    let data  = await productModel.find({_id:req.params.id})
+    let data  = await productModel.find({_id:req.params.id}).populate("category", "name").populate("subCategory", "name") 
     res.json(data);
 })
  

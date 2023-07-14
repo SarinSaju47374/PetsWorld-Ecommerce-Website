@@ -7,34 +7,7 @@
   <i class="fa-solid fa-arrow-up"></i>
 </div>
 <div class="container-category" id="container-category">
-  <div class="category">
-    <a href=""><img
-        src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
-        alt=""
-      /></a>
-    <p>DOG FOOD</p>
-  </div>
-  <div class="category">
-    <a href=""><img
-        src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
-        alt=""
-      /></a>
-    <p>DOG TOYS</p>
-  </div>
-  <div class="category">
-    <a href=""><img
-        src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
-        alt=""
-      /></a>
-    <p>DOG  ESSENTIALS</p>
-  </div>
-  <div class="category">
-    <a href=""><img
-        src="https://cdn.shopify.com/s/files/1/1199/8502/files/dog-food_300x_crop_center.png?v=1666162971"
-        alt=""
-      /></a>
-    <p>DOG TREATS</p>
-  </div>
+  {{!-- Dynamic Data --}}
 </div>
 
 <div class="main-container" style="position:relative">
@@ -270,7 +243,7 @@
                     contentCards.innerHTML += `
                             <div class="card">
                                 <div class="preview">
-                                    <a href="/product-descr?oid=${pr._id}"><img src="${pr.photo[0].filepath}.png" alt=""></a>
+                                    <a href="/product-descr?oid=${pr._id}"><img src="${pr.photo[0].filepath}" alt=""></a>
                                 </div>
                                 <h6>${pr.brandName}</h6>
                                 <h5>${pr.productName}</h5>
@@ -286,11 +259,24 @@
                                     <h6>Rs ${pr.productPrice}<h6>
                                     <h6>Rs ${pr.salePrice}</h6>
                                 </div>
-                                <div class="options">
-                                    <button style="background-color:transparent;border:none;cursor:pointer" onclick='cartAdder("${pr._id}")'><i class="fa-solid fa-cart-shopping"></i></button>
-                                    <a href="#"><i class="fa-solid fa-heart"></i></a>
-                                    <a href="/product-descr?oid=${pr._id}"><i class="fa-solid fa-eye"></i></a>
-                                </div>
+                                ${pr.stock<=2?`
+                                    <div class="outOfStock">
+                                        <i class="fa-solid fa-boxes-stacked"></i> NO STOCK
+                                    </div>
+                                `:``}
+                                ${pr.stock>=2?`
+                                    <div class="options">
+                                        <button style="background-color:transparent;border:none;cursor:pointer" onclick='cartAdder("${pr._id}")'><i class="fa-solid fa-cart-shopping"></i></button>
+                                        <a href="#"><i class="fa-solid fa-heart"></i></a>
+                                        <a href="/product-descr?oid=${pr._id}"><i class="fa-solid fa-eye"></i></a>
+                                    </div>
+                                `:`
+                                    <div class="options">
+                                        <button style="background-color:transparent;border:none;cursor:pointer" onclick='noStock()'><i class="fa-solid fa-cart-shopping"></i></button>
+                                        <a href=""><i class="fa-solid fa-heart"></i></a>
+                                        <a href="/product-descr?oid={{this._id}}"><i class="fa-solid fa-eye"></i></a>
+                                    </div>
+                                `}
 
                             </div>
                         `
@@ -351,7 +337,14 @@
         console.log("vbeep")
     })
 
-
+    function noStock(){
+        Swal.fire({
+            icon: 'info',
+            title: 'Sorry!',
+            text: 'No Stock Amigo!',
+            footer: 'Try Saving this Product to your WishList.'
+        })
+    }
     // *************PAGINATION UI******************
 
     let ulTag = document.querySelector(".pagination ul");
@@ -438,13 +431,14 @@
 
             // Check if the response indicates a redirect is needed
             if (responseData.success) {
-                Swal.fire({
+                await Swal.fire({
                     position: 'center',
                     icon: 'success',
                     title: 'The Product Is Added to The Cart',
                     showConfirmButton: false,
                     timer: 1500
                 })
+                window.location.href="/cart"
             } else {
                 window.location.href = responseData.redirect; // Redirect the browser
             }
@@ -461,7 +455,7 @@
             console.log(ctgrys);
             ctgrys.forEach(val=>{
                 val.photo = JSON.parse(val.photo);
-                container.innerHTML=`
+                container.innerHTML+=`
                   <div class="category" data-aos="zoom-in">
                     <a href="/products?cat=${val.category.name}&sub=${val.name}">
                         <div class="img-ctgry">
