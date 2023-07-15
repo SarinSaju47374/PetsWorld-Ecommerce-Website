@@ -357,7 +357,8 @@ const orderSchema = new Schema({
     required: true,
   },
   totalPrice: {
-    type: String,
+    type: Number,
+    set: (value) => parseFloat(value.toFixed(2)),
     required: true,
   },
 });

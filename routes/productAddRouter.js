@@ -3,7 +3,7 @@ import {productAdd} from "../controllers/controllers.js";
 import multer from "multer";
 import { productModel } from "../models/productModel.js";
 import fs from "fs";
-import  Jimp from 'jimp';
+import fsExtra from "fs-extra";
 import sharp from "sharp";
 import util from 'util';
 import path from "path";
@@ -14,107 +14,6 @@ router.get("/",productAdd);
 router.use(express.json()); 
 
 const upload = multer({ dest: 'views/uploads' });
-// router.post("/",upload.array('photos'),async(req,res)=>{
-//   console.log("I have reached here!")
-//      const{
-//         productName,
-//         brandName,
-//         description,
-//         points,
-//         productPrice,
-//         discount,
-//         stock,
-//         ctgryId,
-//         subCtgryId,
-//         paymentOption,
-//         rating,
-//         imageRatio,
-//      } = req.body;
-//      console.log(req.body)
-     
-    
-//     //  // Get the uploaded files from req.files and extract necessary information
-//     // const photos = req.files.map((file) => {
-//     //     const oldPath = `${file.path}`;
-//     //     const newPath = `${file.path}.png`;
-//     //     fs.rename(oldPath, newPath, function(err) {
-//     //         if (err) throw err;
-//     //         console.log('File renamed successfully');  
-//     //     });
-//     //     return {
-//     //         title: file.originalname,
-//     //         filepath: file.path.replace(/views/gi,""),
-//     //     };
-//     // });
-
-//      // Get the uploaded files from req.files and extract necessary information
-//      const photos = req.files.map((file) => {
-//         const oldPath = `${file.path}`;
-//         const newPath = `${file.path}.png`;
-        
-//         if (fs.existsSync(oldPath)) {
-//           fs.rename(oldPath, newPath, async function(err) {
-//             if (err) throw err;
-//             console.log('File renamed successfully');
-//             // Open the image with Jimp
-//             try {
-//               // Open the image with Sharp
-//               const image = sharp(newPath);
-  
-//               // Calculate the desired aspect ratio
-//               const [num, denom] = imageRatio.split(':');
-//               const aspectRatio = parseFloat(num) / parseFloat(denom);
-  
-//               // Get the image metadata and extract the width
-//               const metadata = await image.metadata();
-//               const width = metadata.width;
-  
-//               // Calculate the desired height based on the aspect ratio
-//               const height = Math.floor(width / aspectRatio);
-  
-//               // Crop the image
-//               const croppedImagePath = newPath.replace('.png', '_cropped.png');
-//               await image.extract({ left: 0, top: 0, width, height }).toFile(croppedImagePath);
-             
-//               console.log('Cropped image successfully');
-//               console.log('Cropped image successfully:', croppedImagePath);
-//             } catch (err) {
-//               console.error('Error while cropping image:', err);
-//             }
-//           });
-          
-//         } else {
-//           console.log('File does not exist at the old path:', oldPath);
-//         }
-        
-//         return {
-//           title: file.originalname,
-//           filepath: file.path.replace(/views/gi,""),
-//         };
-//       });
-//     let salePrice = (productPrice-productPrice*Number(discount)/100);
-//     console.log(salePrice);
-//     await productModel.create({
-//         productName:productName,
-//         brandName:brandName,
-//         description:description,
-//         points:points.split(","),
-//         productPrice:productPrice,
-//         discount:discount,
-//         salePrice:Number(salePrice),
-//         stock:stock,
-//         category:ctgryId,
-//         subCategory:subCtgryId,
-//         paymentOption:paymentOption,
-//         rating:rating,
-//         photo:photos
-//     })
-//     console.log("Successfully product added to data base")
-//     res.redirect("/product-view");
-// })
-
- 
- 
 
 router.post('/', upload.array('photos'), async (req, res) => {
   try {
@@ -189,8 +88,20 @@ router.post('/', upload.array('photos'), async (req, res) => {
             filepath: croppedImagePath.replace(/views/gi, ''),
           });
 
-          // Delete the original uncropped image
-          await fs.promises.unlink(newPath);
+          // // Delay before deleting the original uncropped image
+          // await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          // // Delete the original uncropped image
+          // await fs.promises.unlink(newPath);
+
+          setTimeout(async () => {
+            try {
+              await fsExtra.remove(newPath);
+              console.log('Deleted original image:', newPath);
+            } catch (err) {
+              console.error('Error while deleting original image:', err);
+            }
+          }, 100); // Adjust the delay if needed
           console.log('Deleted original image:', newPath);
         } catch (err) {
           console.error('Error while cropping image:', err);

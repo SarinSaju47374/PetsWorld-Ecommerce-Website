@@ -83,8 +83,28 @@ app.use(express.static('node_modules'));
 // app.use("/node_modules",express.static(path.join(__dirname,"node_modules")));
 
 //Mongooose Connection
-mongoose.connect("mongodb://127.0.0.1:27017/PetsWorld");
+mongoose.connect(process.env.MONGO_STRING);
+// Connection event listeners
+const dbConnection = mongoose.connection;
 
+// Error event
+dbConnection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+
+// Success event
+dbConnection.once('open', () => {
+  console.log('Connected to MongoDB');
+
+  // Your code here - perform operations after successful connection
+});
+
+// Disconnection event
+dbConnection.on('disconnected', () => {
+  console.log('Disconnected from MongoDB');
+});
+
+ 
 
 
 //Form or JSON Configuration

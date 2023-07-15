@@ -420,9 +420,8 @@ async function handleAddr(req, res) {
 //users
 
 async function userProductView(req, res) {
-  let productsD = await fetch(`${process.env.BASE_URL}/api/products`);
-  let productsInfo = await productsD.json();
-  let products = productsInfo.products;
+  let products = await productModel.find().populate('category').populate('subCategory')
+   
 
   //cookie extraction
   let cookieHeaderValue = req.headers.cookie;
@@ -1523,7 +1522,7 @@ async function getProducts(req, res) {
       limit,
       products,
     };
-
+console.log(response)
     res.status(200).json(response);
   } catch (err) {
     console.log(err);
