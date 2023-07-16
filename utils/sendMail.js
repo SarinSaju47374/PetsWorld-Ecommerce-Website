@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-export default async(email,subject,text)=>{
+export default async(email,subject,text )=>{
     try{
         const transporter = nodemailer.createTransport({
             host:process.env.HOST,

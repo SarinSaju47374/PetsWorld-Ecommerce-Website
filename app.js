@@ -341,7 +341,7 @@ app.post('/upload', upload.array('croppedImages'), async (req, res) => {
 });
 
 
-let port  = 2000;
+let port  = 8001;
 app.listen(port,()=>{
     console.log(`App is listening at ${port}`)
 })
