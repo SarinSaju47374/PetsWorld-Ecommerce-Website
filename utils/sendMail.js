@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-export default async(email,subject,text,res)=>{
+export default async(email,subject,text)=>{
     try{
         const transporter = nodemailer.createTransport({
             host:process.env.HOST,
@@ -21,11 +21,9 @@ export default async(email,subject,text,res)=>{
         transporter.sendMail(options,(err,info)=>{
             if(err){
                 console.log("Email not sent");
-                res.status(400).send({message:"Email Not Sent"})
                 console.log(err);
             }else{
                 console.log("Email sent successfully");
-                res.status(200).send({message:"Email Sent"})
             }
         });
         
